@@ -1,0 +1,34 @@
+            {hasMore && (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0 8px' }}>
+                {isMobile ? (
+                  <div
+                    ref={(el) => {
+                      if (!el) return;
+                      const observer = new IntersectionObserver(
+                        ([entry]) => {
+                          if (entry.isIntersecting && !isLoadingMore) {
+                            loadMore();
+                          }
+                        },
+                        { rootMargin: '100px' }
+                      );
+                      observer.observe(el);
+                      return () => observer.disconnect();
+                    }}
+                    style={{ height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    {isLoadingMore ? (
+                      <div style={{ width: 24, height: 24, border: '3px solid #f3f4f6', borderTopColor: '#e396bf', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                    ) : null}
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => loadMore()} 
+                    disabled={isLoadingMore}
+                    style={{ padding: '12px 32px', background: 'linear-gradient(135deg,#e396bf,#c0547a)', color: '#fff', border: 'none', borderRadius: 999, fontSize: 14, fontWeight: 700, cursor: 'pointer', boxShadow: '0 6px 20px rgba(227,150,191,0.25)', fontFamily: 'inherit', opacity: isLoadingMore ? 0.7 : 1 }}
+                  >
+                    {isLoadingMore ? 'Cargando...' : `Cargar más`}
+                  </button>
+                )}
+              </div>
+            )}

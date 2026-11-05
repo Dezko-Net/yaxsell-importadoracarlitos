@@ -1,0 +1,444 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Princesa Jazmín & Oasis de Agrabah — Royal Palace Illustrations & Physics
+   Strictly scoped to PosJasmineDecor components (zero impact on other skins)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Ambient Floating Agrabah Field ("Venta actual", Search, Modal) ──── */
+.ambientField {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+.defsSvg {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.cornerPalace {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  width: 210px;
+  height: 138px;
+  opacity: 0.36;
+  pointer-events: none;
+}
+
+.cornerPalaceModal {
+  width: 174px;
+  height: 114px;
+  opacity: 0.26;
+}
+
+.bottomOasisTrail {
+  position: absolute;
+  bottom: -6px;
+  left: -6px;
+  width: 184px;
+  height: 118px;
+  opacity: 0.32;
+  pointer-events: none;
+}
+
+/* Strictly 2-keyframe LINEAR vertical drift — zero pauses, zero stutter */
+.ambientFallTrack {
+  position: absolute;
+  top: -38px;
+  will-change: transform, opacity;
+  animation-name: jasmineAmbientFall, jasmineAmbientFade;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+  pointer-events: none;
+}
+
+.ambientSwayTrack {
+  display: block;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+  animation-name: jasmineAmbientSway;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+.ambientRockGlyph {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 2px 4px rgba(13, 148, 136, 0.14));
+  will-change: transform;
+  transform-origin: center center;
+  animation-name: jasmineAmbientRock;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+.ambientSparkle {
+  position: absolute;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(254, 240, 138, 0.82) 48%,
+    rgba(45, 212, 191, 0) 100%
+  );
+  box-shadow: 0 0 6px rgba(250, 204, 21, 0.45);
+  animation-name: jasmineSparkleTwinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  pointer-events: none;
+}
+
+@keyframes jasmineAmbientFall {
+  0% {
+    transform: translate3d(0px, 0px, 0);
+  }
+  100% {
+    transform: translate3d(var(--drift-x, 26px), var(--fall-dist, 680px), 0);
+  }
+}
+
+@keyframes jasmineAmbientFade {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: var(--p-alpha, 0.58);
+  }
+  84% {
+    opacity: var(--p-alpha, 0.58);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes jasmineAmbientSway {
+  0% {
+    transform: translate3d(calc(var(--sway-x, 14px) * -1), 0, 0);
+  }
+  100% {
+    transform: translate3d(var(--sway-x, 14px), 0, 0);
+  }
+}
+
+@keyframes jasmineAmbientRock {
+  0% {
+    transform: rotate(calc(var(--sway-deg, 15deg) * -1));
+  }
+  100% {
+    transform: rotate(var(--sway-deg, 15deg));
+  }
+}
+
+@keyframes jasmineSparkleTwinkle {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(0.72);
+  }
+  50% {
+    opacity: 0.88;
+    transform: scale(1.28);
+  }
+}
+
+/* ── 2. "Una venta empieza aquí" — Bespoke Princess Jasmine & Agrabah Hero ─ */
+.jasmineSearchEmpty {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+  height: 100%;
+  padding: 28px 22px;
+  text-align: center;
+  overflow: hidden;
+  border-radius: 18px;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 365px;
+  padding: 20px 22px 18px;
+  border-radius: 26px;
+  border: 1.5px dashed rgba(45, 212, 191, 0.72);
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.9) 0%, transparent 52%),
+    radial-gradient(circle at 84% 82%, rgba(254, 240, 138, 0.28) 0%, transparent 55%),
+    linear-gradient(180deg, rgba(244, 254, 253, 0.86) 0%, rgba(235, 250, 248, 0.82) 55%, rgba(245, 240, 255, 0.84) 100%);
+  backdrop-filter: blur(16px) saturate(0.98);
+  -webkit-backdrop-filter: blur(16px) saturate(0.98);
+  box-shadow:
+    inset 0 0 0 2.5px rgba(255, 255, 255, 0.92),
+    0 14px 34px rgba(13, 148, 136, 0.11);
+}
+
+.heroSvgWrap {
+  position: relative;
+  width: 248px;
+  height: 166px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heroSvg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.floatingItemA {
+  animation: jasmineHeroFloatA 3.6s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.floatingItemB {
+  animation: jasmineHeroFloatB 4.2s ease-in-out -1.4s infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.magicSwirl {
+  animation: jasmineMagicRise 3.1s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: bottom center;
+}
+
+.jasmineBreathe {
+  animation: jasminePrincessBob 4.0s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: bottom center;
+}
+
+.scannerPulseLine {
+  animation: jasmineScanSweep 2.7s ease-in-out infinite alternate;
+}
+
+@keyframes jasmineHeroFloatA {
+  0% {
+    transform: translate3d(-2.5px, -3.5px, 0) rotate(-7deg);
+  }
+  100% {
+    transform: translate3d(3.5px, 4px, 0) rotate(9deg);
+  }
+}
+
+@keyframes jasmineHeroFloatB {
+  0% {
+    transform: translate3d(3px, 3.5px, 0) rotate(8deg);
+  }
+  100% {
+    transform: translate3d(-3.5px, -4px, 0) rotate(-8deg);
+  }
+}
+
+@keyframes jasmineMagicRise {
+  0% {
+    transform: translateY(2px) scale(0.96);
+    opacity: 0.78;
+  }
+  100% {
+    transform: translateY(-3px) scale(1.04);
+    opacity: 1;
+  }
+}
+
+@keyframes jasminePrincessBob {
+  0% {
+    transform: translateY(0px) rotate(-1deg);
+  }
+  100% {
+    transform: translateY(-2.5px) rotate(1deg);
+  }
+}
+
+@keyframes jasmineScanSweep {
+  0% {
+    transform: translateY(-7px);
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translateY(7px);
+    opacity: 0.45;
+  }
+}
+
+.heroBadgePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 11px;
+  margin-bottom: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px dashed #2dd4bf;
+  color: #0f766e;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.heroTitle {
+  font-size: 18.5px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: #092e2c;
+  line-height: 1.25;
+}
+
+.heroOrnamentRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 5px;
+  color: #eab308;
+}
+
+.heroOrnamentLine {
+  width: 36px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #2dd4bf, #eab308, transparent);
+}
+
+.heroSubtitle {
+  max-width: 32ch;
+  font-size: 12px;
+  line-height: 1.58;
+  color: #1f635e;
+}
+
+.heroHintRow {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.heroPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3.5px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #5eead4;
+  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.08);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #0f766e;
+}
+
+/* ── 3. Empty Cart Royal Lamp & Jasmine Emblem ("Venta actual" when empty) ─ */
+.cartEmptyWrap {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 220px;
+  padding: 26px 18px;
+  text-align: center;
+}
+
+.cartEmptySvg {
+  width: 158px;
+  height: 118px;
+  margin-bottom: 8px;
+  overflow: visible;
+}
+
+.cartEmptyTitle {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #092e2c;
+  letter-spacing: -0.015em;
+}
+
+.cartEmptySub {
+  margin-top: 4px;
+  max-width: 26ch;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: #1f635e;
+}
+
+/* ── 4. Sale Result Modal Medallion & Header Art ("Venta cobrada") ───────── */
+.modalCheckMedallion {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  z-index: 1;
+}
+
+.modalCheckSvg {
+  position: absolute;
+  inset: -4px;
+  width: calc(100% + 8px);
+  height: calc(100% + 8px);
+  pointer-events: none;
+  filter: drop-shadow(0 4px 10px rgba(13, 148, 136, 0.24));
+  animation: medallionGentlePulse 4s ease-in-out infinite alternate;
+}
+
+.modalHeaderArt {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 205px;
+  height: 98px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.92;
+}
+
+@keyframes medallionGentlePulse {
+  0% {
+    transform: rotate(-3deg) scale(0.98);
+  }
+  100% {
+    transform: rotate(3deg) scale(1.03);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambientFallTrack,
+  .ambientSwayTrack,
+  .ambientRockGlyph,
+  .ambientSparkle,
+  .floatingItemA,
+  .floatingItemB,
+  .magicSwirl,
+  .jasmineBreathe,
+  .scannerPulseLine,
+  .modalCheckSvg {
+    animation: none !important;
+  }
+}

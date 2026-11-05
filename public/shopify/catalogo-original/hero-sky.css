@@ -1,0 +1,30 @@
+/* Fondo único compartido por el hero del catálogo y la portada de la cuenta. */
+.hero-sky-surface {
+  isolation: isolate;
+  background-color: #5f9bdc;
+  background-image:
+    radial-gradient(ellipse 29% 23% at 12% 94%, rgba(255,255,255,.68) 0%, rgba(238,248,255,.42) 48%, transparent 100%),
+    radial-gradient(ellipse 31% 25% at 39% 101%, rgba(255,255,255,.78) 0%, rgba(235,247,255,.48) 48%, transparent 100%),
+    radial-gradient(ellipse 34% 24% at 70% 100%, rgba(250,253,255,.70) 0%, rgba(232,245,255,.42) 48%, transparent 100%),
+    radial-gradient(ellipse 27% 21% at 98% 89%, rgba(255,255,255,.48) 0%, rgba(235,247,255,.30) 48%, transparent 100%),
+    linear-gradient(160deg,#83b8ec 0%,#639edc 48%,#447fbe 100%);
+  border: 1px solid rgba(255,255,255,.58);
+}
+
+.hero-sky-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.hero-sky-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(100deg,rgba(21,62,112,.14) 0%,rgba(24,73,129,.07) 56%,rgba(28,82,143,.025) 100%);
+}

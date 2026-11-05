@@ -1,0 +1,289 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.email == 'dezkonet@gmail.com'
+        && request.auth.token.email_verified == true;
+    }
+
+    function owns(data) {
+      return signedIn()
+        && (data.get('userId', '') == request.auth.uid
+          || data.get('USERID', '') == request.auth.uid
+          || (request.auth.token.email_verified == true
+            && request.auth.token.email is string
+            && (data.get('email', '') == request.auth.token.email
+              || data.get('CUSTOMEREMAIL', '') == request.auth.token.email)));
+    }
+
+    function enabled(value) {
+      return value == true
+        || value == 1
+        || (value is string && (value == 'true' || value == '1' || value == 'yes' || value == 'si'));
+    }
+
+    function positivePrice(value) {
+      return (value is number && value > 0)
+        || (value is string
+          && value.matches('^[0-9]+([.][0-9]+)?$')
+          && value.matches('.*[1-9].*'));
+    }
+
+    function publishedProduct(data) {
+      let webFlag = data.get('SHOW_IN_WEB', data.get('show_in_web', false));
+      let isDraft = data.get('IS_DRAFT', data.get('is_draft', false));
+      let publishPending = data.get('WEB_PUBLISH_PENDING', data.get('web_publish_pending', false));
+      let status = data.get('STATUS', data.get('status', ''));
+      return enabled(webFlag)
+        && !enabled(isDraft)
+        && !enabled(publishPending)
+        && !(status is string && status.matches('(?i)^(draft|borrador)$'))
+        && (positivePrice(data.get('PRICE', data.get('price', 0)))
+          || positivePrice(data.get('WEBPRICE', data.get('web_price', 0)))
+          || positivePrice(data.get('CURRENTPRICE', data.get('current_price', 0)))
+          || positivePrice(data.get('precio_venta_1', 0)));
+    }
+
+    function activeTimedOffer(data) {
+      return data.get('isActive', false) == true
+        && data.get('status', 'active') == 'active';
+    }
+
+    function validCustomerIdentity(data) {
+      return (signedIn() && data.USERID == request.auth.uid)
+        || (!signedIn() && data.USERID == 'guest');
+    }
+
+    function validMainOrder(data) {
+      return data.keys().hasAll([
+          'USERID', 'ITEMS', 'CUSTOMERNAME', 'CUSTOMERRUT', 'CUSTOMERPHONE',
+          'CUSTOMEREMAIL', 'REGION', 'COMUNA', 'ADDRESS', 'ADDITIONALINFO',
+          'PAYMENTMETHOD', 'SHIPPINGAGENCY', 'SUBTOTAL', 'SHIPPINGCOST', 'TOTAL',
+          'ORDERCODE', 'ORDERINDEX', 'STATUS', 'CREATEDAT', 'EXPIRESAT',
+          'EXPIRESATBACKEND', 'EXPIRATIONWINDOWMINUTES'
+        ])
+        && data.keys().hasOnly([
+          'USERID', 'ITEMS', 'CUSTOMERNAME', 'CUSTOMERRUT', 'CUSTOMERPHONE',
+          'CUSTOMEREMAIL', 'REGION', 'COMUNA', 'ADDRESS', 'ADDITIONALINFO',
+          'PAYMENTMETHOD', 'SHIPPINGAGENCY', 'SUBTOTAL', 'SHIPPINGCOST', 'TOTAL',
+          'ORDERCODE', 'ORDERINDEX', 'STATUS', 'CREATEDAT', 'EXPIRESAT',
+          'EXPIRESATBACKEND', 'EXPIRATIONWINDOWMINUTES', 'CUSTOMERNOTE', 'ISGIFT',
+          'storeId'
+        ])
+        && data.get('storeId', 'main_store') == 'main_store'
+        && validCustomerIdentity(data)
+        && data.ITEMS is string && data.ITEMS.size() > 1 && data.ITEMS.size() <= 30000
+        && data.CUSTOMERNAME is string && data.CUSTOMERNAME.size() <= 160
+        && data.CUSTOMERRUT is string && data.CUSTOMERRUT.size() <= 32
+        && data.CUSTOMERPHONE is string && data.CUSTOMERPHONE.size() <= 40
+        && data.CUSTOMEREMAIL is string && data.CUSTOMEREMAIL.size() <= 254
+        && data.REGION is string && data.REGION.size() <= 120
+        && data.COMUNA is string && data.COMUNA.size() <= 120
+        && data.ADDRESS is string && data.ADDRESS.size() <= 500
+        && data.ADDITIONALINFO is string && data.ADDITIONALINFO.size() <= 2000
+        && data.PAYMENTMETHOD is string && data.PAYMENTMETHOD.size() <= 80
+        && data.SHIPPINGAGENCY is string && data.SHIPPINGAGENCY.size() <= 120
+        && data.SUBTOTAL is number && data.SUBTOTAL >= 0
+        && data.SHIPPINGCOST is number && data.SHIPPINGCOST >= 0
+        && data.TOTAL is number && data.TOTAL >= 0
+        && data.ORDERINDEX is number
+        && data.ORDERCODE is string && data.ORDERCODE.size() <= 80
+        && data.STATUS == 'paid'
+        && data.CREATEDAT is number
+        && data.EXPIRESAT is number
+        && data.EXPIRESATBACKEND is number
+        && data.EXPIRATIONWINDOWMINUTES is number
+        && (!data.keys().hasAny(['CUSTOMERNOTE']) || (data.CUSTOMERNOTE is string && data.CUSTOMERNOTE.size() <= 1000))
+        && (!data.keys().hasAny(['ISGIFT']) || data.ISGIFT is bool);
+    }
+
+    function validWholesaleOrder(data) {
+      return data.keys().hasAll([
+          'USERID', 'ITEMS', 'CUSTOMERNAME', 'CUSTOMERRUT', 'CUSTOMERPHONE',
+          'CUSTOMEREMAIL', 'REGION', 'COMUNA', 'ADDRESS', 'ADDITIONALINFO',
+          'SHIPPINGAGENCY', 'ORDERCODE', 'ORDERINDEX', 'SUBTOTAL', 'TOTAL',
+          'REQCODE', 'STATUS', 'CREATEDAT'
+        ])
+        && data.keys().hasOnly([
+          'USERID', 'ITEMS', 'CUSTOMERNAME', 'CUSTOMERRUT', 'CUSTOMERPHONE',
+          'CUSTOMEREMAIL', 'REGION', 'COMUNA', 'ADDRESS', 'ADDITIONALINFO',
+          'SHIPPINGAGENCY', 'ORDERCODE', 'ORDERINDEX', 'SUBTOTAL', 'TOTAL',
+          'REQCODE', 'STATUS', 'CREATEDAT', 'CUSTOMERNOTE', 'storeId'
+        ])
+        && data.get('storeId', 'main_store') == 'main_store'
+        && validCustomerIdentity(data)
+        && data.ITEMS is string && data.ITEMS.size() > 1 && data.ITEMS.size() <= 30000
+        && data.CUSTOMERNAME is string && data.CUSTOMERNAME.size() <= 160
+        && data.CUSTOMERRUT is string && data.CUSTOMERRUT.size() <= 32
+        && data.CUSTOMERPHONE is string && data.CUSTOMERPHONE.size() <= 40
+        && data.CUSTOMEREMAIL is string && data.CUSTOMEREMAIL.size() <= 254
+        && data.REGION is string && data.REGION.size() <= 120
+        && data.COMUNA is string && data.COMUNA.size() <= 120
+        && data.ADDRESS is string && data.ADDRESS.size() <= 500
+        && data.ADDITIONALINFO is string && data.ADDITIONALINFO.size() <= 2000
+        && data.SHIPPINGAGENCY is string && data.SHIPPINGAGENCY.size() <= 120
+        && data.SUBTOTAL is number && data.SUBTOTAL >= 0
+        && data.TOTAL is number && data.TOTAL >= 0
+        && data.ORDERINDEX is number
+        && data.ORDERCODE is string && data.ORDERCODE.size() <= 80
+        && data.REQCODE is string && data.REQCODE.size() <= 80
+        && data.STATUS == 'processing'
+        && data.CREATEDAT is number
+        && (!data.keys().hasAny(['CUSTOMERNOTE']) || (data.CUSTOMERNOTE is string && data.CUSTOMERNOTE.size() <= 1000));
+    }
+
+    function safeOrderUpdate() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return owns(resource.data)
+        && changed.hasOnly([
+          'CUSTOMERRUT', 'CUSTOMEREMAIL', 'REGION', 'COMUNA', 'ADDRESS',
+          'ADDITIONALINFO', 'SHIPPINGAGENCY', 'AGENCYCHANGED', 'UPDATEDAT',
+          'NEGOTIATION_OPENED_AT'
+        ])
+        && request.resource.data.get('USERID', '') == resource.data.get('USERID', '')
+        && request.resource.data.get('storeId', 'main_store') == resource.data.get('storeId', 'main_store');
+    }
+
+    // El catálogo público se sirve principalmente mediante APIs del servidor.
+    // El acceso directo restante queda limitado a productos efectivamente publicados.
+    match /products/{productId} {
+      allow get: if isAdmin() || publishedProduct(resource.data);
+      allow list: if isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Metadatos de navegación y contenido que la tienda presenta públicamente.
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /subcategories/{subcategoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /banners/{bannerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /timed_offers/{offerId} {
+      allow get, list: if isAdmin() || activeTimedOffer(resource.data);
+      allow write: if isAdmin();
+    }
+
+    match /clips/{clipId} {
+      allow get, list: if isAdmin() || resource.data.get('ISACTIVE', false) == true;
+      allow write: if isAdmin();
+    }
+
+    match /hotspot_panels/{panelId} {
+      allow get, list: if isAdmin() || resource.data.get('ISACTIVE', false) == true;
+      allow write: if isAdmin();
+    }
+
+    match /orders/{orderId} {
+      allow get, list: if isAdmin() || owns(resource.data);
+      allow create: if isAdmin() || validMainOrder(request.resource.data);
+      allow update: if isAdmin() || safeOrderUpdate();
+      allow delete: if isAdmin();
+    }
+
+    match /wholesale_orders/{orderId} {
+      allow get, list: if isAdmin() || owns(resource.data);
+      allow create: if isAdmin() || validWholesaleOrder(request.resource.data);
+      allow update: if isAdmin() || safeOrderUpdate();
+      allow delete: if isAdmin();
+    }
+
+    match /users/{userDocId} {
+      allow get, list: if isAdmin() || owns(resource.data);
+      allow create: if isAdmin() || (signedIn()
+        && request.resource.data.get('userId', '') == request.auth.uid
+        && request.resource.data.keys().hasOnly(['userId', 'email', 'name', 'phone', 'createdAt', 'storeId'])
+        && request.resource.data.get('storeId', 'main_store') == 'main_store');
+      allow update: if isAdmin() || (owns(resource.data)
+        && request.resource.data.get('userId', '') == resource.data.get('userId', '')
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['email', 'name', 'phone', 'updatedAt']));
+      allow delete: if isAdmin();
+    }
+
+    match /addresses/{addressId} {
+      allow get, list: if isAdmin() || owns(resource.data);
+      allow create: if isAdmin() || (signedIn()
+        && request.resource.data.get('userId', '') == request.auth.uid
+        && request.resource.data.keys().hasOnly([
+          'userId', 'alias', 'name', 'phone', 'address', 'fullAddress', 'city',
+          'commune', 'region', 'lat', 'lng', 'storeId'
+        ])
+        && request.resource.data.get('storeId', 'main_store') == 'main_store');
+      allow update: if isAdmin() || (owns(resource.data)
+        && request.resource.data.get('userId', '') == resource.data.get('userId', '')
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'alias', 'name', 'phone', 'address', 'fullAddress', 'city', 'commune',
+          'region', 'lat', 'lng'
+        ]));
+      allow delete: if isAdmin() || owns(resource.data);
+    }
+
+    match /reviews/{reviewId} {
+      allow create: if isAdmin() || (signedIn()
+        && request.resource.data.get('USERID', '') == request.auth.uid
+        && request.resource.data.keys().hasOnly([
+          'PRODUCTID', 'USERID', 'USERNAME', 'RATING', 'COMMENT', 'CREATEDAT', 'REVIEWDATE', 'storeId'
+        ])
+        && request.resource.data.get('storeId', 'main_store') == 'main_store'
+        && request.resource.data.get('PRODUCTID', '') is string
+        && request.resource.data.get('USERNAME', '') is string
+        && request.resource.data.get('RATING', 0) is number
+        && request.resource.data.RATING >= 1 && request.resource.data.RATING <= 5
+        && request.resource.data.get('COMMENT', '') is string
+        && request.resource.data.COMMENT.size() <= 2000);
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /product_questions/{questionId} {
+      allow create: if isAdmin() || (signedIn()
+        && request.resource.data.get('USERID', '') == request.auth.uid
+        && request.resource.data.keys().hasOnly([
+          'PRODUCTID', 'USERID', 'USERNAME', 'QUESTION', 'CREATEDAT', 'storeId'
+        ])
+        && request.resource.data.get('storeId', 'main_store') == 'main_store'
+        && request.resource.data.get('PRODUCTID', '') is string
+        && request.resource.data.get('USERNAME', '') is string
+        && request.resource.data.get('QUESTION', '') is string
+        && request.resource.data.QUESTION.size() > 0
+        && request.resource.data.QUESTION.size() <= 2000);
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /stock_requests/{requestId} {
+      allow get, list: if isAdmin() || owns(resource.data);
+      allow create: if isAdmin() || (signedIn()
+        && request.resource.data.get('userId', '') == request.auth.uid
+        && request.resource.data.keys().hasOnly([
+          'productId', 'productName', 'userId', 'userEmail', 'requestedQuantity', 'status', 'storeId'
+        ])
+        && request.resource.data.get('storeId', 'main_store') == 'main_store'
+        && request.resource.data.get('productId', '') is string
+        && request.resource.data.get('productName', '') is string
+        && request.resource.data.get('requestedQuantity', 0) is number
+        && request.resource.data.requestedQuantity > 0
+        && request.resource.data.requestedQuantity <= 999
+        && request.resource.data.get('status', '') == 'pending');
+      allow update, delete: if isAdmin();
+    }
+
+    // Todas las demás colecciones quedan denegadas a clientes. El Admin SDK de
+    // las APIs del servidor no usa estas reglas. Esto cierra POS/ERP y datos internos.
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

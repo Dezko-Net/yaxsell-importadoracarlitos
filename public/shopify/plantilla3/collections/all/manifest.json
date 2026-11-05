@@ -1,0 +1,115 @@
+{
+  "plantilla": 3,
+  "sourceUrl": "https://theking-castle.myshopify.com/collections/all",
+  "shopifyHost": "theking-castle.myshopify.com",
+  "themeId": "36",
+  "capturedAt": "2026-06-01T00:54:58.814Z",
+  "css": [
+    "/shopify/plantilla3/assets/css/inline/index-inline-1.css",
+    "/shopify/plantilla3/assets/css/theking-castle.myshopify.com/cdn/shop/t/36/assets/swiper-bundle.min.css",
+    "/shopify/plantilla3/assets/css/theking-castle.myshopify.com/cdn/shop/t/36/assets/animate.css",
+    "/shopify/plantilla3/assets/css/theking-castle.myshopify.com/cdn/shop/t/36/assets/base.css",
+    "/shopify/plantilla3/assets/css/theking-castle.myshopify.com/cdn/shop/t/36/assets/component.css",
+    "/shopify/plantilla3/assets/css/theking-castle.myshopify.com/cdn/shop/t/36/assets/theme.css",
+    "/shopify/plantilla3/assets/css/theking-castle.myshopify.com/cdn/shop/t/36/assets/account.css",
+    "/shopify/plantilla3/assets/css/cdn.shopify.com/shopifycloud/model-viewer-ui/assets/v1.0/model-viewer-ui.css",
+    "/shopify/plantilla3/assets/css/cdn.shopify.com/extensions/019e74df-668b-769a-ba9e-6cd96fff6c65/judgeme-546/assets/shopify_v2.css",
+    "/shopify/plantilla3/assets/css/theking-castle.myshopify.com/cdn/shop/t/36/assets/announcement.css",
+    "/shopify/plantilla3/assets/css/theking-castle.myshopify.com/cdn/shop/t/36/assets/header.css",
+    "/shopify/plantilla3/assets/css/theking-castle.myshopify.com/cdn/shop/t/36/assets/cart.css",
+    "/shopify/plantilla3/assets/css/theking-castle.myshopify.com/cdn/shop/t/36/assets/search.css",
+    "/shopify/plantilla3/assets/css/theking-castle.myshopify.com/cdn/shop/t/36/assets/main-collection.css",
+    "/shopify/plantilla3/assets/css/theking-castle.myshopify.com/cdn/shop/t/36/assets/text-with-icon.css",
+    "/shopify/plantilla3/assets/css/theking-castle.myshopify.com/cdn/shop/t/36/assets/footer.css"
+  ],
+  "js": [
+    "/shopify/plantilla3/assets/js/theking-castle.myshopify.com/cdn/shop/t/36/compiled_assets/scripts.js",
+    "/shopify/plantilla3/assets/js/cdn.shopify.com/extensions/019e74df-668b-769a-ba9e-6cd96fff6c65/judgeme-546/assets/loader.js",
+    "/shopify/plantilla3/assets/js/theking-castle.myshopify.com/cdn/shop/t/36/assets/swiper-bundle.min.js",
+    "/shopify/plantilla3/assets/js/theking-castle.myshopify.com/cdn/shop/t/36/assets/cookies.min.js",
+    "/shopify/plantilla3/assets/js/theking-castle.myshopify.com/cdn/shop/t/36/assets/animate.js",
+    "/shopify/plantilla3/assets/js/theking-castle.myshopify.com/cdn/shop/t/36/assets/lazyload.min.js",
+    "/shopify/plantilla3/assets/js/theking-castle.myshopify.com/cdn/shop/t/36/assets/gsap.min.js",
+    "/shopify/plantilla3/assets/js/theking-castle.myshopify.com/cdn/shop/t/36/assets/ScrollTrigger.min.js",
+    "/shopify/plantilla3/assets/js/theking-castle.myshopify.com/cdn/shop/t/36/assets/SplitText.min.js",
+    "/shopify/plantilla3/assets/js/theking-castle.myshopify.com/cdn/shop/t/36/assets/pubsub.js",
+    "/shopify/plantilla3/assets/js/theking-castle.myshopify.com/cdn/shop/t/36/assets/magnet.js",
+    "/shopify/plantilla3/assets/js/theking-castle.myshopify.com/cdn/shop/t/36/assets/theme.js",
+    "/shopify/plantilla3/assets/js/theking-castle.myshopify.com/cdn/shop/t/36/assets/product-3d-model.js",
+    "/shopify/plantilla3/assets/js/theking-castle.myshopify.com/cdn/shop/t/36/assets/graphics-font.json"
+  ],
+  "fonts": [
+    "/shopify/plantilla3/assets/fonts/theking-castle.myshopify.com/cdn/fonts/instrument_sans/instrumentsans_n4.db86542ae5e1596dbdb28c279ae6c2086c4c5bfa.woff2",
+    "/shopify/plantilla3/assets/fonts/theking-castle.myshopify.com/cdn/fonts/instrument_sans/instrumentsans_n4.510f1b081e58d08c30978f465518799851ef6d8b.woff",
+    "/shopify/plantilla3/assets/fonts/theking-castle.myshopify.com/cdn/fonts/instrument_sans/instrumentsans_n7.e4ad9032e203f9a0977786c356573ced65a7419a.woff2",
+    "/shopify/plantilla3/assets/fonts/theking-castle.myshopify.com/cdn/fonts/instrument_sans/instrumentsans_n7.b9e40f166fb7639074ba34738101a9d2990bb41a.woff",
+    "/shopify/plantilla3/assets/fonts/theking-castle.myshopify.com/cdn/fonts/instrument_sans/instrumentsans_i4.028d3c3cd8d085648c808ceb20cd2fd1eb3560e5.woff2",
+    "/shopify/plantilla3/assets/fonts/theking-castle.myshopify.com/cdn/fonts/instrument_sans/instrumentsans_i4.7e90d82df8dee29a99237cd19cc529d2206706a2.woff",
+    "/shopify/plantilla3/assets/fonts/theking-castle.myshopify.com/cdn/fonts/instrument_sans/instrumentsans_i7.d6063bb5d8f9cbf96eace9e8801697c54f363c6a.woff2",
+    "/shopify/plantilla3/assets/fonts/theking-castle.myshopify.com/cdn/fonts/instrument_sans/instrumentsans_i7.ce33afe63f8198a3ac4261b826b560103542cd36.woff",
+    "/shopify/plantilla3/assets/fonts/theking-castle.myshopify.com/cdn/fonts/roboto_condensed/robotocondensed_n7.0c73a613503672be244d2f29ab6ddd3fc3cc69ae.woff2",
+    "/shopify/plantilla3/assets/fonts/theking-castle.myshopify.com/cdn/fonts/roboto_condensed/robotocondensed_n7.ef6ece86ba55f49c27c4904a493c283a40f3a66e.woff",
+    "/shopify/plantilla3/assets/fonts/theking-castle.myshopify.com/cdn/fonts/roboto_condensed/robotocondensed_i7.bed9f3a01efda68cdff8b63e6195c957a0da68cb.woff2",
+    "/shopify/plantilla3/assets/fonts/theking-castle.myshopify.com/cdn/fonts/roboto_condensed/robotocondensed_i7.9ca5759a0bcf75a82b270218eab4c83ec254abf8.woff",
+    "/shopify/plantilla3/assets/fonts/theking-castle.myshopify.com/cdn/fonts/playfair_display/playfairdisplay_n4.9980f3e16959dc89137cc1369bfc3ae98af1deb9.woff2",
+    "/shopify/plantilla3/assets/fonts/theking-castle.myshopify.com/cdn/fonts/playfair_display/playfairdisplay_n4.c562b7c8e5637886a811d2a017f9e023166064ee.woff",
+    "/shopify/plantilla3/assets/fonts/theking-castle.myshopify.com/cdn/fonts/playfair_display/playfairdisplay_n7.592b3435e0fff3f50b26d410c73ae7ec893f6910.woff2",
+    "/shopify/plantilla3/assets/fonts/theking-castle.myshopify.com/cdn/fonts/playfair_display/playfairdisplay_n7.998b1417dec711058cce2abb61a0b8c59066498f.woff",
+    "/shopify/plantilla3/assets/fonts/theking-castle.myshopify.com/cdn/fonts/playfair_display/playfairdisplay_i4.804ea8da9192aaed0368534aa085b3c1f3411619.woff2",
+    "/shopify/plantilla3/assets/fonts/theking-castle.myshopify.com/cdn/fonts/playfair_display/playfairdisplay_i4.5538cb7a825d13d8a2333cd8a94065a93a95c710.woff"
+  ],
+  "stats": {
+    "cssTotal": 15,
+    "jsTotal": 14,
+    "fontsTotal": 18,
+    "imagesTotal": 60,
+    "videosTotal": 0,
+    "svgMasksTotal": 0,
+    "inlineAnimScripts": 6,
+    "inlineCssKB": 74,
+    "bodyCleanKB": 628,
+    "downloaded": {
+      "css": {
+        "ok": 0,
+        "skip": 15,
+        "fail": 0,
+        "errors": []
+      },
+      "js": {
+        "ok": 0,
+        "skip": 13,
+        "fail": 1,
+        "errors": [
+          {
+            "url": "https://theking-castle.myshopify.com/cdn/shop/t/36/assets/graphics-font.json?v=5620",
+            "error": "HTTP 404"
+          }
+        ]
+      },
+      "fonts": {
+        "ok": 0,
+        "skip": 18,
+        "fail": 0,
+        "errors": []
+      },
+      "images": {
+        "ok": 0,
+        "skip": 60,
+        "fail": 0,
+        "errors": []
+      },
+      "videos": {
+        "ok": 0,
+        "skip": 0,
+        "fail": 0,
+        "errors": []
+      },
+      "svgMasks": {
+        "ok": 0,
+        "skip": 0,
+        "fail": 0,
+        "errors": []
+      }
+    }
+  }
+}

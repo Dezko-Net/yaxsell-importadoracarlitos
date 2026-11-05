@@ -1,0 +1,285 @@
+.layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  /* Default active button petal palette (pearl-white & blush silk) */
+  --sakura-p-stop1: rgba(255, 255, 255, 0.95);
+  --sakura-p-stop2: rgba(255, 232, 242, 0.85);
+  --sakura-p-stop3: rgba(252, 198, 220, 0.65);
+  --sakura-p-stroke: rgba(255, 255, 255, 0.55);
+  --sakura-p-center: rgba(219, 88, 136, 0.42);
+  --sakura-p-stamen: rgba(255, 248, 225, 0.92);
+  --sakura-p-glint: rgba(255, 255, 255, 0.72);
+}
+
+/* Adapt petal colors automatically when parent button is disabled ("rosa bloqueado") */
+button:disabled .layer {
+  --sakura-p-stop1: rgba(230, 132, 172, 0.42);
+  --sakura-p-stop2: rgba(240, 166, 196, 0.34);
+  --sakura-p-stop3: rgba(248, 196, 218, 0.24);
+  --sakura-p-stroke: rgba(214, 112, 154, 0.32);
+  --sakura-p-center: rgba(192, 90, 134, 0.28);
+  --sakura-p-stamen: rgba(224, 130, 168, 0.45);
+  --sakura-p-glint: rgba(224, 126, 166, 0.35);
+}
+
+.defsSvg {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Soft silk highlight wash at top-left of active pill */
+.silkWash {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 55% 90% at 12% 15%, rgba(255, 255, 255, 0.16) 0%, transparent 70%),
+    radial-gradient(ellipse 45% 80% at 88% 85%, rgba(255, 228, 239, 0.14) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+button:disabled .silkWash {
+  opacity: 0.4;
+}
+
+/* ── Corner Botanical Watermark Blossoms ─────────────────────────────────── */
+.blossomLeft {
+  position: absolute;
+  left: 8px;
+  bottom: -9px;
+  width: 34px;
+  height: 34px;
+  opacity: 0.46;
+  will-change: transform;
+  animation: blossomSpinLeft 28s linear infinite;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.blossomRight {
+  position: absolute;
+  right: 10px;
+  top: -8px;
+  width: 28px;
+  height: 28px;
+  opacity: 0.42;
+  will-change: transform;
+  animation: blossomSpinRight 34s linear infinite;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.blossomMiniLeft {
+  position: absolute;
+  left: 17%;
+  top: 5px;
+  width: 14px;
+  height: 14px;
+  opacity: 0.34;
+  will-change: transform;
+  animation: blossomGentleBob 6.5s ease-in-out infinite;
+}
+
+.blossomMiniRight {
+  position: absolute;
+  right: 18%;
+  bottom: 5px;
+  width: 13px;
+  height: 13px;
+  opacity: 0.32;
+  will-change: transform;
+  animation: blossomGentleBob 7.4s ease-in-out -2.8s infinite;
+}
+
+button:not(:disabled):hover .blossomLeft {
+  opacity: 0.62;
+}
+
+button:not(:disabled):hover .blossomRight {
+  opacity: 0.58;
+}
+
+/* ── Drifting Sakura Petals Inside Button ────────────────────────────────── */
+.driftingPetal {
+  position: absolute;
+  top: -16px;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+.trajA {
+  animation-name: sakuraBtnDriftA;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.trajB {
+  animation-name: sakuraBtnDriftB;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.trajC {
+  animation-name: sakuraBtnDriftC;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+button:disabled .driftingPetal {
+  animation-play-state: running;
+}
+
+.petalInner {
+  display: block;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+  animation: petalFlutter3D 3.4s ease-in-out infinite alternate;
+}
+
+/* ── Micro Dew Glints ────────────────────────────────────────────────────── */
+.dewGlint {
+  position: absolute;
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation: dewTwinkle 4.2s ease-in-out infinite;
+}
+
+/* ── Keyframes ───────────────────────────────────────────────────────────── */
+@keyframes blossomSpinLeft {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.05);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@keyframes blossomSpinRight {
+  0% {
+    transform: rotate(360deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.06);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@keyframes blossomGentleBob {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-8deg);
+  }
+  50% {
+    transform: translate3d(4px, 3px, 0) rotate(14deg);
+  }
+}
+
+/* Diagonal S-curve breeze across button height (~64px) */
+@keyframes sakuraBtnDriftA {
+  0% {
+    transform: translate3d(-10px, -4px, 0) rotate(-18deg);
+    opacity: 0;
+  }
+  14% {
+    opacity: var(--p-alpha, 0.58);
+  }
+  50% {
+    transform: translate3d(14px, 34px, 0) rotate(68deg);
+    opacity: var(--p-alpha, 0.58);
+  }
+  86% {
+    opacity: var(--p-alpha, 0.58);
+  }
+  100% {
+    transform: translate3d(34px, 74px, 0) rotate(148deg);
+    opacity: 0;
+  }
+}
+
+@keyframes sakuraBtnDriftB {
+  0% {
+    transform: translate3d(8px, -4px, 0) rotate(12deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: var(--p-alpha, 0.5);
+  }
+  48% {
+    transform: translate3d(-10px, 32px, 0) rotate(-62deg);
+    opacity: var(--p-alpha, 0.5);
+  }
+  85% {
+    opacity: var(--p-alpha, 0.5);
+  }
+  100% {
+    transform: translate3d(12px, 74px, 0) rotate(-135deg);
+    opacity: 0;
+  }
+}
+
+@keyframes sakuraBtnDriftC {
+  0% {
+    transform: translate3d(-16px, 0px, 0) rotate(-25deg);
+    opacity: 0;
+  }
+  16% {
+    opacity: var(--p-alpha, 0.52);
+  }
+  52% {
+    transform: translate3d(18px, 30px, 0) rotate(42deg);
+    opacity: var(--p-alpha, 0.52);
+  }
+  86% {
+    opacity: var(--p-alpha, 0.52);
+  }
+  100% {
+    transform: translate3d(46px, 72px, 0) rotate(115deg);
+    opacity: 0;
+  }
+}
+
+@keyframes petalFlutter3D {
+  0% {
+    transform: rotateX(0deg) rotateY(0deg) scale(0.96);
+  }
+  50% {
+    transform: rotateX(34deg) rotateY(42deg) scale(1.04);
+  }
+  100% {
+    transform: rotateX(-26deg) rotateY(-38deg) scale(0.98);
+  }
+}
+
+@keyframes dewTwinkle {
+  0%,
+  100% {
+    opacity: 0.14;
+    transform: scale(0.75) rotate(0deg);
+  }
+  50% {
+    opacity: 0.62;
+    transform: scale(1.12) rotate(25deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .driftingPetal,
+  .petalInner,
+  .blossomLeft,
+  .blossomRight,
+  .blossomMiniLeft,
+  .blossomMiniRight,
+  .dewGlint {
+    animation: none !important;
+  }
+}

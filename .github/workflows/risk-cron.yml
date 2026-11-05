@@ -1,0 +1,20 @@
+name: Nightly Risk Velocity Cron
+
+on:
+  schedule:
+    # 03:00 AM hora de Chile (UTC-3) = 06:00 UTC
+    - cron: '0 6 * * *'
+  workflow_dispatch: # Permite ejecutar manualmente desde GitHub
+
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger Risk Velocity Cron
+        run: |
+          curl -fsS -X GET \
+            "${{ secrets.RISK_CRON_URL || 'https://yaxsell.cl/api/cron/risk-velocity' }}?secret=${{ secrets.CRON_SECRET }}" \
+            -H "User-Agent: github-actions-risk-cron"
+      - name: Show response
+        run: echo "Cron ejecutado correctamente"

@@ -1,0 +1,21 @@
+﻿{
+  "firestore": [
+    {
+      "database": "(default)",
+      "rules": "firestore.carlitos.rules",
+      "indexes": "firestore.indexes.json"
+    }
+  ],
+  "auth": {
+    "providers": {
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "Importadora Carlitos",
+        "supportEmail": "yanpolreyes666@gmail.com"
+      }
+    }
+  },
+  "storage": {
+    "rules": "storage.carlitos.rules"
+  }
+}

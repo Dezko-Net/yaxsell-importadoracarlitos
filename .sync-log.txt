@@ -1,0 +1,322 @@
+[10:26:05] === SYNC START ===
+[10:26:05] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[10:26:05] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[10:26:05] MODE: Single file
+[10:26:05] SYNCED: src\templates\plantilla1\Navbar.tsx
+[10:26:05] === SYNC END ===
+[10:26:16] === SYNC START ===
+[10:26:16] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[10:26:16] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[10:26:16] MODE: Single file
+[10:26:16] === SYNC END ===
+[10:26:58] === SYNC START ===
+[10:26:58] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[10:26:58] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[10:26:58] TIMESTAMP SET: 05/25/2026 10:26:58 - only changes after this will be synced
+[10:26:58] First run - timestamp set to NOW. No past files will be synced.
+[10:26:58] MODE: Full sync
+[10:27:05] SYNCED: public\button.json
+[10:27:05] SYNCED: scripts\migrate-create-collections.ts
+[10:27:05] SYNCED: scripts\migrate-data.ts
+[10:27:05] SYNCED: scripts\migrate-replace-creds.ps1
+[10:27:06] SYNCED: src\app\admin\(panel)\layout.tsx
+[10:27:06] SYNCED: src\app\admin\(panel)\catalog-products\page.tsx
+[10:27:06] SYNCED: src\app\admin\(panel)\categories\page.tsx
+[10:27:06] SYNCED: src\app\admin\(panel)\orders\page.tsx
+[10:27:06] SYNCED: src\app\admin\(panel)\products\page.tsx
+[10:27:06] SYNCED: src\app\admin\(panel)\store-settings\page.tsx
+[10:27:06] SYNCED: src\app\admin\(panel)\users\page.tsx
+[10:27:06] SYNCED: src\app\admin\(panel)\vip\page.tsx
+[10:27:06] SYNCED: src\app\admin\theme-editor\ThemeEditorClient.tsx
+[10:27:06] SYNCED: src\app\api\ai-sidekick\route.ts
+[10:27:06] SYNCED: src\app\api\init-theme-config\route.ts
+[10:27:06] SYNCED: src\app\api\products\search\route.ts
+[10:27:06] SYNCED: src\app\api\template\route.ts
+[10:27:06] SYNCED: src\app\api\theme-config\route.ts
+[10:27:06] SYNCED: src\app\api\version\route.ts
+[10:27:06] SYNCED: src\app\carrito\page.tsx
+[10:27:06] SYNCED: src\app\catalogo\page.tsx
+[10:27:06] SYNCED: src\app\checkout\page.tsx
+[10:27:06] SYNCED: src\app\cuenta\CuentaLayout.tsx
+[10:27:06] SYNCED: src\app\cuenta\page.tsx
+[10:27:06] SYNCED: src\app\cuenta\consultas\page.tsx
+[10:27:06] SYNCED: src\app\cuenta\cupones\page.tsx
+[10:27:06] SYNCED: src\app\cuenta\direcciones\page.tsx
+[10:27:06] SYNCED: src\app\cuenta\favoritos\page.tsx
+[10:27:06] SYNCED: src\app\cuenta\notificaciones\page.tsx
+[10:27:06] SYNCED: src\app\cuenta\pedidos\page.tsx
+[10:27:06] SYNCED: src\app\cuenta\perfil\page.tsx
+[10:27:06] SYNCED: src\app\cuenta\puntos\page.tsx
+[10:27:06] SYNCED: src\app\cuenta\regalos\page.tsx
+[10:27:06] SYNCED: src\app\cuenta\tickets\page.tsx
+[10:27:06] SYNCED: src\app\inventario\page.tsx
+[10:27:06] SYNCED: src\app\llegan-pronto\page.tsx
+[10:27:06] SYNCED: src\app\login\page.tsx
+[10:27:06] SYNCED: src\app\pedido-confirmado\page.tsx
+[10:27:06] SYNCED: src\app\productos\page.tsx
+[10:27:06] SYNCED: src\app\productos\ProductosInner.tsx
+[10:27:06] SYNCED: src\components\AnimHeart.tsx
+[10:27:06] SYNCED: src\components\AperturaDiscountBadge.tsx
+[10:27:06] SYNCED: src\components\AperturaPromoBanner.tsx
+[10:27:06] SYNCED: src\components\CartLineRow.tsx
+[10:27:06] SYNCED: src\components\ChatBot.tsx
+[10:27:06] SYNCED: src\components\HeroSkeletonMobile.tsx
+[10:27:06] SYNCED: src\components\InaugurationBanner.tsx
+[10:27:06] SYNCED: src\components\LoyaltyLevel.tsx
+[10:27:06] SYNCED: src\components\LoyaltyPoints.tsx
+[10:27:06] SYNCED: src\components\MaintenanceGuard.tsx
+[10:27:06] SYNCED: src\components\NavAvatarWithBadge.tsx
+[10:27:06] SYNCED: src\components\NotificationsOverlay.tsx
+[10:27:06] SYNCED: src\components\ProductBadges.tsx
+[10:27:06] SYNCED: src\components\ProductCardPreview.tsx
+[10:27:06] SYNCED: src\components\ProductLocator.tsx
+[10:27:06] SYNCED: src\components\SearchOverlay.tsx
+[10:27:06] SYNCED: src\components\SmartCards.tsx
+[10:27:06] SYNCED: src\components\Toast.tsx
+[10:27:06] SYNCED: src\components\WelcomeGiftSuccess.tsx
+[10:27:06] SYNCED: src\components\admin\AISidekick.tsx
+[10:27:06] SYNCED: src\components\cuenta\CuentaPageShell.tsx
+[10:27:06] SYNCED: src\components\inventario\ScanWizardModal.tsx
+[10:27:06] SYNCED: src\lib\appwrite.ts
+[10:27:06] SYNCED: src\lib\gradient-templates.ts
+[10:27:06] SYNCED: src\lib\home-header-avatar.ts
+[10:27:06] SYNCED: src\lib\section-config.ts
+[10:27:06] SYNCED: src\templates\plantilla1\HomePage.tsx
+[10:27:06] SYNCED: src\templates\plantilla1\mobile-responsive.css
+[10:27:06] SYNCED: src\templates\plantilla1\ProductDetail.tsx
+[10:27:06] SYNCED: src\templates\plantilla1\shopify-fix.css
+[10:27:06] SYNCED: src\templates\plantilla1\tpl1-collections-premium.css
+[10:27:06] SYNCED: src\templates\plantilla2\HomePage.tsx
+[10:27:07] === SYNC END (515 files scanned) ===
+[10:40:47] === SYNC START ===
+[10:40:47] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[10:40:47] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[10:40:47] MODE: Single file
+[10:40:47] SYNCED: src\templates\plantilla1\Navbar.tsx
+[10:40:47] === SYNC END ===
+[10:40:49] === SYNC START ===
+[10:40:49] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[10:40:49] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[10:40:49] MODE: Single file
+[10:40:49] SYNCED: src\components\SearchOverlay.tsx
+[10:40:49] === SYNC END ===
+[10:40:51] === SYNC START ===
+[10:40:51] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[10:40:51] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[10:40:51] MODE: Single file
+[10:40:51] SYNCED: src\app\productos\ProductosInner.tsx
+[10:40:51] === SYNC END ===
+[10:43:38] === SYNC START ===
+[10:43:38] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[10:43:38] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[10:43:38] MODE: Single file
+[10:43:38] SYNCED: src\templates\plantilla1\Navbar.tsx
+[10:43:38] === SYNC END ===
+[10:47:25] === SYNC START ===
+[10:47:25] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[10:47:25] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[10:47:25] MODE: Single file
+[10:47:25] SYNCED: src\templates\plantilla1\Navbar.tsx
+[10:47:25] === SYNC END ===
+[10:51:46] === SYNC START ===
+[10:51:46] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[10:51:46] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[10:51:46] MODE: Single file
+[10:51:46] SYNCED: src\templates\plantilla1\Navbar.tsx
+[10:51:46] === SYNC END ===
+[10:56:42] === SYNC START ===
+[10:56:42] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[10:56:42] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[10:56:42] MODE: Single file
+[10:56:42] SYNCED: src\templates\plantilla1\Navbar.tsx
+[10:56:42] === SYNC END ===
+[10:57:54] === SYNC START ===
+[10:57:54] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[10:57:54] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[10:57:54] MODE: Single file
+[10:57:54] SYNCED: src\templates\plantilla1\Navbar.tsx
+[10:57:54] === SYNC END ===
+[11:03:31] === SYNC START ===
+[11:03:31] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[11:03:31] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[11:03:31] MODE: Single file
+[11:03:31] SYNCED: src\templates\plantilla1\shopify-fix.css
+[11:03:31] === SYNC END ===
+[11:03:31] === SYNC START ===
+[11:03:31] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[11:03:31] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[11:03:31] MODE: Single file
+[11:03:31] SYNCED: src\templates\plantilla1\HomePage.tsx
+[11:03:31] === SYNC END ===
+[11:06:01] === SYNC START ===
+[11:06:01] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[11:06:01] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[11:06:01] MODE: Single file
+[11:06:01] SYNCED: src\templates\plantilla1\shopify-fix.css
+[11:06:01] === SYNC END ===
+[11:06:01] === SYNC START ===
+[11:06:01] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[11:06:01] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[11:06:01] MODE: Single file
+[11:06:01] SYNCED: src\templates\plantilla1\Navbar.tsx
+[11:06:01] === SYNC END ===
+[11:08:18] === SYNC START ===
+[11:08:18] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[11:08:18] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[11:08:18] MODE: Single file
+[11:08:18] SYNCED: src\templates\plantilla1\shopify-fix.css
+[11:08:18] === SYNC END ===
+[11:09:14] === SYNC START ===
+[11:09:14] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[11:09:14] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[11:09:14] MODE: Single file
+[11:09:14] SYNCED: src\templates\plantilla1\shopify-fix.css
+[11:09:14] === SYNC END ===
+[11:09:14] === SYNC START ===
+[11:09:14] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[11:09:14] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[11:09:14] MODE: Single file
+[11:09:14] SYNCED: src\templates\plantilla1\HomePage.tsx
+[11:09:14] === SYNC END ===
+[11:09:44] === SYNC START ===
+[11:09:44] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[11:09:44] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[11:09:44] MODE: Single file
+[11:09:44] SYNCED: src\templates\plantilla1\Navbar.tsx
+[11:09:44] === SYNC END ===
+[11:17:37] === SYNC START ===
+[11:17:37] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[11:17:37] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[11:17:37] MODE: Single file
+[11:17:37] SYNCED: src\app\llegan-pronto\page.tsx
+[11:17:37] === SYNC END ===
+[11:30:59] === SYNC START ===
+[11:30:59] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[11:30:59] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[11:30:59] MODE: Single file
+[11:30:59] SYNCED: src\app\llegan-pronto\page.tsx
+[11:30:59] === SYNC END ===
+[11:45:53] === SYNC START ===
+[11:45:53] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[11:45:53] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[11:45:53] MODE: Single file
+[11:45:53] SYNCED: src\lib\appwrite.ts
+[11:45:53] === SYNC END ===
+[11:45:53] === SYNC START ===
+[11:45:53] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[11:45:53] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[11:45:53] MODE: Single file
+[11:45:53] SYNCED: src\templates\plantilla1\ProductDetail.tsx
+[11:45:53] === SYNC END ===
+[11:52:11] === SYNC START ===
+[11:52:11] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[11:52:11] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[11:52:11] MODE: Single file
+[11:52:11] SYNCED: src\app\admin\(panel)\users\page.tsx
+[11:52:11] === SYNC END ===
+[11:56:30] === SYNC START ===
+[11:56:30] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[11:56:30] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[11:56:30] MODE: Single file
+[11:56:30] SYNCED: src\app\admin\(panel)\users\page.tsx
+[11:56:30] === SYNC END ===
+[11:56:30] === SYNC START ===
+[11:56:30] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[11:56:30] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[11:56:30] MODE: Single file
+[11:56:30] SYNCED: src\context\CartContext.tsx
+[11:56:30] === SYNC END ===
+[11:56:30] === SYNC START ===
+[11:56:30] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[11:56:30] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[11:56:30] MODE: Single file
+[11:56:30] SYNCED: src\lib\appwrite-admin.ts
+[11:56:30] === SYNC END ===
+[12:01:49] === SYNC START ===
+[12:01:49] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[12:01:49] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[12:01:49] MODE: Single file
+[12:01:49] SYNCED: src\app\admin\(panel)\users\page.tsx
+[12:01:49] === SYNC END ===
+[12:01:49] === SYNC START ===
+[12:01:49] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[12:01:49] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[12:01:49] MODE: Single file
+[12:01:49] === SYNC END ===
+[12:05:11] === SYNC START ===
+[12:05:11] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[12:05:11] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[12:05:11] MODE: Single file
+[12:05:11] SYNCED: src\app\admin\(panel)\users\page.tsx
+[12:05:11] === SYNC END ===
+[12:05:11] === SYNC START ===
+[12:05:11] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[12:05:11] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[12:05:11] MODE: Single file
+[12:05:11] SYNCED: src\app\cuenta\CuentaLayout.tsx
+[12:05:11] === SYNC END ===
+[12:05:11] === SYNC START ===
+[12:05:11] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[12:05:11] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[12:05:11] MODE: Single file
+[12:05:11] SYNCED: src\app\cuenta\chat\page.tsx
+[12:05:11] === SYNC END ===
+[12:05:11] === SYNC START ===
+[12:05:11] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[12:05:11] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[12:05:11] MODE: Single file
+[12:05:11] SYNCED: src\lib\appwrite.ts
+[12:05:11] === SYNC END ===
+[12:05:11] === SYNC START ===
+[12:05:11] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[12:05:11] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[12:05:11] MODE: Single file
+[12:05:11] SYNCED: src\lib\appwrite-admin.ts
+[12:05:11] === SYNC END ===
+[12:07:16] === SYNC START ===
+[12:07:16] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[12:07:16] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[12:07:16] MODE: Single file
+[12:07:16] SYNCED: src\app\admin\(panel)\users\page.tsx
+[12:07:16] === SYNC END ===
+[12:07:16] === SYNC START ===
+[12:07:16] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[12:07:16] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[12:07:16] MODE: Single file
+[12:07:16] SYNCED: src\app\cuenta\chat\page.tsx
+[12:07:16] === SYNC END ===
+[12:26:19] === SYNC START ===
+[12:26:19] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[12:26:19] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[12:26:19] MODE: One-shot sync (since 05/25/2026 12:21:19)
+[12:26:26] === SYNC END (0 changed files) ===
+[12:26:29] === SYNC START ===
+[12:26:29] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[12:26:29] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[12:26:29] MODE: Single file
+[12:26:29] === SYNC END ===
+[12:26:29] === SYNC START ===
+[12:26:29] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[12:26:29] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[12:26:29] MODE: Single file
+[12:26:29] === SYNC END ===
+[12:26:29] === SYNC START ===
+[12:26:29] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[12:26:29] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[12:26:29] MODE: Single file
+[12:26:29] === SYNC END ===
+[12:26:29] === SYNC START ===
+[12:26:29] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[12:26:29] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[12:26:29] MODE: Single file
+[12:26:29] === SYNC END ===
+[12:26:29] === SYNC START ===
+[12:26:29] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[12:26:29] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[12:26:29] MODE: Single file
+[12:26:29] === SYNC END ===
+[12:26:29] === SYNC START ===
+[12:26:29] Source:      C:\Proyectos\PROJECT YAXSEL\web-store
+[12:26:29] Destination: C:\Proyectos\COMPRA REGION - YAXSELL\web-store
+[12:26:29] MODE: Single file
+[12:26:29] === SYNC END ===

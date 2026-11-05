@@ -1,0 +1,140 @@
+.stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+  user-select: none;
+}
+
+.defsSvg {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.sheen {
+  position: absolute;
+  inset: -40% -20%;
+  background: radial-gradient(
+    ellipse at 22% 50%,
+    rgba(255, 247, 237, 0.24) 0%,
+    rgba(254, 215, 170, 0.1) 38%,
+    transparent 70%
+  );
+  animation: nekoVelvetBreathe 5.5s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+.particleWrap {
+  position: absolute;
+  will-change: transform, opacity;
+  animation-name: nekoFloatAcross;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  pointer-events: none;
+}
+
+.particleSvg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  will-change: transform;
+  animation-name: nekoFlutter;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+.dew {
+  position: absolute;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    #ffffff 0%,
+    rgba(255, 237, 213, 0.92) 48%,
+    rgba(251, 146, 60, 0) 100%
+  );
+  animation-name: nekoDewPulse;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  pointer-events: none;
+}
+
+@keyframes nekoVelvetBreathe {
+  0% {
+    transform: translate3d(-6%, -4%, 0) scale(0.96);
+    opacity: 0.72;
+  }
+  100% {
+    transform: translate3d(8%, 4%, 0) scale(1.05);
+    opacity: 1;
+  }
+}
+
+@keyframes nekoFloatAcross {
+  0% {
+    transform: translate3d(-12px, 10px, 0) scale(0.76);
+    opacity: 0;
+  }
+  14% {
+    opacity: var(--p-opacity, 0.78);
+  }
+  52% {
+    transform: translate3d(calc(var(--drift-x, 28px) * 0.52), calc(var(--drift-y, -16px) * 0.48), 0)
+      scale(1);
+    opacity: var(--p-opacity, 0.78);
+  }
+  86% {
+    opacity: calc(var(--p-opacity, 0.78) * 0.85);
+  }
+  100% {
+    transform: translate3d(var(--drift-x, 28px), var(--drift-y, -16px), 0) scale(0.84);
+    opacity: 0;
+  }
+}
+
+@keyframes nekoFlutter {
+  0% {
+    transform: rotate(var(--rot-start, -14deg));
+  }
+  100% {
+    transform: rotate(var(--rot-end, 16deg));
+  }
+}
+
+@keyframes nekoDewPulse {
+  0%,
+  100% {
+    opacity: 0.16;
+    transform: scale(0.68);
+  }
+  50% {
+    opacity: 0.86;
+    transform: scale(1.22);
+  }
+}
+
+[data-pos='charge']:disabled .stage,
+button:disabled .stage {
+  opacity: 0.36;
+}
+
+[data-pos='charge']:disabled .particleWrap,
+button:disabled .particleWrap,
+[data-pos='charge']:disabled .dew,
+button:disabled .dew {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .particleWrap,
+  .particleSvg,
+  .dew,
+  .sheen {
+    animation: none !important;
+  }
+}

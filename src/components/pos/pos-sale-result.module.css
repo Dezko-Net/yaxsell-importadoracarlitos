@@ -1,0 +1,632 @@
+.dialog { margin:auto; width:min(440px,calc(100vw - 24px)); max-height:calc(100dvh - 24px); padding:0; overflow-y:auto; border:1px solid var(--pos-line, #d7e4dc); border-radius:var(--pos-radius-panel, 18px); background:var(--pos-panel-bg, white); color:var(--pos-ink); box-shadow:0 20px 70px #0d1d1740; }
+.dialog::backdrop { background:rgb(18 32 26 / 50%); backdrop-filter:blur(3px); }
+.header { display:flex; align-items:center; gap:12px; padding:22px; background:var(--pos-panel-sub-bg, #f2f8ef); border-bottom:1px solid var(--pos-line); }
+.check { width:44px; height:44px; display:grid; place-items:center; border-radius:50%; background:var(--pos-soft, #dceee0); color:var(--pos-personal-accent-text, var(--pos-accent)); flex-shrink:0; }
+.header h2 { font-size:22px; font-weight:650; letter-spacing:-.035em; color:var(--pos-ink-strong, var(--pos-ink)); }
+.header p { color:var(--pos-muted); font-size:12px; margin-top:3px; }
+.header > button { margin-left:auto; display:grid; place-items:center; width:40px; height:40px; flex-shrink:0; color:var(--pos-muted); border-radius:var(--pos-radius-control, 9px); }
+.header > button:hover { background:var(--pos-card-bg, white); color:var(--pos-ink); }
+.body { padding:24px; }
+.amount > span { display:block; font-size:12px; color:var(--pos-muted); }
+.amount strong { font-size:40px; font-weight:650; letter-spacing:-.045em; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; color:var(--pos-ink-strong, var(--pos-ink)); }
+.info { margin:15px 0 20px; font-size:12px; }
+.info > div { display:flex; justify-content:space-between; gap:16px; padding:8px 0; border-bottom:1px solid var(--pos-line, #eef1ec); }
+.info dt { color:var(--pos-muted); }
+.info dd { text-align:right; font-weight:600; color:var(--pos-ink-strong, var(--pos-ink)); }
+.change { padding:16px 18px; border:1px solid #dfc875; border-radius:var(--pos-radius-control, 10px); background:#fff8df; color:#69521b; }
+.change > span { display:block; font-size:12px; font-weight:600; }
+.change strong { display:block; font-size:30px; letter-spacing:-.03em; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.notice { display:flex; gap:10px; margin-top:16px; padding:12px; border-radius:var(--pos-radius-control, 9px); background:var(--pos-panel-sub-bg, #f5f7f3); font-size:12px; color:var(--pos-muted); line-height:1.6; }
+.notice svg { flex-shrink:0; margin-top:3px; }
+.notice strong { display:block; color:var(--pos-ink); }
+.actions { display:flex; flex-direction:column; gap:8px; margin-top:24px; }
+.actions button { display:flex; align-items:center; justify-content:center; gap:10px; min-height:48px; padding:12px 16px; border:1px solid var(--pos-line); border-radius:var(--pos-radius-control, 10px); background:var(--pos-card-bg, white); color:var(--pos-ink); font-size:13px; font-weight:650; }
+.actions button:hover { background:var(--pos-soft, #f3f7ef); }
+.actions button.next { background:var(--pos-accent-gradient, var(--pos-accent)); border-color:var(--pos-accent); color:var(--pos-accent-contrast, white); box-shadow:var(--pos-charge-shadow, none); }
+.actions button.next:hover { filter:brightness(1.06); }
+.next span { font-size:10px; border:1px solid #ffffff50; border-radius:4px; padding:2px 5px; }
+
+/* ── Bespoke Sakura Milk & Coquette Celebration Modal (`sakuraMode`) ──────── */
+.sakuraOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  padding: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(66, 20, 42, 0.24);
+  backdrop-filter: blur(8px) saturate(0.98);
+  -webkit-backdrop-filter: blur(8px) saturate(0.98);
+  animation: sakuraModalFadeIn 0.22s ease-out both;
+}
+
+@keyframes sakuraModalFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.sakuraCard {
+  position: relative;
+  z-index: 2;
+  width: min(444px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  border: 1.5px solid #f3a6c5;
+  border-radius: 26px;
+  background: linear-gradient(180deg, rgba(255, 251, 253, 0.96) 0%, rgba(255, 243, 248, 0.95) 100%);
+  color: #4a1932;
+  box-shadow:
+    inset 0 0 0 3px #ffffff,
+    0 22px 56px rgba(96, 26, 56, 0.2);
+}
+
+.sakuraCard .header {
+  position: relative;
+  overflow: hidden;
+  padding: 22px 22px 20px;
+  background: linear-gradient(135deg, #ffeaf3 0%, #ffdce9 55%, #fff2f7 100%);
+  border-bottom: 1.5px dashed #f2a2c2;
+}
+
+.sakuraHeaderText {
+  position: relative;
+  z-index: 1;
+}
+
+.sakuraBadgeTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  margin-bottom: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid #f4b2cd;
+  color: #b54978;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.sakuraCard .header h2 {
+  color: #3d1026;
+  font-weight: 750;
+}
+
+.sakuraCard .header p {
+  color: #8f4b6c;
+  font-weight: 600;
+}
+
+.sakuraCard .header > button {
+  position: relative;
+  z-index: 2;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid #f4b8d0;
+  color: #8f4b6c;
+}
+
+.sakuraCard .header > button:hover {
+  background: #ffffff;
+  color: #4a1932;
+}
+
+.sakuraCard .body {
+  position: relative;
+  overflow: hidden;
+  padding: 24px;
+}
+
+.sakuraBodyContent {
+  position: relative;
+  z-index: 2;
+}
+
+.sakuraCard .info > div {
+  border-bottom: 1px dashed #f3bfd5;
+}
+
+.sakuraCard .change {
+  padding: 15px 18px;
+  border: 1.5px dashed #f09ec0;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 236, 245, 0.9) 100%);
+  box-shadow: inset 0 0 0 2px #ffffff;
+  color: #6b2246;
+}
+
+.sakuraCard .change > span {
+  color: #a44a74;
+}
+
+.sakuraCard .change strong {
+  color: #3f1027;
+  font-weight: 750;
+}
+
+.sakuraCard .actions button {
+  border-radius: 999px;
+  border: 1.5px solid #f3b5ce;
+  background: rgba(255, 255, 255, 0.94);
+  color: #54213b;
+}
+
+.sakuraCard .actions button:hover {
+  background: #fff5f9;
+}
+
+.sakuraCard .actions button.next {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(125deg, #db6590 0%, #e77ba2 50%, #d8608c 100%);
+  border: 1px solid rgba(235, 134, 171, 0.68);
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(138, 38, 76, 0.2);
+  box-shadow:
+    0 3px 10px rgba(196, 86, 128, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.sakuraCard .actions button.next:hover {
+  filter: none;
+  background: linear-gradient(125deg, #d45c88 0%, #e2729b 50%, #d15884 100%);
+  box-shadow:
+    0 4px 13px rgba(196, 86, 128, 0.21),
+    inset 0 1px 0 rgba(255, 255, 255, 0.38);
+}
+
+.sakuraNextLabel {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sakuraCard .next span {
+  border-radius: 999px;
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+/* ── Bespoke Mikan Neko & Gato Naranja Celebration Modal (`nekoMode`) ────── */
+.nekoOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  padding: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(58, 28, 12, 0.24);
+  backdrop-filter: blur(8px) saturate(0.98);
+  -webkit-backdrop-filter: blur(8px) saturate(0.98);
+  animation: sakuraModalFadeIn 0.22s ease-out both;
+}
+
+.nekoCard {
+  position: relative;
+  z-index: 2;
+  width: min(444px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  border: 1.5px solid #f4ae78;
+  border-radius: 26px;
+  background: linear-gradient(180deg, rgba(255, 251, 246, 0.96) 0%, rgba(255, 241, 226, 0.95) 100%);
+  color: #46230d;
+  box-shadow:
+    inset 0 0 0 3px #ffffff,
+    0 22px 56px rgba(92, 42, 12, 0.2);
+}
+
+.nekoCard .header {
+  position: relative;
+  overflow: hidden;
+  padding: 22px 22px 20px;
+  background: linear-gradient(135deg, #fff1e2 0%, #ffe3c9 55%, #fff6ec 100%);
+  border-bottom: 1.5px dashed #f2ab74;
+}
+
+.nekoBadgeTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  margin-bottom: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid #f4b786;
+  color: #b85316;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.nekoCard .header h2 {
+  color: #3a1a07;
+  font-weight: 750;
+}
+
+.nekoCard .header p {
+  color: #8f4e27;
+  font-weight: 600;
+}
+
+.nekoCard .header > button {
+  position: relative;
+  z-index: 2;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid #f4be91;
+  color: #8f4e27;
+}
+
+.nekoCard .header > button:hover {
+  background: #ffffff;
+  color: #46230d;
+}
+
+.nekoCard .body {
+  position: relative;
+  overflow: hidden;
+  padding: 24px;
+}
+
+.nekoCard .info > div {
+  border-bottom: 1px dashed #f3c49d;
+}
+
+.nekoCard .change {
+  padding: 15px 18px;
+  border: 1.5px dashed #f0a46d;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 239, 222, 0.92) 100%);
+  box-shadow: inset 0 0 0 2px #ffffff;
+  color: #69310f;
+}
+
+.nekoCard .change > span {
+  color: #a6521f;
+}
+
+.nekoCard .change strong {
+  color: #3a1a07;
+  font-weight: 750;
+}
+
+.nekoCard .actions button {
+  border-radius: 999px;
+  border: 1.5px solid #f3ba8c;
+  background: rgba(255, 255, 255, 0.94);
+  color: #522910;
+}
+
+.nekoCard .actions button:hover {
+  background: #fff6ed;
+}
+
+.nekoCard .actions button.next {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(125deg, #df7229 0%, #ed8b42 50%, #d86920 100%);
+  border: 1px solid rgba(238, 146, 76, 0.72);
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(124, 48, 10, 0.22);
+  box-shadow:
+    0 3px 10px rgba(198, 92, 24, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32);
+}
+
+.nekoCard .actions button.next:hover {
+  filter: none;
+  background: linear-gradient(125deg, #d6681f 0%, #e58036 50%, #cf5f18 100%);
+  box-shadow:
+    0 4px 13px rgba(198, 92, 24, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.nekoCard .next span {
+  border-radius: 999px;
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+/* ── Bespoke Capybara Onsen & Matcha Latte Celebration Modal (`capyMode`) ── */
+.capyOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  padding: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(18, 48, 28, 0.24);
+  backdrop-filter: blur(8px) saturate(0.98);
+  -webkit-backdrop-filter: blur(8px) saturate(0.98);
+  animation: sakuraModalFadeIn 0.22s ease-out both;
+}
+
+.capyCard {
+  position: relative;
+  z-index: 2;
+  width: min(444px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  border: 1.5px solid #86ce9f;
+  border-radius: 26px;
+  background: linear-gradient(180deg, rgba(249, 254, 250, 0.96) 0%, rgba(236, 249, 239, 0.95) 100%);
+  color: #163b24;
+  box-shadow:
+    inset 0 0 0 3px #ffffff,
+    0 22px 56px rgba(24, 68, 40, 0.2);
+}
+
+.capyCard .header {
+  position: relative;
+  overflow: hidden;
+  padding: 22px 22px 20px;
+  background: linear-gradient(135deg, #e7f7ec 0%, #d4eedc 55%, #effaf2 100%);
+  border-bottom: 1.5px dashed #7cc695;
+}
+
+.capyBadgeTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  margin-bottom: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid #8bd0a2;
+  color: #25663e;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.capyCard .header h2 {
+  color: #102e1b;
+  font-weight: 750;
+}
+
+.capyCard .header p {
+  color: #3d7050;
+  font-weight: 600;
+}
+
+.capyCard .header > button {
+  position: relative;
+  z-index: 2;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid #96d4ab;
+  color: #3d7050;
+}
+
+.capyCard .header > button:hover {
+  background: #ffffff;
+  color: #163b24;
+}
+
+.capyCard .body {
+  position: relative;
+  overflow: hidden;
+  padding: 24px;
+}
+
+.capyCard .info > div {
+  border-bottom: 1px dashed #a3dbb6;
+}
+
+.capyCard .change {
+  padding: 15px 18px;
+  border: 1.5px dashed #7bc494;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(232, 248, 236, 0.92) 100%);
+  box-shadow: inset 0 0 0 2px #ffffff;
+  color: #1c4d30;
+}
+
+.capyCard .change > span {
+  color: #36734d;
+}
+
+.capyCard .change strong {
+  color: #102e1b;
+  font-weight: 750;
+}
+
+.capyCard .actions button {
+  border-radius: 999px;
+  border: 1.5px solid #95d3ab;
+  background: rgba(255, 255, 255, 0.94);
+  color: #1c472c;
+}
+
+.capyCard .actions button:hover {
+  background: #eefaf1;
+}
+
+.capyCard .actions button.next {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(125deg, #4b8f63 0%, #63aa7b 50%, #428359 100%);
+  border: 1px solid rgba(118, 190, 142, 0.72);
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(24, 68, 39, 0.22);
+  box-shadow:
+    0 3px 10px rgba(45, 106, 79, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32);
+}
+
+.capyCard .actions button.next:hover {
+  filter: none;
+  background: linear-gradient(125deg, #43835a 0%, #599e70 50%, #3b7750 100%);
+  box-shadow:
+    0 4px 13px rgba(45, 106, 79, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.capyCard .next span {
+  border-radius: 999px;
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+/* ── Bespoke Princess Jasmine & Agrabah Oasis Celebration Modal (`jasmineMode`) ─ */
+.jasmineOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  padding: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(11, 52, 50, 0.25);
+  backdrop-filter: blur(8px) saturate(0.98);
+  -webkit-backdrop-filter: blur(8px) saturate(0.98);
+  animation: sakuraModalFadeIn 0.22s ease-out both;
+}
+
+.jasmineCard {
+  position: relative;
+  z-index: 2;
+  width: min(444px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  border: 1.5px solid #4fd1c5;
+  border-radius: 26px;
+  background: linear-gradient(180deg, rgba(244, 254, 253, 0.96) 0%, rgba(235, 250, 248, 0.95) 100%);
+  color: #0f3f3c;
+  box-shadow:
+    inset 0 0 0 3px #ffffff,
+    0 22px 56px rgba(13, 94, 88, 0.22);
+}
+
+.jasmineCard .header {
+  position: relative;
+  overflow: hidden;
+  padding: 22px 22px 20px;
+  background: linear-gradient(135deg, #dcfaf7 0%, #c6f4ee 55%, #f3eeff 100%);
+  border-bottom: 1.5px dashed #4fd1c5;
+}
+
+.jasmineBadgeTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  margin-bottom: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid #5eead4;
+  color: #0d6b66;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.jasmineCard .header h2 {
+  color: #092e2c;
+  font-weight: 750;
+}
+
+.jasmineCard .header p {
+  color: #1f635e;
+  font-weight: 600;
+}
+
+.jasmineCard .header > button {
+  position: relative;
+  z-index: 2;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid #67e0d6;
+  color: #1f635e;
+}
+
+.jasmineCard .header > button:hover {
+  background: #ffffff;
+  color: #092e2c;
+}
+
+.jasmineCard .body {
+  position: relative;
+  overflow: hidden;
+  padding: 24px;
+}
+
+.jasmineCard .info > div {
+  border-bottom: 1px dashed #81e6d9;
+}
+
+.jasmineCard .change {
+  padding: 15px 18px;
+  border: 1.5px dashed #4fd1c5;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(224, 250, 247, 0.92) 100%);
+  box-shadow: inset 0 0 0 2px #ffffff;
+  color: #0f524d;
+}
+
+.jasmineCard .change > span {
+  color: #1b6b64;
+}
+
+.jasmineCard .change strong {
+  color: #092e2c;
+  font-weight: 750;
+}
+
+.jasmineCard .actions button {
+  border-radius: 999px;
+  border: 1.5px solid #67e0d6;
+  background: rgba(255, 255, 255, 0.94);
+  color: #0f4743;
+}
+
+.jasmineCard .actions button:hover {
+  background: #e6fcf9;
+}
+
+.jasmineCard .actions button.next {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(125deg, #139a93 0%, #26b8ae 50%, #0e8b85 100%);
+  border: 1px solid rgba(250, 204, 21, 0.72);
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(9, 64, 68, 0.24);
+  box-shadow:
+    0 3px 10px rgba(15, 150, 144, 0.18),
+    inset 0 1px 0 rgba(254, 240, 138, 0.42);
+}
+
+.jasmineCard .actions button.next:hover {
+  filter: none;
+  background: linear-gradient(125deg, #0f8c86 0%, #1fad9f 50%, #0c7d78 100%);
+  box-shadow:
+    0 4px 13px rgba(15, 150, 144, 0.24),
+    inset 0 1px 0 rgba(254, 240, 138, 0.52);
+}
+
+.jasmineCard .next span {
+  border-radius: 999px;
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+@media (max-width:400px) { .header,.body,.sakuraCard .header,.sakuraCard .body,.nekoCard .header,.nekoCard .body,.capyCard .header,.capyCard .body,.jasmineCard .header,.jasmineCard .body { padding:18px; } .amount strong { font-size:34px; } }

@@ -1,0 +1,303 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "reviews",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "PRODUCTID", "order": "ASCENDING" },
+        { "fieldPath": "CREATEDAT", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "STATUS", "order": "ASCENDING" },
+        { "fieldPath": "UPDATEDAT", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "STATUS", "order": "ASCENDING" },
+        { "fieldPath": "CREATEDAT", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "STATUS", "order": "ASCENDING" },
+        { "fieldPath": "CREATEDAT", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "STATUS", "order": "ASCENDING" },
+        { "fieldPath": "STOCKDEDUCTED", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "STATUS", "order": "ASCENDING" },
+        { "fieldPath": "EXPIRESAT", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "STATUS", "order": "ASCENDING" },
+        { "fieldPath": "EXPIRESATBACKEND", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "STATUS", "order": "ASCENDING" },
+        { "fieldPath": "AUTOCANCELAT", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "STATUS", "order": "ASCENDING" },
+        { "fieldPath": "PAYMENTEXPIREDAT", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "USERID", "order": "ASCENDING" },
+        { "fieldPath": "CREATEDAT", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "CUSTOMERPHONE", "order": "ASCENDING" },
+        { "fieldPath": "CREATEDAT", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "vendor_orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "STATUS", "order": "ASCENDING" },
+        { "fieldPath": "CREATEDAT", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "vendor_orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "STATUS", "order": "ASCENDING" },
+        { "fieldPath": "CREATEDAT", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "vendor_orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "STATUS", "order": "ASCENDING" },
+        { "fieldPath": "AUTOCANCELAT", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "vendor_orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "STATUS", "order": "ASCENDING" },
+        { "fieldPath": "PAYMENTEXPIREDAT", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "vendor_orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "STATUS", "order": "ASCENDING" },
+        { "fieldPath": "EXPIRESAT", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "vendor_orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "VENDOR_ID", "order": "ASCENDING" },
+        { "fieldPath": "CREATEDAT", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "products",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "VENDOR_ID", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "vendor_orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "VENDOR_ID", "order": "ASCENDING" },
+        { "fieldPath": "ORDERINDEX", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "ventas_pos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "sede", "order": "ASCENDING" },
+        { "fieldPath": "fechaStr", "order": "ASCENDING" },
+        { "fieldPath": "createdAtTs", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "ventas_pos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "estado", "order": "ASCENDING" },
+        { "fieldPath": "fechaStr", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "ventas_pos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "sesionCajaId", "order": "ASCENDING" },
+        { "fieldPath": "fechaStr", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "ventas_pos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "sesionCajaId", "order": "ASCENDING" },
+        { "fieldPath": "fechaTs", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "ventas_pos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "sesionCajaId", "order": "ASCENDING" },
+        { "fieldPath": "createdAtTs", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "ventas_pos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "estado", "order": "ASCENDING" },
+        { "fieldPath": "fechaTs", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "ventas_pos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "estado", "order": "ASCENDING" },
+        { "fieldPath": "createdAtTs", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "ventas_pos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "sede", "order": "ASCENDING" },
+        { "fieldPath": "fechaStr", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "ventas_pos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "sede", "order": "ASCENDING" },
+        { "fieldPath": "createdAtTs", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "stock_movements",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "tipo", "order": "ASCENDING" },
+        { "fieldPath": "fechaTs", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "stock_movements",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "tipo", "order": "ASCENDING" },
+        { "fieldPath": "sede", "order": "ASCENDING" },
+        { "fieldPath": "fechaTs", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "pos_returns",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "sede", "order": "ASCENDING" },
+        { "fieldPath": "createdAtTs", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "pos_returns",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "sede", "order": "ASCENDING" },
+        { "fieldPath": "saleFechaStr", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "stock_receptions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "sede", "order": "ASCENDING" },
+        { "fieldPath": "createdAtTs", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "cortes_caja",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "sede", "order": "ASCENDING" },
+        { "fieldPath": "fechaStr", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "cortes_caja",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "sede", "order": "ASCENDING" },
+        { "fieldPath": "fechaCierreStr", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "caja_sesiones",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "sede", "order": "ASCENDING" },
+        { "fieldPath": "estado", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "caja_sesiones",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "sede", "order": "ASCENDING" },
+        { "fieldPath": "aperturaAtTs", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

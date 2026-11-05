@@ -1,0 +1,651 @@
+================================================================================
+AUDITORÍA DE LECTURAS DE APPWRITE - CONTEXTO COMPLETO PARA IA ANALISTAS
+================================================================================
+Fecha: 26 Junio 2026
+Proyecto: Yaxsell (e-commerce de cosméticos Kevin&Coco Chile)
+Stack: Next.js 15, Appwrite Cloud, WhatsApp Business API, Gemini AI
+Hosting: Vercel (serverless functions)
+Appwrite Endpoint: https://nyc.cloud.appwrite.io/v1
+Project ID: 6a0a4e8d0032177f3f90
+Database ID: 6a0a58ca001798410d86
+
+================================================================================
+1. EL PROBLEMA
+================================================================================
+
+SÍNTOMA:
+- Sin Kenia activa: ~6,000 a 40,000 lecturas/día (rango normal)
+- Con Kenia activa (activada madrugada del 24-Jun): subió a 120,000-173,000 lecturas en unas horas
+- Solo unos pocos clientes le hablaron a Kenia (no es volumen de mensajes)
+- El aumento fue de golpe, no gradual
+
+REGLA CRÍTICA DE APPWRITE (confirmada en documentación oficial):
+- Appwrite cuenta reads POR DOCUMENTO RETORNADO, no por API call
+- Si haces listDocuments con limit=100 y retorna 100 docs = 100 read operations
+- Si una query retorna 0 documentos = 1 read operation
+- Si haces getDocument = 1 read operation
+- Los writes (create/update/delete) = 1 write operation por documento
+
+Planes Appwrite:
+- Free: 500K reads/mes
+- Pro: 1.75M reads/mes ($0.06 por cada 100K extra)
+
+================================================================================
+2. QUÉ ES KENIA
+================================================================================
+
+Kenia es un chatbot de WhatsApp integrado en el e-commerce. Usa Gemini AI para:
+- Responder clientes que escriben por WhatsApp
+- Buscar productos en la base de datos
+- Gestionar pedidos (crear, actualizar estado)
+- Notificar al admin cuando necesita intervención humana
+- Generar saludos personalizados con IA
+
+Cuando Kenia está DESACTIVADA:
+- El webhook recibe el mensaje, envía un aviso de "mantenimiento" (1 vez por cliente) y retorna
+- Mínimas lecturas a Appwrite
+
+Cuando Kenia está ACTIVADA:
+- El webhook procesa el mensaje completo: busca productos, órdenes, historial, genera respuesta IA, guarda en historial, notifica al admin
+- El panel admin se deja abierto para monitorear conversaciones (polling)
+
+================================================================================
+3. ARQUITECTURA DEL WEBHOOK (src/app/api/whatsapp/webhook/route.ts)
+================================================================================
+
+Este es el flujo completo cuando llega un mensaje de WhatsApp (POST):
+
+PASO 1: Verificación GET (challenge de Meta) — sin Appwrite
+
+PASO 2: Parseo del mensaje
+- Extrae fromPhone, msgId, msgType, userText
+- Si no hay texto → retorna (no_text_ignored)
+
+PASO 3: Lock de deduplicación (LÍNEAS 433-451)
+- serverGetDocument(ADMIN_CHAT, lockDocId) → 1 read (o 0 si no existe = 1 read igual)
+- Si existe → duplicate_ignored (retorna)
+- Si no existe → serverCreateDocument(ADMIN_CHAT, lockDocId) → 1 write
+- Total: 1 read + 1 write por cada mensaje (duplicado o no)
+
+PASO 4: Si es imagen (LÍNEAS 460-620)
+- getKeniaUsage(fromPhone) → fetchConfigFromAppwrite() → 1 read (config doc)
+- Si no hay pendingOrderId:
+  - serverListDocuments(ORDERS, limit=50) → hasta 50 reads
+  - Filtra en memoria por phone
+- Descarga imagen de Meta, sube a Appwrite Storage
+- Si excede 5 imágenes/día → setKeniaBlocked → fetchConfigFromAppwrite + saveConfigToAppwrite
+- serverUpdateDocument(ORDERS, pendingOrderId) → 1 write
+- notifyPaymentUploaded → getKeniaRuntimeSnapshot → fetchConfigFromAppwrite (cacheado) + readUsageFromFile + sendWhatsAppMessage + addToHistory
+- Total imagen: ~55 reads + varios writes
+
+PASO 5: Botón "comprobante" (LÍNEAS 784-826)
+- serverListDocuments(ORDERS, limit=50) → hasta 50 reads
+- Filtra por phone en memoria
+- Total: ~50 reads
+
+PASO 6: markAsRead (WhatsApp API, no Appwrite)
+
+PASO 7: Si Kenia desactivada (LÍNEAS 832-857)
+- getKeniaUsage(fromPhone) → fetchConfigFromAppwrite → 1 read
+- Si no ha enviado aviso de mantenimiento → sendWhatsAppMessage + addToHistory (1 write)
+- recordKeniaUsage (file I/O, no Appwrite)
+- Total: ~1 read + 1 write
+- RETORNA AQUÍ — no procesa más
+
+PASO 8: Determinar si es admin (LÍNEAS 655-662)
+- getKeniaConfig() → fetchConfigFromAppwrite() → 1 read (config doc)
+- Compara phone con ADMIN_PHONES list
+- getKeniaUsage(fromPhone, blockedPhones) → readUsageFromFile (file I/O, no Appwrite)
+  NOTA: Antes del fix, getKeniaUsage llamaba fetchConfigFromAppwrite de nuevo = 1 read extra
+  NOTA 2: En Vercel serverless, el cache en memoria (_configCache, TTL 60s) NO es confiable
+          porque cada invocación puede ser en una instancia nueva donde _configCache = null
+
+PASO 9: Comandos admin (MODO CLIENTE, MODO ADMIN) (LÍNEAS 668-682)
+- recordKeniaUsage (file I/O)
+- sendWhatsAppMessage + addToHistory (1 write)
+- Total: 1 write
+
+PASO 10: Auto-linking de usuarios no registrados (LÍNEAS 880-1033)
+- lookupRegisteredUser(fromPhone):
+  - serverListDocuments(USERS, limit=5, phone variants) → hasta 5 reads
+  - Si falla: serverListDocuments(USERS, limit=20) → hasta 20 reads
+  - Solo se ejecuta la PRIMERA VEZ (después se cachea en usage.isRegistered)
+- Si no registrado Y no se sabe si tiene órdenes:
+  - serverListDocuments(ORDERS, limit=100) → hasta 100 reads
+  - Filtra por phone en memoria
+  - Solo la PRIMERA VEZ (después se cachea en usage.isGuestWithOrders)
+- Si detecta email o RUT en el mensaje:
+  - findOrdersByEmail → serverListDocuments(ORDERS, limit=25, email) → hasta 25 reads
+  - findUserByEmail → serverListDocuments(USERS, limit=5, email) → hasta 5 reads
+  - findOrdersByRut → serverListDocuments(ORDERS, limit=25, rut) → hasta 25 reads
+  - linkPhoneToOrdersAndUser → serverUpdateDocument por cada orden + serverUpdateDocument del user
+- Total primera vez: ~130 reads + N writes
+- Total veces siguientes: 0 reads (todo cacheado en usage file)
+
+PASO 11: Welcome menu (LÍNEAS 1058-1130) — solo primera vez
+- getKeniaConfig (ya cargado, cacheado)
+- Gemini API call para generar saludo (no Appwrite)
+- sendWelcomeMenu (WhatsApp API)
+- addToHistory (1 write)
+- recordKeniaUsage (file I/O)
+- Total: 1 write
+
+PASO 12: Fetch context para Gemini (LÍNEAS 1133-1475) — CADA MENSAJE
+- Si es admin:
+  - serverListDocuments(ORDERS, limit=100) → hasta 100 reads
+  - serverListDocuments(PRODUCTS, limit=30) → hasta 30 reads
+  - Total admin context: ~130 reads
+
+- Si es cliente:
+  - Buscar órdenes del cliente:
+    - serverListDocuments(ORDERS, limit=20, phone variants) → hasta 20 reads
+    - AHORA CACHEADO 1 min (antes no)
+  - Buscar órdenes de negociación:
+    - serverListDocuments(ORDERS, limit=20, phone) → hasta 20 reads
+    - Por cada item faltante: serverGetDocument(PRODUCTS, item.id) → 1 read c/u
+    - serverListDocuments(PRODUCTS, limit=8, categoryId) → hasta 8 reads
+  - Buscar productos por nombre:
+    - serverListDocuments(PRODUCTS, limit=25, search) → hasta 25 reads
+    - Si no encuentra: serverListDocuments(PRODUCTS, limit=25, tags) → hasta 25 reads
+    - AHORA CACHEADO 2 min
+    - BUG CORREGIDO: antes las queries usaban formato incorrecto (raw string en vez de
+      JSON.stringify) lo que causaba que SIEMPRE fallaran y cayeran al fallback de categorías
+  - Fallback categorías:
+    - serverListDocuments(CATEGORIES, limit=100) → hasta 100 reads
+    - AHORA CACHEADO 5 min
+  - Total cliente context: ~100-200 reads (dependiendo de cuántos fallbacks ejecuta)
+
+PASO 13: getHistory (LÍNEA 1488) — CADA MENSAJE
+- serverListDocuments(ADMIN_CHAT, limit=20, userId) → hasta 20 reads
+- Total: 20 reads
+
+PASO 14: Anti-spam check (LÍNEAS 1543-1576)
+- getKeniaUsage (ya no llama fetchConfigFromAppwrite con el fix)
+- Si spam detectado → setKeniaBlocked → fetchConfigFromAppwrite + saveConfigToAppwrite
+- Total normal: 0 reads
+
+PASO 15: Gemini API call (LÍNEAS 1610-1700)
+- No usa Appwrite
+- Genera respuesta con IA
+
+PASO 16: Procesar acciones de la IA (LÍNEAS 1700-1850)
+- SEARCH_SKU: serverListDocuments(PRODUCTS, limit=1, code) → 1 read
+  + serverListDocuments(PRODUCTS, limit=1, name) → 1 read
+- UPDATE_ORDER: serverListDocuments(ORDERS, limit=1, code) → 1 read
+  + serverListDocuments(ORDERS, limit=100) → hasta 100 reads (busca orden reciente)
+  + serverUpdateDocument(ORDERS) → 1 write
+- MARK_OUT_OF_STOCK: similar + serverUpdateDocument(PRODUCTS) → 1 write
+- Total: 1-100 reads dependiendo de la acción
+
+PASO 17: Guardar respuesta (LÍNEAS 1884-1929)
+- addToHistory(fromPhone, 'user', userText) → 1 write
+- addToHistory(fromPhone, 'assistant', reply) → 1 write
+- recordKeniaUsage (file I/O, no Appwrite)
+- Total: 2 writes
+
+PASO 18: Smart notifications al admin (LÍNEAS 1893-1960)
+- Si el mensaje es de cliente y la IA detecta [ACTION:ASK_ADMIN] o [ACTION:ESCALATE_ADMIN]:
+  - sendWhatsAppMessage(ADMIN_PHONES[0]) → WhatsApp API
+  - addToHistory(admin, 'assistant') → 1 write
+- Si messageCount > threshold (default 10):
+  - setKeniaBlocked → fetchConfigFromAppwrite + saveConfigToAppwrite
+  - notifyAdmin → getKeniaRuntimeSnapshot → fetchConfigFromAppwrite + readUsageFromFile
+  - Total: 1-2 reads + 1 write
+
+================================================================================
+4. RESUMEN DE READS POR MENSAJE DE CLIENTE (después de fixes)
+================================================================================
+
+Escenario: Cliente registrado, mensaje normal (no primera vez, no imagen)
+
+| Operación | Documentos leídos | Reads |
+|-----------|-------------------|-------|
+| Lock dedup (getDocument) | 1 | 1 |
+| getKeniaConfig (fetchConfigFromAppwrite) | 1 | 1 |
+| getKeniaUsage (con blockedPhones del config) | 0 | 0 |
+| getHistory (limit=20) | 20 | 20 |
+| Órdenes del cliente (cacheado 1 min) | 0-20 | 0-20 |
+| Búsqueda productos (cacheado 2 min) | 0-25 | 0-25 |
+| Categorías (cacheado 5 min, solo si búsqueda falla) | 0-100 | 0-100 |
+| Total por mensaje (mejor caso) | | ~22 |
+| Total por mensaje (peor caso, cache miss) | | ~167 |
+
+ANTES DE LOS FIXES (peor caso):
+| Operación | Reads |
+|-----------|-------|
+| Lock dedup | 1 |
+| getKeniaConfig | 1 |
+| getKeniaUsage #1 (fetchConfigFromAppwrite extra) | 1 |
+| getKeniaUsage #2 (fetchConfigFromAppwrite extra) | 1 |
+| getHistory (20) | 20 |
+| Órdenes del cliente (20, sin cache) | 20 |
+| Búsqueda productos NAME (FALLABA - formato incorrecto) | 1 |
+| Búsqueda productos TAGS (FALLABA - formato incorrecto) | 1 |
+| Categorías fallback (100, SIEMPRE caía aquí) | 100 |
+| Total por mensaje (peor caso antes) | ~146 |
+
+================================================================================
+5. PANEL ADMIN - POLLING (EL MAYOR SOSPECHOSO)
+================================================================================
+
+Archivo: src/app/admin/(panel)/ia/whatsapp/page.tsx
+
+El panel admin tiene polling automático que carga:
+1. loadThreads(true) → GET /api/admin/ia/threads
+2. loadThread(selectedPhone) → GET /api/admin/ia/thread
+
+Endpoint /api/admin/ia/threads (src/app/api/admin/ia/threads/route.ts):
+- serverListDocuments(ADMIN_CHAT, limit=200) [AHORA 50] → 200 reads [AHORA 50]
+- getKeniaRuntimeSnapshot() → fetchConfigFromAppwrite (1 read) + readUsageFromFile (0 reads)
+- Total por poll: ~201 reads [AHORA ~51]
+
+Endpoint /api/admin/ia/thread (src/app/api/admin/ia/thread/route.ts):
+- serverListDocuments(ADMIN_CHAT, limit=300) [AHORA 50] → 300 reads [AHORA 50]
+- serverUpdateDocument por cada doc no leído → N writes
+- getKeniaUsage → fetchConfigFromAppwrite → 1 read [AHORA 0 con fix]
+- getKeniaConfig → fetchConfigFromAppwrite → 1 read
+- Total por poll: ~302 reads [AHORA ~51]
+
+ANTES (polling cada 30s, panel abierto 8h/día):
+- threads: 200 reads × 2/min × 60 × 8 = 192,000 reads/día
+- thread: 300 reads × 2/min × 60 × 8 = 288,000 reads/día
+- Total panel: ~480,000 reads/día
+
+DESPUÉS (polling cada 60s, limit 50, panel abierto 8h/día):
+- threads: 50 reads × 1/min × 60 × 8 = 24,000 reads/día
+- thread: 50 reads × 1/min × 60 × 8 = 24,000 reads/día
+- Total panel: ~48,000 reads/día
+
+PERO: El usuario dice que solo unos pocos clientes le hablaron a Kenia.
+Si el panel no se dejó abierto tanto tiempo, el consumo del panel sería menor.
+HAY QUE INVESTIGAR SI HAY OTRA FUENTE DE READS.
+
+================================================================================
+6. OTROS ENDPOINTS QUE HACEN READS DE APPWRITE
+================================================================================
+
+A. /api/admin/badges (src/app/api/admin/badges/route.ts)
+- serverListDocuments(ORDERS, limit=1, status=pending) → 1 read
+- serverListDocuments(ORDERS, limit=1, status=processing) → 1 read
+- Se llama en cada navegación del panel admin (no polling)
+- Total: 2 reads por navegación
+
+B. /api/admin/appwrite-usage (src/app/api/admin/appwrite-usage/route.ts)
+- Usa unstable_cache con revalidate 300s (5 min)
+- Hace fetch a Appwrite API de usage (no database reads, es API de métricas)
+- No debería generar database reads
+
+C. /api/admin/read-sources (src/app/api/admin/read-sources/route.ts)
+- Lee un archivo local (no Appwrite)
+- No genera reads
+
+D. /api/admin/ia/debug (src/app/api/admin/ia/debug/route.ts)
+- getKeniaConfig → 1 read
+- getKeniaUsage → 1 read (fetchConfigFromAppwrite)
+- Solo en carga de página /admin/ia
+
+E. /api/admin/ia/config (src/app/api/admin/ia/config/route.ts)
+- getKeniaConfig → 1 read (cacheado 60s)
+- Solo en carga o save de config
+
+F. /api/admin/ia/customer-lookup (src/app/api/admin/ia/customer-lookup/route.ts)
+- DESPUÉS DEL FIX: 1 serverListDocuments(USERS) + 1 serverListDocuments(ORDERS) = ~2-20 reads
+- ANTES DEL FIX: Por cada phone, serverListDocuments(ORDERS, limit=100) = N × 100 reads
+- Se llama al seleccionar un thread en el panel
+
+G. /api/public-data/home (src/app/api/public-data/home/route.ts)
+- 7 serverListDocuments en paralelo (categories, subcategories, products, offers, etc.)
+- unstable_cache con revalidate 86400 (24h) + s-maxage 300 (CDN 5 min)
+- Total: ~200-400 reads pero solo cuando cache expira (cada 24h o cold start)
+- NO depende de Kenia
+
+H. /api/public-data/products, /api/public-data/catalog, etc.
+- Todos usan unstable_cache con revalidate largo
+- NO dependen de Kenia
+
+I. /api/appwrite-proxy (src/app/api/appwrite-proxy/route.ts)
+- unstable_cache con revalidate 86400 (24h)
+- Solo colecciones públicas (products, categories, etc.)
+- NO depende de Kenia
+
+J. /api/appwrite-proxy-v1/[...path] (src/app/api/appwrite-proxy-v1/[[...path]]/route.ts)
+- unstable_cache con revalidate 300 (5 min)
+- Solo GET cacheados, POST/PUT/DELETE son pass-through
+- NO depende de Kenia
+
+K. /api/webhooks/appwrite/orders (src/app/api/webhooks/appwrite/orders/route.ts)
+- Se dispara cuando Appwrite detecta create/update en órdenes
+- notifyOrderStatusChange:
+  - resolveUserIdFromOrder → serverListDocuments(USERS, limit=1) → 1 read
+  - existsByRefKey → serverListDocuments(NOTIFICATIONS, limit=5) → 5 reads
+  - serverGetDocument(ADMIN_CHAT, docId) → 1 read (dedup check)
+  - createNotificationClient/Server → 1 write
+  - generateAIMessage → Gemini API (no Appwrite)
+  - sendWhatsAppTemplate/sendWhatsAppMessage → WhatsApp API
+  - addToHistory → 1 write
+- notifyNewOrder → notifyAdmin → getKeniaRuntimeSnapshot → 1 read + sendWhatsAppMessage + addToHistory
+- Total por evento: ~8 reads + 3 writes
+- NO depende directamente de Kenia, pero Kenia puede disparar updates de órdenes
+
+L. /api/cron/negotiation (src/app/api/cron/negotiation/route.ts)
+- No es automático, se invoca manualmente
+- serverListDocuments(ORDERS) + serverGetDocument(PRODUCTS) por item
+- No es fuente de reads masivos
+
+M. /api/public-data/kenia-status (src/app/api/public-data/kenia-status/route.ts)
+- unstable_cache con revalidate 86400 (24h)
+- getKeniaConfig → 1 read solo cuando cache expira
+- Se llama desde el frontend para mostrar si Kenia está activa
+- Mínimo impacto
+
+================================================================================
+7. NOTIFICATION SERVICE (src/services/notificationService.ts)
+================================================================================
+
+notifyOrderStatusChange se llama desde:
+1. /api/webhooks/appwrite/orders (cuando Appwrite detecta cambio en orden)
+2. Potencialmente desde el webhook de WhatsApp cuando Kenia actualiza un pedido
+
+Cada notificación hace:
+- resolveUserIdFromOrder: 1 read (users collection)
+- existsByRefKey: hasta 5 reads (notifications collection)
+- Dedup check: 1 read (admin_chat)
+- createNotification: 1 write
+- generateAIMessage: Gemini API call (no Appwrite)
+- sendWhatsAppTemplate o sendWhatsAppMessage: WhatsApp API
+- addToHistory: 1 write
+- Total: ~7 reads + 2 writes por notificación
+
+================================================================================
+8. KENIA RUNTIME - SISTEMA DE CONFIG Y USAGE
+================================================================================
+
+Archivo: src/lib/kenia-runtime.ts
+
+CONFIG:
+- fetchConfigFromAppwrite(): serverGetDocument(THEME_CONFIG, 'kenia_config') → 1 read
+- Cache en memoria: _configCache, TTL 60 segundos
+- PROBLEMA EN VERCEL: El cache en memoria NO es confiable en serverless
+  Cada invocación del webhook puede ser en una instancia nueva donde _configCache = null
+  Esto significa que CADA mensaje puede hacer 1 read real de config
+
+USAGE:
+- readUsageFromFile(): Lee /tmp/kenia-usage.json (file I/O, no Appwrite)
+- writeUsageToFile(): Escribe /tmp/kenia-usage.json (file I/O, no Appwrite)
+- PROBLEMA EN VERCEL: /tmp es efímero, cada cold start pierde el archivo
+  Esto significa que usage.isRegistered, usage.isGuestWithOrders, etc. se pierden
+  Y se vuelven a consultar Appwrite en cada cold start
+
+FUNCIONES QUE LLAMAN fetchConfigFromAppwrite:
+- getKeniaConfig() → 1 read
+- getKeniaUsage() → 1 read (ANTES del fix, AHORA acepta blockedPhones del config ya cargado)
+- setKeniaBlocked() → 1 read + 1 write (saveConfigToAppwrite)
+- getKeniaRuntimeSnapshot() → 1 read
+- saveKeniaConfig() → 1 read + 1 write
+- deleteKeniaPhone() → 1 read + 1 write
+
+================================================================================
+9. FIXES YA APLICADOS (commits pushados a main)
+================================================================================
+
+FIX 1: Formato de queries de Appwrite (webhook route.ts)
+- ANTES: Las búsquedas de productos usaban raw string interpolation:
+  `{"method":"search","attribute":"NAME","values":["${query}"]}`
+  Esto causaba "Invalid query: Syntax error" en Appwrite
+- DESPUÉS: JSON.stringify({ method: 'search', attribute: 'NAME', values: [searchQuery] })
+- IMPACTO: Cada búsqueda fallaba y caía al fallback de categorías (100 reads extra)
+
+FIX 2: Caches en memoria en el webhook
+- Categorías: cache 5 min (antes se consultaba cada mensaje)
+- Búsqueda de productos: cache 2 min
+- Órdenes de cliente: cache 1 min
+
+FIX 3: getKeniaUsage con blockedPhones override
+- ANTES: getKeniaUsage llamaba fetchConfigFromAppwrite cada vez (1 read extra)
+- DESPUÉS: Acepta blockedPhones del config ya cargado (0 reads extra)
+- Se aplica en las 2 llamadas del webhook (líneas 665 y 1544)
+
+FIX 4: customer-lookup optimizado
+- ANTES: Por cada phone, serverListDocuments(ORDERS, limit=100) = N × 100 reads
+- DESPUÉS: Una sola query con todos los phone variants = 1 × 100 reads
+
+FIX 5: threads limit 200→50
+- Reduce 75% reads por poll del panel
+
+FIX 6: thread limit 300→50
+- Reduce 83% reads por carga de conversación
+
+FIX 7: Polling 30s→60s
+- Reduce 50% la frecuencia de polls
+
+FIX 8: Admin notification throttling
+- Las notificaciones al admin ahora tienen cooldown
+
+================================================================================
+10. LO QUE NO EXPLICA LOS 120K-173K READS
+================================================================================
+
+El usuario dice que SOLO UNOS POCOS clientes le hablaron a Kenia.
+Si asumimos 20 mensajes de clientes en el día:
+
+- Webhook: 20 msgs × ~150 reads (antes de fixes, peores casos) = 3,000 reads
+- Panel polling (si abierto 8h): ~480,000 reads (antes de fixes)
+- Panel polling (si abierto 2h): ~120,000 reads (antes de fixes)
+
+ESTO SUGIERE QUE EL PANEL ADMIN ABIERTO ES EL CULPRIT PRINCIPAL.
+
+Pero el usuario dice que no dejó el panel abierto todo el día.
+Entonces hay ALGO MÁS generando reads que no hemos identificado.
+
+POSIBILIDADES NO INVESTIGADAS:
+
+A. Appwrite Webhooks internos
+- Appwrite puede tener webhooks configurados que se disparen en cada create/update
+- Si el webhook de orders está configurado, cada addToHistory (create en admin_chat)
+  podría disparar un webhook que genere más reads
+- VERIFICAR: ¿Hay webhooks configurados en Appwrite console para admin_chat?
+
+B. Realtime subscriptions
+- Si el frontend o el panel tiene suscripciones realtime de Appwrite
+- Cada evento de realtime puede contar como reads
+
+C. /tmp efímero en Vercel
+- El usage file se pierde en cada cold start
+- Esto significa que usage.isRegistered se pierde y se vuelve a consultar
+- Pero lookupRegisteredUser solo hace 5 reads, no 100k
+
+D. Meta reenviando webhooks
+- Si el webhook tarda mucho en responder (>10s), Meta reintenta
+- Cada retry hace 1 read (lock check) + retorna rápido
+- Pero si hay muchos retries = muchos reads
+- VERIFICAR: ¿El webhook está respondiendo rápido?
+
+E. Funciones de Appwrite (Functions)
+- Si hay Functions de Appwrite ejecutándose en eventos
+- Estas podrían hacer reads adicionales
+
+F. Otros servicios conectados a Appwrite
+- ¿Hay otros proyectos/apps conectados a la misma DB?
+
+G. El cache unstable_cache de Next.js no funciona correctamente
+- Si los caches no están funcionando, cada request a /api/public-data/home
+  hace 200+ reads cada vez que un cliente visita la web
+- VERIFICAR: ¿Cuánto tráfico web hay? Si hay 500 visitas/día y el cache no funciona,
+  serían 500 × 200 = 100,000 reads solo del home
+
+H. Vercel ISR regenerando páginas
+- Si hay páginas con ISR, cada regeneración hace reads
+- VERIFICAR: ¿Hay páginas estáticas con ISR que consultan Appwrite?
+
+I. El middleware de Next.js
+- Si el middleware hace queries a Appwrite en cada request
+- VERIFICAR: ¿Qué hace el middleware?
+
+J. Appwrite SDK del lado del cliente
+- HAY 208+ llamadas directas del SDK de Appwrite (databases.listDocuments/getDocument)
+  desde archivos page.tsx del lado del cliente ('use client')
+- Las páginas con más llamadas:
+  - admin/orders/[id]/page.tsx: 20 llamadas (panel admin, no público)
+  - pedido/[id]/page.tsx: 14 llamadas (página de pedido del cliente)
+  - admin/theme-editor: 10 llamadas (panel admin)
+  - inventario/page.tsx: 10 llamadas (panel admin)
+  - admin/catalog-products: 9 llamadas (panel admin)
+  - HomePage.tsx: 7 llamadas (página principal, todos los visitantes)
+  - checkout/page.tsx: 8 llamadas (checkout del cliente)
+  - admin/products: 8 llamadas (panel admin)
+  - catalogo/page.tsx: 6 llamadas (catálogo público)
+  - admin/blocked-products: 6 llamadas (panel admin)
+  - admin/orders: 6 llamadas (panel admin)
+  - admin/catalog-visibility: 7 llamadas (panel admin)
+- Estas llamadas NO pasan por el proxy cacheado ni por ningún cache
+- Cada cliente que visita /pedido/{id} genera ~14 reads directos
+- Cada cliente que visita /catalogo genera ~6 reads directos
+- Cada cliente que visita el home genera ~7 reads directos
+- Cada cliente que hace checkout genera ~8 reads directos
+- PERO: estas llamadas existen tanto con Kenia activa como desactivada
+- La pregunta es: ¿Kenia causa que más clientes visiten estas páginas?
+  (ej: Kenia envía links de pedidos, lo que aumenta visitas a /pedido/{id})
+
+K. Middleware de Next.js (src/middleware.ts)
+- NO hace reads a Appwrite
+- Solo bloquea bots y loguea requests a /api/*
+- Tiene un log [REQ] que se puede filtrar en Vercel para ver qué endpoints se llaman
+- IMPORTANTE: Este log puede usarse para auditar qué endpoints reciben más tráfico
+
+================================================================================
+11. ARCHIVOS CLAVE PARA INVESTIGAR
+================================================================================
+
+- src/app/api/whatsapp/webhook/route.ts (1971 líneas) — webhook principal
+- src/lib/kenia-runtime.ts (530 líneas) — config y usage de Kenia
+- src/lib/whatsapp.ts (357 líneas) — getHistory, addToHistory, sendWhatsAppMessage
+- src/lib/appwrite-server.ts — serverListDocuments, serverGetDocument, etc.
+- src/lib/appwrite.ts — configuración del SDK cliente
+- src/lib/notify-admin.ts — notifyAdmin, notifyNewOrder
+- src/services/notificationService.ts (470 líneas) — notifyOrderStatusChange
+- src/app/admin/(panel)/ia/whatsapp/page.tsx (1571 líneas) — panel admin
+- src/app/api/admin/ia/threads/route.ts — lista de conversaciones
+- src/app/api/admin/ia/thread/route.ts — conversación individual
+- src/app/api/admin/ia/customer-lookup/route.ts — búsqueda de clientes
+- src/app/api/admin/badges/route.ts — badges del panel
+- src/app/api/public-data/home/route.ts — datos del home
+- src/app/api/appwrite-proxy/route.ts — proxy público
+- src/app/api/appwrite-proxy-v1/[[...path]]/route.ts — proxy v1
+- src/app/api/webhooks/appwrite/orders/route.ts — webhook de órdenes
+- src/middleware.ts (SI EXISTE) — middleware de Next.js
+- next.config.ts — configuración de Next.js (ISR, revalidate, etc.)
+
+================================================================================
+12. DATOS DE USAGE DE APPWRITE (últimos 20 días)
+================================================================================
+
+El usuario proporcionó una API key de Appwrite para consultar usage:
+API Key: standard_de757dd8d6cd1808ddc9a0b6694cad9a4e4ceb904a97613e4bc255cb116c0b1272ee9d865149911bab66ecb0e078d3120fbf9bd5c82cba8bc0d2ea6354cb3d24aa96e77f53d86fbf3a68a007abb0af608ee4854491b3e2b29b0d6e2fe63f907d592e8000c16c38f408e3bd1de65505897c249ecac5ecfb1e1a6de5c9b40aa655
+
+Endpoint para consultar usage:
+GET https://nyc.cloud.appwrite.io/v1/databases/6a0a58ca001798410d86/usage
+Headers: X-Appwrite-Project: 6a0a4e8d0032177f3f90, X-Appwrite-Key: <API_KEY>
+
+Datos observados (de la sesión anterior):
+- Días sin Kenia (1-23 Jun): ~6,000-40,000 reads/día
+- Día con Kenia activada (24 Jun): ~173,000 reads (día parcial)
+- El salto fue inmediato al activar Kenia
+
+================================================================================
+14. DATOS EN TIEMPO REAL (26 Junio 2026, día de fixes)
+================================================================================
+
+Los fixes se pushearon hoy. Lecturas observadas hoy:
+
+Hora     Reads totales    Delta     Rate
+14:04    172,144          -         -
+14:10    173,216          +1,072    178 reads/min
+14:15    173,956          +740      148 reads/min
+14:32    174,108          +152      9 reads/min
+14:45    174,528          +420      32 reads/min
+
+ANÁLISIS:
+- Los primeros 2 intervalos (178 y 148 reads/min) son altos
+- Luego cae dramáticamente a 9 reads/min (17 min sin actividad)
+- Después sube a 32 reads/min
+
+Con los fixes aplicados (limit=50, polling 60s):
+- Panel Kenia abierto: 50 (threads) + 50 (thread) = 100 reads/min
+- Pero 178 > 100, sugiere que hay llamadas adicionales
+
+POSIBLES EXPLICACIONES DEL RATE ALTO INICIAL:
+1. El deploy de Vercel aún no había terminado (old code corriendo)
+2. Panel admin abierto + cliente navegando la web
+3. Alguna página del cliente haciendo reads directos
+
+POSIBLES EXPLICACIONES DEL DROP A 9 reads/min:
+1. Panel admin cerrado
+2. Sin tráfico de clientes
+3. Solo reads residuales (caches expirando, health checks)
+
+HALLAZGOS ADICIONALES:
+- /cuenta/chat page: listDocuments(ADMIN_CHAT, limit=200) = 200 reads por carga
+  El polling fue eliminado (comentario línea 46), pero cada carga = 200 reads
+- /admin/orders/negotiation: listDocuments(ADMIN_CHAT, limit=100) = 100 reads por carga
+- No hay realtime subscriptions de Appwrite
+- No hay service workers
+- NotificationContext es un stub vacío (deshabilitado)
+- appwrite-usage endpoint: consulta API de métricas (no database reads), cache 5 min
+- No procesa force=1 (el cache siempre aplica)
+
+CONCLUSIÓN PRELIMINAR:
+El rate de 32 reads/min en el último intervalo es consistente con:
+- Tráfico normal de clientes en la web (home, catálogo, productos)
+- Sin panel admin abierto
+- Sin mensajes a Kenia
+
+El rate de 178 reads/min inicial probablemente era:
+- Panel admin aún con código viejo (pre-deploy)
+- O panel admin + tráfico web combinado
+
+================================================================================
+15. PROMPT ACTUALIZADO PARA IA ANALISTAS
+================================================================================
+
+"Actúas como arquitecto de software experto en optimización de bases de datos y plataformas serverless.
+
+CONTEXTO:
+Tengo una aplicación Next.js 15 hosted en Vercel (serverless) que usa Appwrite Cloud como base de datos. Tengo un chatbot de WhatsApp llamado 'Kenia' que usa Gemini AI para responder clientes.
+
+PROBLEMA:
+Cuando activo Kenia, las lecturas (reads) de Appwrite saltan de ~40,000/día a ~120,000-173,000/día en cuestión de horas, aunque solo unos pocos clientes (5-10) le hablaron a Kenia. Necesito identificar qué está generando este volumen masivo de reads.
+
+REGLA CRÍTICA: Appwrite cuenta reads POR DOCUMENTO RETORNADO. Si hago listDocuments con limit=100 y retorna 100 docs, son 100 read operations, no 1.
+
+LO QUE YA INVESTIGUÉ Y FIXE:
+1. Bug de formato de queries (causaba búsquedas fallidas → 100 reads extra de fallback a categorías por mensaje)
+2. Falta de caches en memoria para categorías, productos y órdenes
+3. getKeniaUsage hacía fetchConfigFromAppwrite redundante (1 read extra por llamada)
+4. Panel admin polling cada 30s con limit=200 (threads) y limit=300 (thread) = ~500 reads por poll
+5. Polling aumentado a 60s, limits reducidos a 50
+6. customer-lookup hacía N×100 reads, ahora hace 1×100
+
+LO QUE NO EXPLICA EL VOLUMEN:
+Con 10 clientes mandando 2-3 mensajes cada uno = 30 mensajes × 150 reads/mensaje = 4,500 reads.
+Incluso con el panel abierto 2 horas = ~120,000 reads (antes de fixes).
+Pero el usuario dice que no dejó el panel abierto tanto tiempo.
+
+PREGUNTAS CLAVE:
+1. ¿Qué otras fuentes de reads podría haber que no he considerado?
+2. ¿Podrían los webhooks de Appwrite (configurados en console) estar generando reads adicionales?
+3. ¿Podría el SDK de Appwrite del lado del cliente estar haciendo reads directos? (SÍ, 208+ llamadas encontradas)
+4. ¿Podría el middleware de Next.js estar haciendo queries? (NO, solo bloquea bots)
+5. ¿Podrían las páginas ISR estar regenerando y haciendo reads?
+6. ¿Podría /tmp efímero de Vercel causar que el usage file se pierda y genere re-queries masivos?
+7. ¿Hay alguna forma de auditar exactamente qué colecciones reciben más reads?
+8. ¿Puede Kenia estar causando indirectamente que los clientes visiten más páginas (links de pedidos)?
+9. ¿Puede el webhook de Appwrite (orders) estar disparándose masivamente cuando Kenia actualiza pedidos?
+10. ¿Puede el sistema de notificaciones (notificationService.ts) estar generando reads masivos?
+11. ¿Puede el polling del panel admin combinado con client-side SDK explicar el volumen?
+12. ¿Cómo puedo usar los logs [REQ] del middleware para identificar exactamente qué endpoints se llaman más?
+
+Dame un plan de investigación sistemático para identificar la fuente exacta de los reads.
+
+================================================================================
+FIN DEL DOCUMENTO
+================================================================================

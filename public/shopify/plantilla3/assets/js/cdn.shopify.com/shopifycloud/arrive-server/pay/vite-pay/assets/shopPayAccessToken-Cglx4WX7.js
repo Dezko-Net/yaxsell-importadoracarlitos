@@ -1,0 +1,1 @@
+function e(){try{const e=localStorage.getItem("shopPayAccessToken");if(e){const t={shopPaySessionToken:e};try{const e=new URLSearchParams(window.location.search).get("redirect_uri");e&&(t.redirect_uri=e)}catch{}return t}}catch{}return{}}export{e as a};

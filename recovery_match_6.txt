@@ -1,0 +1,15 @@
+  const qParam = searchParams.get('q') || '';
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [search, setSearch] = useState(qParam);
+  const [selectedCat, setSelectedCat] = useState(lockCategoryId || '');
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
+  const [timedOffersMap, setTimedOffersMap] = useState<Record<string, TimedOffer>>({});
+  const [selectedSubcat, setSelectedSubcat] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
+  const [view, setView] = useState<'grid' | 'list'>('grid');

@@ -1,0 +1,2706 @@
+<div class="facet-filtering hidden lg:block no-js-hidden">
+  <div
+    class="facets sticky-element sticky-element--adapt"
+    style="--sticky-element-top: 3rem;"
+  >
+    <facets-form-component
+      class="facets__form-wrapper"
+      section-id="template--20816637788298__main"
+    >
+      <form
+        action="/collections/all"
+        id="FacetFiltersForm--template--20816637788298__main-desktop"
+        class="facets__form"
+        ref="facetsForm"
+      >
+        
+          
+          
+          
+
+              
+                
+
+<accordion-component class="facets__inputs-accordion accordion accordion--standard accordion--arrow-plus">
+  <details
+    ref="item[]"
+    class="accordion__details is-open"
+    
+      open
+    
+  >
+    <summary
+      ref="summary[]"
+      class="accordion__summary flex facet__summary h6"
+      on:click="/onSummaryClick"
+      
+        aria-expanded="true"
+      
+    >
+      <span class="accordion__summary-text facet__label">Availability</span>
+      
+<span
+    class="icon icon--plus flex accordion__summary-arrow"
+    
+    
+  ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+  <path fill="none" d="M0 0H20V20H0V0z"/>
+  <path class="icon--plus-line-1" x1="40" y1="128" x2="216" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="var(--icon-stroke-width, 2)" d="M3.125 10L16.875 10"/>
+  <path class="icon--plus-line-2" x1="128" y1="40" x2="128" y2="216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="var(--icon-stroke-width, 2)" d="M10 3.125L10 16.875"/>
+</svg></span>
+    </summary>
+    <div ref="content[]" class="accordion__content">
+      <div class="accordion__inner">
+        <facet-inputs-component
+          on:change="/updateFilters"
+          id="facet-inputs-component-filter-v-availability"
+        ><div
+            class="facets__inputs-wrapper"
+            ref="showMoreContent"
+          >
+            <ul
+              id="filters-list-template--20816637788298__main-filter-v-availability"
+              class="facets__inputs-list flex flex-col gap-3 list-unstyled"
+              name="Availability"
+            >
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-v-availability-1"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.v.availability"
+      value="1"
+      id="Filter-filter-v-availability-1"
+      class="checkbox__input form-control"
+      data-label="In stock"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">In stock</span>
+    </span>
+    <span class="checkbox__count color-subtext">53</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-v-availability-2"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.v.availability"
+      value="0"
+      id="Filter-filter-v-availability-2"
+      class="checkbox__input form-control"
+      data-label="Out of stock"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">Out of stock</span>
+    </span>
+    <span class="checkbox__count color-subtext">3</span>
+  </label>
+</div>
+
+</li></ul>
+          </div></facet-inputs-component>
+      </div>
+    </div>
+  </details>
+</accordion-component>
+
+              
+
+              
+<accordion-component class="accordion accordion--standard accordion--arrow-plus">
+  <details
+    ref="item[]"
+    class="accordion__details is-open"
+    
+      open
+    
+  >
+    <summary
+      ref="summary[]"
+      class="accordion__summary flex facet__summary h6"
+      on:click="/onSummaryClick"
+      
+        aria-expanded="true"
+      
+    >
+      <span class="accordion__summary-text facet__label">Price</span>
+      
+<span
+    class="icon icon--plus flex accordion__summary-arrow"
+    
+    
+  ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+  <path fill="none" d="M0 0H20V20H0V0z"/>
+  <path class="icon--plus-line-1" x1="40" y1="128" x2="216" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="var(--icon-stroke-width, 2)" d="M3.125 10L16.875 10"/>
+  <path class="icon--plus-line-2" x1="128" y1="40" x2="128" y2="216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="var(--icon-stroke-width, 2)" d="M10 3.125L10 16.875"/>
+</svg></span>
+    </summary>
+    <div ref="content[]" class="accordion__content">
+      <div class="accordion__inner"><price-facet-component
+          class="price-facet flex flex-col gap-5"
+          id="facet-inputs-filter-v-price"
+          on:change="/updatePriceFilterAndResults"
+          data-intersect-threshold-percent="2"
+          
+        >
+          <div class="price-facet__highest-price color-subtext">The highest price is $66.00
+          </div>
+          <div class="price-facet__range-wrapper">
+            <div
+              class="price-facet__range-inputs relative"
+              style="--range-min: 0.0%; --range-max: 100.0%;"
+            >
+              <input
+                type="range"
+                class="price-facet__range-input price-facet__range-input--min pointer-events-none"
+                min="0"
+                max="6600"
+                value="0"
+                step="1"
+                ref="rangeMin"
+                aria-label="Minimum price"
+              >
+              <input
+                type="range"
+                class="price-facet__range-input price-facet__range-input--max pointer-events-none absolute inset-0"
+                min="0"
+                max="6600"
+                value="6600"
+                step="1"
+                ref="rangeMax"
+                aria-label="Maximum price"
+              >
+            </div>
+          </div>
+          <div class="price-facet__inputs-wrapper facets__inputs-wrapper facets__inputs-wrapper--row flex items-center gap-4">
+            <div class="field price-facet__field flex items-center gap-2">
+              <label
+                class="field__label price-facet__label"
+                for="Price-GTE"
+              >
+                $
+              </label>
+              <input
+                class="field__input price-facet__input form-control w-full"
+                name="filter.v.price.gte"
+                id="Price-GTE"type="text"
+                inputmode="decimal"
+                placeholder="0"
+                data-min="0"
+                data-max="66.00"
+                ref="minInput"
+                autocomplete="off"
+                
+              >
+            </div>
+
+            
+
+            <div class="field price-facet__field flex items-center gap-2">
+              <label
+                class="field__label price-facet__label"
+                for="Price-LTE"
+              >
+                $
+              </label>
+              <input
+                class="field__input price-facet__input form-control w-full"
+                name="filter.v.price.lte"
+                id="Price-LTE"type="text"
+                inputmode="decimal"
+                placeholder="66.00"
+                data-min="0.00"
+                data-max="66.00"
+                ref="maxInput"
+                autocomplete="off"
+                
+              >
+            </div>
+          </div>
+        </price-facet-component>
+      </div>
+    </div>
+  </details>
+</accordion-component>
+
+              
+                
+
+<accordion-component class="facets__inputs-accordion accordion accordion--standard accordion--arrow-plus">
+  <details
+    ref="item[]"
+    class="accordion__details is-open"
+    
+      open
+    
+  >
+    <summary
+      ref="summary[]"
+      class="accordion__summary flex facet__summary h6"
+      on:click="/onSummaryClick"
+      
+        aria-expanded="true"
+      
+    >
+      <span class="accordion__summary-text facet__label">Color</span>
+      
+<span
+    class="icon icon--plus flex accordion__summary-arrow"
+    
+    
+  ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+  <path fill="none" d="M0 0H20V20H0V0z"/>
+  <path class="icon--plus-line-1" x1="40" y1="128" x2="216" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="var(--icon-stroke-width, 2)" d="M3.125 10L16.875 10"/>
+  <path class="icon--plus-line-2" x1="128" y1="40" x2="128" y2="216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="var(--icon-stroke-width, 2)" d="M10 3.125L10 16.875"/>
+</svg></span>
+    </summary>
+    <div ref="content[]" class="accordion__content">
+      <div class="accordion__inner">
+        <facet-inputs-component
+          on:change="/updateFilters"
+          id="facet-inputs-component-filter-v-t-shopify-color-pattern"
+        ><show-more-component class="show-more" data-expanded="false" data-skip-node-update="true"><div
+            class="facets__inputs-wrapper"
+            ref="showMoreContent"
+          >
+            <ul
+              id="filters-list-template--20816637788298__main-filter-v-t-shopify-color-pattern"
+              class="facets__inputs-list flex flex-col gap-3 list-unstyled facets__inputs-list--swatches"
+              name="Color"
+            >
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="Black"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-1"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115761217674"
+                          aria-label="Black"
+                          id="Filter-filter-v-t-shopify-color-pattern-1"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/Black.jpg?v=1761708291&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">Black</span>
+                        </span>
+                        <span class="color-subtext">2</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="Blue"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-2"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115759349898"
+                          aria-label="Blue"
+                          id="Filter-filter-v-t-shopify-color-pattern-2"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/Blue.jpg?v=1761707413&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">Blue</span>
+                        </span>
+                        <span class="color-subtext">8</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="Brown"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-3"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115761119370"
+                          aria-label="Brown"
+                          id="Filter-filter-v-t-shopify-color-pattern-3"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/Brown.jpg?v=1761708182&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">Brown</span>
+                        </span>
+                        <span class="color-subtext">7</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="Cherry"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-4"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115762331786"
+                          aria-label="Cherry"
+                          id="Filter-filter-v-t-shopify-color-pattern-4"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/cherry.jpg?v=1761708826&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">Cherry</span>
+                        </span>
+                        <span class="color-subtext">1</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="Cream"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-5"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115759612042"
+                          aria-label="Cream"
+                          id="Filter-filter-v-t-shopify-color-pattern-5"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/Cream.jpg?v=1761707458&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">Cream</span>
+                        </span>
+                        <span class="color-subtext">8</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="Cream/Brown"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-6"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115760332938"
+                          aria-label="Cream/Brown"
+                          id="Filter-filter-v-t-shopify-color-pattern-6"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/Cream_Brown.jpg?v=1761707722&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">Cream/Brown</span>
+                        </span>
+                        <span class="color-subtext">1</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="Cream/Yellow"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-7"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115761971338"
+                          aria-label="Cream/Yellow"
+                          id="Filter-filter-v-t-shopify-color-pattern-7"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/Cream_Yellow.jpg?v=1761708604&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">Cream/Yellow</span>
+                        </span>
+                        <span class="color-subtext">1</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="Fade Rose"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-8"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115761807498"
+                          aria-label="Fade Rose"
+                          id="Filter-filter-v-t-shopify-color-pattern-8"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/Fade_Rose.jpg?v=1761708517&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">Fade Rose</span>
+                        </span>
+                        <span class="color-subtext">2</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="Green"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-9"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115759153290"
+                          aria-label="Green"
+                          id="Filter-filter-v-t-shopify-color-pattern-9"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/green_1.jpg?v=1761707247&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">Green</span>
+                        </span>
+                        <span class="color-subtext">12</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="Grey"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-10"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115761152138"
+                          aria-label="Grey"
+                          id="Filter-filter-v-t-shopify-color-pattern-10"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/Grey.jpg?v=1761708242&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">Grey</span>
+                        </span>
+                        <span class="color-subtext">5</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item hidden"
+                  
+                    ref="showMoreItems[]"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="Mint"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-11"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115760365706"
+                          aria-label="Mint"
+                          id="Filter-filter-v-t-shopify-color-pattern-11"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/Mint.jpg?v=1761707827&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">Mint</span>
+                        </span>
+                        <span class="color-subtext">2</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item hidden"
+                  
+                    ref="showMoreItems[]"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="Mud"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-12"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115761414282"
+                          aria-label="Mud"
+                          id="Filter-filter-v-t-shopify-color-pattern-12"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/mud.jpg?v=1761708383&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">Mud</span>
+                        </span>
+                        <span class="color-subtext">2</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item hidden"
+                  
+                    ref="showMoreItems[]"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="Navy"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-13"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115759677578"
+                          aria-label="Navy"
+                          id="Filter-filter-v-t-shopify-color-pattern-13"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/Navy.jpg?v=1761707509&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">Navy</span>
+                        </span>
+                        <span class="color-subtext">12</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item hidden"
+                  
+                    ref="showMoreItems[]"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="Navy/Blue"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-14"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115762167946"
+                          aria-label="Navy/Blue"
+                          id="Filter-filter-v-t-shopify-color-pattern-14"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/Navy_Blue.jpg?v=1761708732&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">Navy/Blue</span>
+                        </span>
+                        <span class="color-subtext">1</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item hidden"
+                  
+                    ref="showMoreItems[]"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="Olive"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-15"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115761479818"
+                          aria-label="Olive"
+                          id="Filter-filter-v-t-shopify-color-pattern-15"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/Olive.jpg?v=1761708453&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">Olive</span>
+                        </span>
+                        <span class="color-subtext">3</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item hidden"
+                  
+                    ref="showMoreItems[]"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="Orange"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-16"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115761021066"
+                          aria-label="Orange"
+                          id="Filter-filter-v-t-shopify-color-pattern-16"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/Orange.jpg?v=1761708137&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">Orange</span>
+                        </span>
+                        <span class="color-subtext">4</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item hidden"
+                  
+                    ref="showMoreItems[]"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="Pink"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-17"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115760398474"
+                          aria-label="Pink"
+                          id="Filter-filter-v-t-shopify-color-pattern-17"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/Pink.jpg?v=1761707875&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">Pink</span>
+                        </span>
+                        <span class="color-subtext">6</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item hidden"
+                  
+                    ref="showMoreItems[]"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="Pink/Cherry"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-18"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115760267402"
+                          aria-label="Pink/Cherry"
+                          id="Filter-filter-v-t-shopify-color-pattern-18"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/Pink_Cherry.jpg?v=1761707722&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">Pink/Cherry</span>
+                        </span>
+                        <span class="color-subtext">1</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item hidden"
+                  
+                    ref="showMoreItems[]"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="Pink/Red"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-19"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115762069642"
+                          aria-label="Pink/Red"
+                          id="Filter-filter-v-t-shopify-color-pattern-19"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/Pink_Red.jpg?v=1761708605&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">Pink/Red</span>
+                        </span>
+                        <span class="color-subtext">1</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item hidden"
+                  
+                    ref="showMoreItems[]"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="Purple"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-20"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115760889994"
+                          aria-label="Purple"
+                          id="Filter-filter-v-t-shopify-color-pattern-20"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/Purple.jpg?v=1761708092&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">Purple</span>
+                        </span>
+                        <span class="color-subtext">3</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item hidden"
+                  
+                    ref="showMoreItems[]"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="Red"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-21"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115759808650"
+                          aria-label="Red"
+                          id="Filter-filter-v-t-shopify-color-pattern-21"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/red.jpg?v=1761707584&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">Red</span>
+                        </span>
+                        <span class="color-subtext">4</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item hidden"
+                  
+                    ref="showMoreItems[]"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="White"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-22"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115759939722"
+                          aria-label="White"
+                          id="Filter-filter-v-t-shopify-color-pattern-22"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/White.jpg?v=1761707653&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">White</span>
+                        </span>
+                        <span class="color-subtext">6</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item hidden"
+                  
+                    ref="showMoreItems[]"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="White/Black"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-23"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115760758922"
+                          aria-label="White/Black"
+                          id="Filter-filter-v-t-shopify-color-pattern-23"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/white_black.jpg?v=1761707996&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">White/Black</span>
+                        </span>
+                        <span class="color-subtext">1</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item hidden"
+                  
+                    ref="showMoreItems[]"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="White/Red"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-24"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115760693386"
+                          aria-label="White/Red"
+                          id="Filter-filter-v-t-shopify-color-pattern-24"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/white_red.jpg?v=1761707996&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">White/Red</span>
+                        </span>
+                        <span class="color-subtext">1</span>
+                      </label>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item hidden"
+                  
+                    ref="showMoreItems[]"
+                  
+                ><fieldset
+                      class="facets__swatch block focus-within--inset reversed-link"
+                      aria-label="Yellow"
+                      on:keydown="#facet-inputs-component-filter-v-t-shopify-color-pattern/handleKeyDown"
+                    >
+                      <label
+                        class="flex items-center gap-2 flex-1"
+                        on:pointerenter="/prefetchPage"
+                        on:pointerleave="/cancelPrefetchPage"
+                        for="Filter-filter-v-t-shopify-color-pattern-25"
+                      >
+                        <input
+                          tabindex="0"
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="filter.v.t.shopify.color-pattern"
+                          value="gid://shopify/Metaobject/115759251594"
+                          aria-label="Yellow"
+                          id="Filter-filter-v-t-shopify-color-pattern-25"
+                          
+                          
+                          
+                          ref="facetInputs[]"
+                        >
+                        
+
+<span
+  class="swatch"
+  style="--swatch-background: url(//pebble-little.myshopify.com/cdn/shop/files/yellow.jpg?v=1761707361&width=80);"
+></span>
+
+                        <span class="flex-1 color-subtext">
+                          <span class="reversed-link__text">Yellow</span>
+                        </span>
+                        <span class="color-subtext">4</span>
+                      </label>
+                    </fieldset></li></ul>
+          </div><button
+              class="show-more__button button-unstyled flex items-center gap-2 text-body-sm color-subtext"
+              ref="showMoreButton"
+              on:click="/toggle"
+              aria-expanded="false"
+              aria-controls="filters-list-template--20816637788298__main-filter-v-t-shopify-color-pattern"
+            >
+              
+<span
+    class="icon icon--plus icon--small"
+    
+    
+  ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+  <path fill="none" d="M0 0H20V20H0V0z"/>
+  <path class="icon--plus-line-1" x1="40" y1="128" x2="216" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="var(--icon-stroke-width, 2)" d="M3.125 10L16.875 10"/>
+  <path class="icon--plus-line-2" x1="128" y1="40" x2="128" y2="216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="var(--icon-stroke-width, 2)" d="M10 3.125L10 16.875"/>
+</svg></span>
+              <span class="show-more__label show-more__label--more">Show more</span>
+              <span class="show-more__label show-more__label--less">Show less</span>
+            </button>
+            </show-more-component>
+</facet-inputs-component>
+      </div>
+    </div>
+  </details>
+</accordion-component>
+
+              
+
+              
+                
+
+<accordion-component class="facets__inputs-accordion accordion accordion--standard accordion--arrow-plus">
+  <details
+    ref="item[]"
+    class="accordion__details is-open"
+    
+      open
+    
+  >
+    <summary
+      ref="summary[]"
+      class="accordion__summary flex facet__summary h6"
+      on:click="/onSummaryClick"
+      
+        aria-expanded="true"
+      
+    >
+      <span class="accordion__summary-text facet__label">Size</span>
+      
+<span
+    class="icon icon--plus flex accordion__summary-arrow"
+    
+    
+  ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+  <path fill="none" d="M0 0H20V20H0V0z"/>
+  <path class="icon--plus-line-1" x1="40" y1="128" x2="216" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="var(--icon-stroke-width, 2)" d="M3.125 10L16.875 10"/>
+  <path class="icon--plus-line-2" x1="128" y1="40" x2="128" y2="216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="var(--icon-stroke-width, 2)" d="M10 3.125L10 16.875"/>
+</svg></span>
+    </summary>
+    <div ref="content[]" class="accordion__content">
+      <div class="accordion__inner">
+        <facet-inputs-component
+          on:change="/updateFilters"
+          id="facet-inputs-component-filter-v-t-shopify-size"
+        ><div
+            class="facets__inputs-wrapper"
+            ref="showMoreContent"
+          >
+            <ul
+              id="filters-list-template--20816637788298__main-filter-v-t-shopify-size"
+              class="facets__inputs-list flex flex-col gap-3 list-unstyled"
+              name="Size"
+            >
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-v-t-shopify-size-1"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.v.t.shopify.size"
+      value="gid://shopify/TaxonomyValue/2878"
+      id="Filter-filter-v-t-shopify-size-1"
+      class="checkbox__input form-control"
+      data-label="0"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">0</span>
+    </span>
+    <span class="checkbox__count color-subtext">5</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-v-t-shopify-size-2"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.v.t.shopify.size"
+      value="gid://shopify/TaxonomyValue/2879"
+      id="Filter-filter-v-t-shopify-size-2"
+      class="checkbox__input form-control"
+      data-label="1"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">1</span>
+    </span>
+    <span class="checkbox__count color-subtext">5</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-v-t-shopify-size-3"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.v.t.shopify.size"
+      value="gid://shopify/TaxonomyValue/223"
+      id="Filter-filter-v-t-shopify-size-3"
+      class="checkbox__input form-control"
+      data-label="2-3 years"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">2-3 years</span>
+    </span>
+    <span class="checkbox__count color-subtext">41</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-v-t-shopify-size-4"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.v.t.shopify.size"
+      value="gid://shopify/TaxonomyValue/224"
+      id="Filter-filter-v-t-shopify-size-4"
+      class="checkbox__input form-control"
+      data-label="3-4 years"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">3-4 years</span>
+    </span>
+    <span class="checkbox__count color-subtext">38</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-v-t-shopify-size-5"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.v.t.shopify.size"
+      value="gid://shopify/TaxonomyValue/225"
+      id="Filter-filter-v-t-shopify-size-5"
+      class="checkbox__input form-control"
+      data-label="4-5 years"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">4-5 years</span>
+    </span>
+    <span class="checkbox__count color-subtext">38</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-v-t-shopify-size-6"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.v.t.shopify.size"
+      value="gid://shopify/TaxonomyValue/226"
+      id="Filter-filter-v-t-shopify-size-6"
+      class="checkbox__input form-control"
+      data-label="5-6 years"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">5-6 years</span>
+    </span>
+    <span class="checkbox__count color-subtext">38</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-v-t-shopify-size-7"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.v.t.shopify.size"
+      value="gid://shopify/TaxonomyValue/227"
+      id="Filter-filter-v-t-shopify-size-7"
+      class="checkbox__input form-control"
+      data-label="6-7 years"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">6-7 years</span>
+    </span>
+    <span class="checkbox__count color-subtext">38</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-v-t-shopify-size-8"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.v.t.shopify.size"
+      value="gid://shopify/TaxonomyValue/228"
+      id="Filter-filter-v-t-shopify-size-8"
+      class="checkbox__input form-control"
+      data-label="7-8 years"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">7-8 years</span>
+    </span>
+    <span class="checkbox__count color-subtext">33</span>
+  </label>
+</div>
+
+</li></ul>
+          </div></facet-inputs-component>
+      </div>
+    </div>
+  </details>
+</accordion-component>
+
+              
+
+              
+                
+
+<accordion-component class="facets__inputs-accordion accordion accordion--standard accordion--arrow-plus">
+  <details
+    ref="item[]"
+    class="accordion__details is-open"
+    
+      open
+    
+  >
+    <summary
+      ref="summary[]"
+      class="accordion__summary flex facet__summary h6"
+      on:click="/onSummaryClick"
+      
+        aria-expanded="true"
+      
+    >
+      <span class="accordion__summary-text facet__label">Categories</span>
+      
+<span
+    class="icon icon--plus flex accordion__summary-arrow"
+    
+    
+  ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+  <path fill="none" d="M0 0H20V20H0V0z"/>
+  <path class="icon--plus-line-1" x1="40" y1="128" x2="216" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="var(--icon-stroke-width, 2)" d="M3.125 10L16.875 10"/>
+  <path class="icon--plus-line-2" x1="128" y1="40" x2="128" y2="216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="var(--icon-stroke-width, 2)" d="M10 3.125L10 16.875"/>
+</svg></span>
+    </summary>
+    <div ref="content[]" class="accordion__content">
+      <div class="accordion__inner">
+        <facet-inputs-component
+          on:change="/updateFilters"
+          id="facet-inputs-component-filter-p-m-custom-categories"
+        ><div
+            class="facets__inputs-wrapper"
+            ref="showMoreContent"
+          >
+            <ul
+              id="filters-list-template--20816637788298__main-filter-p-m-custom-categories"
+              class="facets__inputs-list flex flex-col gap-3 list-unstyled facets__inputs-list--images"
+              name="Categories"
+            >
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                ><fieldset
+                      class="flex items-center relative justify-between gap-3 focus-within--inset reversed-link"
+                      aria-label="T-Shirts"
+                      on:keydown="#facet-inputs-component-filter-p-m-custom-categories/handleKeyDown"
+                    >
+                      <input
+                        tabindex="0"
+                        type="checkbox"
+                        name="filter.p.m.custom.categories"
+                        value="gid://shopify/Metaobject/119477993610"
+                        aria-label="T-Shirts"
+                        id="Filter-filter-p-m-custom-categories-1"
+                        
+                        
+                        
+                        ref="facetInputs[]"
+                      ><div class="facets__image-wrapper flex items-center gap-2 flex-1">
+                        
+                          <img src="//pebble-little.myshopify.com/cdn/shop/files/menu-shop-collection-1.jpg?v=1762827019&amp;width=300" alt="T-Shirts" srcset="//pebble-little.myshopify.com/cdn/shop/files/menu-shop-collection-1.jpg?v=1762827019&amp;width=50 50w, //pebble-little.myshopify.com/cdn/shop/files/menu-shop-collection-1.jpg?v=1762827019&amp;width=100 100w" width="300" height="300" loading="lazy" sizes="50px">
+                        
+                        <label
+                          class="facets__image-label color-subtext flex-1"
+                          for="Filter-filter-p-m-custom-categories-1"
+                          tabindex="-1"
+                        >
+                          <span class="reversed-link__text">T-Shirts</span>
+                        </label>
+                      </div>
+                      <span class="color-subtext">11</span>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                ><fieldset
+                      class="flex items-center relative justify-between gap-3 focus-within--inset reversed-link"
+                      aria-label="Sweaters"
+                      on:keydown="#facet-inputs-component-filter-p-m-custom-categories/handleKeyDown"
+                    >
+                      <input
+                        tabindex="0"
+                        type="checkbox"
+                        name="filter.p.m.custom.categories"
+                        value="gid://shopify/Metaobject/119478026378"
+                        aria-label="Sweaters"
+                        id="Filter-filter-p-m-custom-categories-2"
+                        
+                        
+                        
+                        ref="facetInputs[]"
+                      ><div class="facets__image-wrapper flex items-center gap-2 flex-1">
+                        
+                          <img src="//pebble-little.myshopify.com/cdn/shop/files/menu-shop-collection-2.jpg?v=1762827268&amp;width=300" alt="Sweaters" srcset="//pebble-little.myshopify.com/cdn/shop/files/menu-shop-collection-2.jpg?v=1762827268&amp;width=50 50w, //pebble-little.myshopify.com/cdn/shop/files/menu-shop-collection-2.jpg?v=1762827268&amp;width=100 100w" width="300" height="300" loading="lazy" sizes="50px">
+                        
+                        <label
+                          class="facets__image-label color-subtext flex-1"
+                          for="Filter-filter-p-m-custom-categories-2"
+                          tabindex="-1"
+                        >
+                          <span class="reversed-link__text">Sweaters</span>
+                        </label>
+                      </div>
+                      <span class="color-subtext">10</span>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                ><fieldset
+                      class="flex items-center relative justify-between gap-3 focus-within--inset reversed-link"
+                      aria-label="Outerwear"
+                      on:keydown="#facet-inputs-component-filter-p-m-custom-categories/handleKeyDown"
+                    >
+                      <input
+                        tabindex="0"
+                        type="checkbox"
+                        name="filter.p.m.custom.categories"
+                        value="gid://shopify/Metaobject/119478124682"
+                        aria-label="Outerwear"
+                        id="Filter-filter-p-m-custom-categories-3"
+                        
+                        
+                        
+                        ref="facetInputs[]"
+                      ><div class="facets__image-wrapper flex items-center gap-2 flex-1">
+                        
+                          <img src="//pebble-little.myshopify.com/cdn/shop/files/menu-shop-collection-3.jpg?v=1762827275&amp;width=300" alt="Outerwear" srcset="//pebble-little.myshopify.com/cdn/shop/files/menu-shop-collection-3.jpg?v=1762827275&amp;width=50 50w, //pebble-little.myshopify.com/cdn/shop/files/menu-shop-collection-3.jpg?v=1762827275&amp;width=100 100w" width="300" height="300" loading="lazy" sizes="50px">
+                        
+                        <label
+                          class="facets__image-label color-subtext flex-1"
+                          for="Filter-filter-p-m-custom-categories-3"
+                          tabindex="-1"
+                        >
+                          <span class="reversed-link__text">Outerwear</span>
+                        </label>
+                      </div>
+                      <span class="color-subtext">11</span>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                ><fieldset
+                      class="flex items-center relative justify-between gap-3 focus-within--inset reversed-link"
+                      aria-label="Pants"
+                      on:keydown="#facet-inputs-component-filter-p-m-custom-categories/handleKeyDown"
+                    >
+                      <input
+                        tabindex="0"
+                        type="checkbox"
+                        name="filter.p.m.custom.categories"
+                        value="gid://shopify/Metaobject/119478157450"
+                        aria-label="Pants"
+                        id="Filter-filter-p-m-custom-categories-4"
+                        
+                        
+                        
+                        ref="facetInputs[]"
+                      ><div class="facets__image-wrapper flex items-center gap-2 flex-1">
+                        
+                          <img src="//pebble-little.myshopify.com/cdn/shop/files/menu-shop-collection-4.jpg?v=1762827276&amp;width=300" alt="Pants" srcset="//pebble-little.myshopify.com/cdn/shop/files/menu-shop-collection-4.jpg?v=1762827276&amp;width=50 50w, //pebble-little.myshopify.com/cdn/shop/files/menu-shop-collection-4.jpg?v=1762827276&amp;width=100 100w" width="300" height="300" loading="lazy" sizes="50px">
+                        
+                        <label
+                          class="facets__image-label color-subtext flex-1"
+                          for="Filter-filter-p-m-custom-categories-4"
+                          tabindex="-1"
+                        >
+                          <span class="reversed-link__text">Pants</span>
+                        </label>
+                      </div>
+                      <span class="color-subtext">13</span>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                ><fieldset
+                      class="flex items-center relative justify-between gap-3 focus-within--inset reversed-link"
+                      aria-label="Accessories"
+                      on:keydown="#facet-inputs-component-filter-p-m-custom-categories/handleKeyDown"
+                    >
+                      <input
+                        tabindex="0"
+                        type="checkbox"
+                        name="filter.p.m.custom.categories"
+                        value="gid://shopify/Metaobject/119478190218"
+                        aria-label="Accessories"
+                        id="Filter-filter-p-m-custom-categories-5"
+                        
+                        
+                        
+                        ref="facetInputs[]"
+                      ><div class="facets__image-wrapper flex items-center gap-2 flex-1">
+                        
+                          <img src="//pebble-little.myshopify.com/cdn/shop/files/menu-shop-collection-6.jpg?v=1762827275&amp;width=300" alt="Accessories" srcset="//pebble-little.myshopify.com/cdn/shop/files/menu-shop-collection-6.jpg?v=1762827275&amp;width=50 50w, //pebble-little.myshopify.com/cdn/shop/files/menu-shop-collection-6.jpg?v=1762827275&amp;width=100 100w" width="300" height="300" loading="lazy" sizes="50px">
+                        
+                        <label
+                          class="facets__image-label color-subtext flex-1"
+                          for="Filter-filter-p-m-custom-categories-5"
+                          tabindex="-1"
+                        >
+                          <span class="reversed-link__text">Accessories</span>
+                        </label>
+                      </div>
+                      <span class="color-subtext">17</span>
+                    </fieldset></li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                ><fieldset
+                      class="flex items-center relative justify-between gap-3 focus-within--inset reversed-link"
+                      aria-label="Sets"
+                      on:keydown="#facet-inputs-component-filter-p-m-custom-categories/handleKeyDown"
+                    >
+                      <input
+                        tabindex="0"
+                        type="checkbox"
+                        name="filter.p.m.custom.categories"
+                        value="gid://shopify/Metaobject/119478255754"
+                        aria-label="Sets"
+                        id="Filter-filter-p-m-custom-categories-6"
+                        
+                        
+                        
+                        ref="facetInputs[]"
+                      ><div class="facets__image-wrapper flex items-center gap-2 flex-1">
+                        
+                          <img src="//pebble-little.myshopify.com/cdn/shop/files/menu-shop-collection-5.jpg?v=1762827275&amp;width=300" alt="Sets" srcset="//pebble-little.myshopify.com/cdn/shop/files/menu-shop-collection-5.jpg?v=1762827275&amp;width=50 50w, //pebble-little.myshopify.com/cdn/shop/files/menu-shop-collection-5.jpg?v=1762827275&amp;width=100 100w" width="300" height="300" loading="lazy" sizes="50px">
+                        
+                        <label
+                          class="facets__image-label color-subtext flex-1"
+                          for="Filter-filter-p-m-custom-categories-6"
+                          tabindex="-1"
+                        >
+                          <span class="reversed-link__text">Sets</span>
+                        </label>
+                      </div>
+                      <span class="color-subtext">14</span>
+                    </fieldset></li></ul>
+          </div></facet-inputs-component>
+      </div>
+    </div>
+  </details>
+</accordion-component>
+
+              
+
+              
+                
+
+<accordion-component class="facets__inputs-accordion accordion accordion--standard accordion--arrow-plus">
+  <details
+    ref="item[]"
+    class="accordion__details is-open"
+    
+      open
+    
+  >
+    <summary
+      ref="summary[]"
+      class="accordion__summary flex facet__summary h6"
+      on:click="/onSummaryClick"
+      
+        aria-expanded="true"
+      
+    >
+      <span class="accordion__summary-text facet__label">Product type</span>
+      
+<span
+    class="icon icon--plus flex accordion__summary-arrow"
+    
+    
+  ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+  <path fill="none" d="M0 0H20V20H0V0z"/>
+  <path class="icon--plus-line-1" x1="40" y1="128" x2="216" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="var(--icon-stroke-width, 2)" d="M3.125 10L16.875 10"/>
+  <path class="icon--plus-line-2" x1="128" y1="40" x2="128" y2="216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="var(--icon-stroke-width, 2)" d="M10 3.125L10 16.875"/>
+</svg></span>
+    </summary>
+    <div ref="content[]" class="accordion__content">
+      <div class="accordion__inner">
+        <facet-inputs-component
+          on:change="/updateFilters"
+          id="facet-inputs-component-filter-p-product_type"
+        ><show-more-component class="show-more" data-expanded="false" data-skip-node-update="true"><div
+            class="facets__inputs-wrapper"
+            ref="showMoreContent"
+          >
+            <ul
+              id="filters-list-template--20816637788298__main-filter-p-product_type"
+              class="facets__inputs-list flex flex-col gap-3 list-unstyled"
+              name="Product type"
+            >
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-p-product_type-1"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.p.product_type"
+      value="Backpacks"
+      id="Filter-filter-p-product_type-1"
+      class="checkbox__input form-control"
+      data-label="Backpacks"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">Backpacks</span>
+    </span>
+    <span class="checkbox__count color-subtext">4</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-p-product_type-2"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.p.product_type"
+      value="Bags"
+      id="Filter-filter-p-product_type-2"
+      class="checkbox__input form-control"
+      data-label="Bags"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">Bags</span>
+    </span>
+    <span class="checkbox__count color-subtext">1</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-p-product_type-3"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.p.product_type"
+      value="Beanies"
+      id="Filter-filter-p-product_type-3"
+      class="checkbox__input form-control"
+      data-label="Beanies"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">Beanies</span>
+    </span>
+    <span class="checkbox__count color-subtext">1</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-p-product_type-4"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.p.product_type"
+      value="Dresses"
+      id="Filter-filter-p-product_type-4"
+      class="checkbox__input form-control"
+      data-label="Dresses"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">Dresses</span>
+    </span>
+    <span class="checkbox__count color-subtext">2</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-p-product_type-5"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.p.product_type"
+      value="Hats"
+      id="Filter-filter-p-product_type-5"
+      class="checkbox__input form-control"
+      data-label="Hats"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">Hats</span>
+    </span>
+    <span class="checkbox__count color-subtext">4</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-p-product_type-6"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.p.product_type"
+      value="Hoodies"
+      id="Filter-filter-p-product_type-6"
+      class="checkbox__input form-control"
+      data-label="Hoodies"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">Hoodies</span>
+    </span>
+    <span class="checkbox__count color-subtext">2</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-p-product_type-7"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.p.product_type"
+      value="Jackets"
+      id="Filter-filter-p-product_type-7"
+      class="checkbox__input form-control"
+      data-label="Jackets"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">Jackets</span>
+    </span>
+    <span class="checkbox__count color-subtext">6</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-p-product_type-8"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.p.product_type"
+      value="Pants"
+      id="Filter-filter-p-product_type-8"
+      class="checkbox__input form-control"
+      data-label="Pants"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">Pants</span>
+    </span>
+    <span class="checkbox__count color-subtext">5</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-p-product_type-9"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.p.product_type"
+      value="Shirts"
+      id="Filter-filter-p-product_type-9"
+      class="checkbox__input form-control"
+      data-label="Shirts"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">Shirts</span>
+    </span>
+    <span class="checkbox__count color-subtext">5</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-p-product_type-10"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.p.product_type"
+      value="Shoes"
+      id="Filter-filter-p-product_type-10"
+      class="checkbox__input form-control"
+      data-label="Shoes"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">Shoes</span>
+    </span>
+    <span class="checkbox__count color-subtext">5</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item hidden"
+                  
+                    ref="showMoreItems[]"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-p-product_type-11"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.p.product_type"
+      value="Shorts"
+      id="Filter-filter-p-product_type-11"
+      class="checkbox__input form-control"
+      data-label="Shorts"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">Shorts</span>
+    </span>
+    <span class="checkbox__count color-subtext">5</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item hidden"
+                  
+                    ref="showMoreItems[]"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-p-product_type-12"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.p.product_type"
+      value="Skirts"
+      id="Filter-filter-p-product_type-12"
+      class="checkbox__input form-control"
+      data-label="Skirts"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">Skirts</span>
+    </span>
+    <span class="checkbox__count color-subtext">1</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item hidden"
+                  
+                    ref="showMoreItems[]"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-p-product_type-13"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.p.product_type"
+      value="Sweaters"
+      id="Filter-filter-p-product_type-13"
+      class="checkbox__input form-control"
+      data-label="Sweaters"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">Sweaters</span>
+    </span>
+    <span class="checkbox__count color-subtext">2</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item hidden"
+                  
+                    ref="showMoreItems[]"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-p-product_type-14"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.p.product_type"
+      value="T-Shirts"
+      id="Filter-filter-p-product_type-14"
+      class="checkbox__input form-control"
+      data-label="T-Shirts"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">T-Shirts</span>
+    </span>
+    <span class="checkbox__count color-subtext">4</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item hidden"
+                  
+                    ref="showMoreItems[]"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-p-product_type-15"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.p.product_type"
+      value="Tank Tops"
+      id="Filter-filter-p-product_type-15"
+      class="checkbox__input form-control"
+      data-label="Tank Tops"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">Tank Tops</span>
+    </span>
+    <span class="checkbox__count color-subtext">4</span>
+  </label>
+</div>
+
+</li>
+                <li
+                  data-skip-node-update="true"
+                  class="facets__inputs-list-item hidden"
+                  
+                    ref="showMoreItems[]"
+                  
+                >
+<div
+  class="checkbox focus-within--inset reversed-link"
+  on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"
+>
+  <label
+    class="flex items-center gap-2 flex-1"
+    for="Filter-filter-p-product_type-16"
+    
+  >
+    <input
+      type="checkbox"
+      name="filter.p.product_type"
+      value="Vests"
+      id="Filter-filter-p-product_type-16"
+      class="checkbox__input form-control"
+      data-label="Vests"
+      
+      
+      
+      
+      
+        ref="facetInputs[]"
+      
+      
+    >
+    <span class="checkbox__label flex-1">
+      <span class="checkbox__label-text color-subtext reversed-link__text">Vests</span>
+    </span>
+    <span class="checkbox__count color-subtext">2</span>
+  </label>
+</div>
+
+</li></ul>
+          </div><button
+              class="show-more__button button-unstyled flex items-center gap-2 text-body-sm color-subtext"
+              ref="showMoreButton"
+              on:click="/toggle"
+              aria-expanded="false"
+              aria-controls="filters-list-template--20816637788298__main-filter-p-product_type"
+            >
+              
+<span
+    class="icon icon--plus icon--small"
+    
+    
+  ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+  <path fill="none" d="M0 0H20V20H0V0z"/>
+  <path class="icon--plus-line-1" x1="40" y1="128" x2="216" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="var(--icon-stroke-width, 2)" d="M3.125 10L16.875 10"/>
+  <path class="icon--plus-line-2" x1="128" y1="40" x2="128" y2="216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="var(--icon-stroke-width, 2)" d="M10 3.125L10 16.875"/>
+</svg></span>
+              <span class="show-more__label show-more__label--more">Show more</span>
+              <span class="show-more__label show-more__label--less">Show less</span>
+            </button>
+            </show-more-component>
+</facet-inputs-component>
+      </div>
+    </div>
+  </details>
+</accordion-component>
+
+              
+
+        
+      </form>
+    </facets-form-component>

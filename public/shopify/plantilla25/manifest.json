@@ -1,0 +1,97 @@
+{
+  "plantilla": 25,
+  "sourceUrl": "https://concept-theme-tech.myshopify.com",
+  "shopifyHost": "concept-theme-tech.myshopify.com",
+  "themeId": "191",
+  "capturedAt": "2026-07-25T10:55:38.947Z",
+  "css": [
+    "/shopify/plantilla25/assets/css/inline/index-inline-1.css",
+    "/shopify/plantilla25/assets/css/concept-theme-tech.myshopify.com/cdn/shop/t/191/assets/theme.css",
+    "/shopify/plantilla25/assets/css/concept-theme-tech.myshopify.com/cdn/shop/t/191/assets/apps.css",
+    "/shopify/plantilla25/assets/css/concept-theme-tech.myshopify.com/cdn/shop/t/191/assets/newsletter-popup.css",
+    "/shopify/plantilla25/assets/css/concept-theme-tech.myshopify.com/cdn/shop/t/191/assets/mobile-dock.css",
+    "/shopify/plantilla25/assets/css/concept-theme-tech.myshopify.com/cdn/shop/t/191/assets/pickup-availability.css",
+    "/shopify/plantilla25/assets/css/concept-theme-tech.myshopify.com/cdn/shop/t/191/assets/blog.css"
+  ],
+  "js": [
+    "/shopify/plantilla25/assets/js/concept-theme-tech.myshopify.com/cdn/shop/t/191/assets/vendor.js",
+    "/shopify/plantilla25/assets/js/concept-theme-tech.myshopify.com/cdn/shop/t/191/assets/theme.js",
+    "/shopify/plantilla25/assets/js/concept-theme-tech.myshopify.com/cdn/shop/t/191/assets/tab-attention.js",
+    "/shopify/plantilla25/assets/js/concept-theme-tech.myshopify.com/cdn/shop/t/191/assets/cart.js",
+    "/shopify/plantilla25/assets/js/concept-theme-tech.myshopify.com/cdn/shop/t/191/assets/gift-wrapping.js",
+    "/shopify/plantilla25/assets/js/concept-theme-tech.myshopify.com/cdn/shop/t/191/assets/search.js",
+    "/shopify/plantilla25/assets/js/concept-theme-tech.myshopify.com/cdn/shop/t/191/assets/newsletter-popup.js",
+    "/shopify/plantilla25/assets/js/concept-theme-tech.myshopify.com/cdn/shop/t/191/assets/mobile-dock.js",
+    "/shopify/plantilla25/assets/js/concept-theme-tech.myshopify.com/cdn/shop/t/191/assets/pickup-availability.js",
+    "/shopify/plantilla25/assets/js/concept-theme-tech.myshopify.com/cdn/shop/t/191/assets/instant-page.js",
+    "/shopify/plantilla25/assets/js/cdn.shopify.com/storefront/standard-actions.js"
+  ],
+  "fonts": [
+    "/shopify/plantilla25/assets/fonts/concept-theme-tech.myshopify.com/cdn/fonts/inter/inter_n4.b2a3f24c19b4de56e8871f609e73ca7f6d2e2bb9.woff2",
+    "/shopify/plantilla25/assets/fonts/concept-theme-tech.myshopify.com/cdn/fonts/inter/inter_n4.af8052d517e0c9ffac7b814872cecc27ae1fa132.woff",
+    "/shopify/plantilla25/assets/fonts/concept-theme-tech.myshopify.com/cdn/fonts/inter/inter_n5.d7101d5e168594dd06f56f290dd759fba5431d97.woff2",
+    "/shopify/plantilla25/assets/fonts/concept-theme-tech.myshopify.com/cdn/fonts/inter/inter_n5.5332a76bbd27da00474c136abb1ca3cbbf259068.woff",
+    "/shopify/plantilla25/assets/fonts/concept-theme-tech.myshopify.com/cdn/fonts/inter/inter_n7.02711e6b374660cfc7915d1afc1c204e633421e4.woff2",
+    "/shopify/plantilla25/assets/fonts/concept-theme-tech.myshopify.com/cdn/fonts/inter/inter_n7.6dab87426f6b8813070abd79972ceaf2f8d3b012.woff",
+    "/shopify/plantilla25/assets/fonts/concept-theme-tech.myshopify.com/cdn/fonts/inter/inter_i4.feae1981dda792ab80d117249d9c7e0f1017e5b3.woff2",
+    "/shopify/plantilla25/assets/fonts/concept-theme-tech.myshopify.com/cdn/fonts/inter/inter_i4.62773b7113d5e5f02c71486623cf828884c85c6e.woff",
+    "/shopify/plantilla25/assets/fonts/concept-theme-tech.myshopify.com/cdn/fonts/inter/inter_i7.b377bcd4cc0f160622a22d638ae7e2cd9b86ea4c.woff2",
+    "/shopify/plantilla25/assets/fonts/concept-theme-tech.myshopify.com/cdn/fonts/inter/inter_i7.7c69a6a34e3bb44fcf6f975857e13b9a9b25beb4.woff"
+  ],
+  "bodyClass": "template-index loaded has-modal-opening",
+  "rootVarsCount": 204,
+  "segmentation": {
+    "sections": 25,
+    "dir": "sections/",
+    "liquid": true
+  },
+  "stats": {
+    "cssTotal": 6,
+    "jsTotal": 11,
+    "fontsTotal": 10,
+    "imagesTotal": 851,
+    "videosTotal": 9,
+    "svgMasksTotal": 0,
+    "inlineAnimScripts": 3,
+    "inlineCssKB": 30,
+    "bodyCleanKB": 688,
+    "downloaded": {
+      "css": {
+        "ok": 6,
+        "skip": 0,
+        "fail": 0,
+        "errors": []
+      },
+      "js": {
+        "ok": 11,
+        "skip": 0,
+        "fail": 0,
+        "errors": []
+      },
+      "fonts": {
+        "ok": 0,
+        "skip": 10,
+        "fail": 0,
+        "errors": []
+      },
+      "images": {
+        "ok": 4,
+        "skip": 847,
+        "fail": 0,
+        "errors": []
+      },
+      "videos": {
+        "ok": 0,
+        "skip": 9,
+        "fail": 0,
+        "errors": []
+      },
+      "svgMasks": {
+        "ok": 0,
+        "skip": 0,
+        "fail": 0,
+        "errors": []
+      }
+    }
+  }
+}

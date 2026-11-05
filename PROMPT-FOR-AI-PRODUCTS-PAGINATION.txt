@@ -1,0 +1,122 @@
+# TASK: Optimize useProductsCache to load 10 products per page (server-side pagination) instead of 10,000 at once
+
+## PROBLEM
+
+The hook `useProductsCache` (used by `/productos`, `/paquetes`, `/embalajes`, and category pages) downloads ALL products from the API in a single request:
+
+```typescript
+// src/hooks/useProductsCache.ts line 61
+const globalKey = isClient ? `/api/public-data/products?limit=10000` : null;
+```
+
+This calls `/api/public-data/products?limit=10000` which internally fetches ALL documents from Appwrite's `products` collection using a cursor-based loop (100 at a time until exhausted). If there are 800 products, that's 800 reads per visitor on first load.
+
+The "infinite scroll" in the current code is FAKE — it already has all products in memory and just slices them client-side:
+```typescript
+// line 243-245
+const paginatedProducts = useMemo(() => {
+  return processedData.products.slice(0, page * limit);
+}, [processedData.products, page, limit]);
+```
+
+## ROOT CAUSE
+
+Appwrite charges per DOCUMENT RETURNED, not per API call. Downloading 800 products = 800 reads. The current architecture downloads everything and filters/sorts/paginates client-side, which is the opposite of what we need.
+
+## SOLUTION REQUIRED
+
+Change `useProductsCache` to fetch products page-by-page from the server (10 at a time), with real server-side pagination, filtering, and sorting. The API route already supports `offset` and `limit` parameters, but the hook doesn't use them — it always requests `limit=10000`.
+
+## KEY FILES
+
+1. **`src/hooks/useProductsCache.ts`** — The hook that needs to be rewritten. Currently:
+   - Fetches ALL products via SWR with `limit=10000`
+   - Filters by category, subcategory, subSubcategory, tag, search, price range, ofertasOnly, catalogMode (all client-side)
+   - Sorts client-side (newest, updated, price_asc, price_desc)
+   - Paginates client-side (slice)
+   - Returns: products, allProducts, total, priceRange, categoryCounts, subcategoryCounts, subSubcategoryCounts, allTags, isLoadingInitialData, isLoadingMore, isReachingEnd, loadMore, isMobile, mutate
+
+2. **`src/app/api/public-data/products/route.ts`** — The API route. Already supports:
+   - `limit` and `offset` params (but defaults to limit=1000)
+   - Server-side filtering: categoryId, subcategoryId, subSubcategoryId, tag, search, ofertasOnly, priceMin, priceMax
+   - Server-side sorting: newest, updated, price_asc, price_desc
+   - Returns: products (paginated), total, priceRange, categoryCounts, subcategoryCounts, subSubcategoryCounts, allTags
+   - BUT: it fetches ALL products from Appwrite into memory first, then filters/sorts/slices. This is because Appwrite's SDK doesn't support all these filter combinations natively.
+   - Has `unstable_cache` with 1h revalidate + in-memory cache with 2s TTL
+
+3. **`src/templates/plantilla1/CollectionAll.tsx`** — Main consumer of the hook. Uses:
+   - `products` (paginated), `allProducts` (non-paginated for carousels/offers), `total`, `priceRange`, `categoryCounts`, `allTags`, `isLoadingInitialData`, `isLoadingMore`, `isReachingEnd`, `loadMore`, `isMobile`
+   - Has its own client-side filtering on top of the hook results (e.g., `visibleProducts` filters by stock, PACKQTY, live shopping)
+   - Uses `allProducts` for carousels (offersDayProducts, carouselPaquetes, cheapestRetailProducts)
+
+4. **`src/app/productos/ProductosInner.tsx`** — Another consumer. Uses:
+   - `products` (paginated), `total`, `priceRange`, `categoryCounts`, `subcategoryCounts`, `subSubcategoryCounts`, `allTags`, `isLoadingInitialData`, `isLoadingMore`, `isReachingEnd`, `loadMore`
+   - Has IntersectionObserver for infinite scroll calling `loadMore()`
+
+5. **`src/app/catalogo/page.tsx`** — ALREADY FIXED. This is the reference implementation. It was changed from loading 500 products at once to loading 10 per page via `/api/public-data/catalog-products` API route with IntersectionObserver-based infinite scroll. Use this as a pattern reference.
+
+## IMPORTANT CONSTRAINTS
+
+1. **The `allProducts` field is used by carousels** (offers, cheapest products, paquetes carousel). These carousels need access to ALL products, not just the current page. You need to handle this — either:
+   - Option A: Keep a separate lightweight fetch for carousel data (just $id, NAME, PRICE, PACKQTY, STOCK, IMAGEURL — minimal fields)
+   - Option B: Load carousel products separately in the component, not through the hook
+   - Option C: Accept that carousels won't work with pagination (NOT recommended — they're a key UX feature)
+
+2. **`categoryCounts`, `subcategoryCounts`, `subSubcategoryCounts`** are used to show counts in filter sidebars. These need to be available BEFORE the user scrolls through products. The API already returns these in every response, so the first page load will include them.
+
+3. **`priceRange`** is used for the price slider filter. The API returns this. It should be available on first page load.
+
+4. **`allTags`** is used for tag filtering UI. The API returns this. Should be available on first page load.
+
+5. **Search** must work server-side. When user types "labial", the API should return only matching products, paginated 10 at a time. The API already supports `search` param with normalized text matching.
+
+6. **`catalogMode`** ('retail', 'paquetes', 'embalajes') filters products by PACKQTY. Currently done client-side in the hook. The API does NOT support this param yet — you need to either add it to the API or filter client-side on the paginated results (less ideal).
+
+7. **The API route fetches ALL products from Appwrite into memory anyway** (cursor loop in `getCachedAllProducts`). This is cached for 1 hour via `unstable_cache` + 2s in-memory. So the Appwrite reads only happen once per hour. The real problem is the NETWORK TRANSFER of 800 products to the client, not the Appwrite reads (those are cached server-side). BUT — if the user wants to reduce Appwrite reads too, the `getCachedAllProducts` function reads ALL products every hour. With 800 products that's 800 reads/hour = 19,200 reads/day just from this cache refresh.
+
+8. **SWR is used** with `dedupingInterval: 86400000` (24h). This means once data is loaded, it's cached in the browser for 24h. The problem is the INITIAL load for a new visitor.
+
+## RECOMMENDED APPROACH
+
+1. **Change the hook to use SWR with paginated keys** instead of one global key:
+   ```typescript
+   // Instead of:
+   const globalKey = `/api/public-data/products?limit=10000`;
+   
+   // Use:
+   const pageKey = `/api/public-data/products?limit=10&offset=${offset}&categoryId=${categoryId}&sortBy=${sortBy}&search=${search}&...`;
+   ```
+
+2. **Use SWR infinite** (`useSWRInfinite`) for the infinite scroll pattern, or manage pagination manually with state (like the catalogo page does).
+
+3. **For carousels (`allProducts`)**: Make a separate lightweight API call that returns only the fields needed for carousels (or accept that carousels need their own data fetching). Alternatively, the API could return a `carouselProducts` field with a limited set of pre-sorted products.
+
+4. **Add `catalogMode` support to the API route** so paquetes/embalajes filtering happens server-side.
+
+5. **Keep the IntersectionObserver pattern** from the catalogo page for triggering `loadMore`.
+
+## REFERENCE: Already-fixed catalogo page
+
+The `/catalogo` page was already fixed with the same pattern:
+- API route: `src/app/api/public-data/catalog-products/route.ts` (paginated, 10 per page, server-side cache)
+- Client: `src/app/catalogo/page.tsx` (IntersectionObserver, offsetRef, debounced search)
+- No more 500-product download — now 10 at a time
+
+## APWRITE READ COUNTING (CRITICAL CONTEXT)
+
+Appwrite charges **per document returned**, not per API call:
+- `listDocuments(limit=10)` returning 10 docs = **10 reads**
+- `listDocuments(limit=10000)` returning 800 docs = **800 reads**
+- `listDocuments(limit=1)` returning 1 doc = **1 read**
+
+The `getCachedAllProducts` function in the API route uses a cursor loop fetching 100 at a time until all are loaded. With 800 products, that's 800 reads every time the cache expires (1 hour via unstable_cache, but in-memory cache is only 2 seconds). On Vercel serverless, the in-memory cache is unreliable (each cold start resets it), so effectively 800 reads per cold start.
+
+## WHAT THE OTHER AI NEEDS TO DO
+
+1. Rewrite `useProductsCache` to fetch 10 products per page from `/api/public-data/products` with proper `offset` and `limit` params
+2. Pass all filter params (categoryId, subcategoryId, search, sortBy, tag, priceMin, priceMax, ofertasOnly, catalogMode) to the API as query params
+3. Add `catalogMode` support to the API route (filter by PACKQTY > 1 for paquetes/embalajes)
+4. Handle the `allProducts` field for carousels (separate fetch or API response field)
+5. Keep the same return interface so consumers (CollectionAll.tsx, ProductosInner.tsx) don't need major changes
+6. Use IntersectionObserver for infinite scroll (reference: catalogo page)
+7. Debounce search input (400ms) before triggering a new page request

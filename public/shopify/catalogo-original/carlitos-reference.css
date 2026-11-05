@@ -1,0 +1,92 @@
+/* Storefront inspired by Carlitos' yellow shop window. */
+:root { --carlitos-bg:#f7f7f6; --carlitos-gold:#f8e403; }
+header.glass { background:#fdda02 !important; background-image:none !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; border-bottom:0 !important; box-shadow:none !important; }
+header.glass > div { padding-top:12px; padding-bottom:12px; }
+.catalog-brand #mainLogoImg { width:112px; height:78px; object-fit:contain; border:0; border-radius:6px; box-shadow:none; background:transparent; }
+.catalog-brand-name { display:none; }
+.carlitos-hero-emblem { width:min(250px,calc(100% - 48px)); height:auto; aspect-ratio:974 / 681; border-radius:12px; }
+.carlitos-hero-emblem img { object-fit:contain; }
+.catalog-footer-brand img { width:76px; height:53px; object-fit:contain; border-radius:5px; }
+.catalog-nav-link.active { background:rgba(255,255,255,.65) !important; }
+#searchInput { background:#fff !important; border:1px solid rgba(99,80,0,.12) !important; }
+.catalog-browse-button { background:var(--carlitos-crimson) !important; color:#fff !important; }
+.catalog-packs-button { background:#fff !important; border-color:rgba(100,75,0,.14) !important; }
+.catalog-service-bar { border-color:rgba(111,92,0,.16); color:#50482e; }
+.carlitos-header-favorites { display:none; }
+#app { padding-top:22px !important; }
+.catalog-home { gap:22px; }
+.carlitos-hero { min-height:320px; border:0; border-radius:20px; box-shadow:0 12px 34px rgba(35,30,15,.07); }
+.carlitos-hero-copy { padding:36px clamp(26px,4vw,56px); }
+.carlitos-hero-visual { min-height:320px; }
+.carlitos-hero-metrics { display:none; }
+.carlitos-hero h1 { font-size:clamp(34px,3.6vw,52px); }
+.carlitos-quick-categories { display:flex; gap:9px; overflow-x:auto; padding:2px 1px 5px; scrollbar-width:none; }
+.carlitos-quick-categories::-webkit-scrollbar { display:none; }
+.carlitos-quick-category { flex:none; display:inline-flex; align-items:center; justify-content:center; min-height:38px; padding:0 18px; background:#fff; border:1px solid #e4e1e0; border-radius:999px; color:#322d2e; text-decoration:none; font-size:13px; font-weight:650; }
+.carlitos-quick-category:hover { border-color:var(--carlitos-crimson); color:var(--carlitos-crimson); }
+.carlitos-quick-category.is-active { background:var(--carlitos-crimson); border-color:var(--carlitos-crimson); color:white; }
+.carlitos-see-all { color:var(--carlitos-crimson); font-size:13px; font-weight:700; white-space:nowrap; }
+.product-card.catalog-card { border-radius:15px; box-shadow:0 3px 12px rgba(35,30,25,.04); }
+.catalog-card-media { border-radius:10px; }
+.catalog-card-add { background:var(--carlitos-crimson) !important; border-color:var(--carlitos-crimson) !important; }
+.catalog-card-add:hover:not(:disabled) { background:var(--carlitos-crimson-dark) !important; border-color:var(--carlitos-crimson-dark) !important; }
+.catalog-card-add:disabled { opacity:.55; }
+.catalog-section-heading .section-title::before { background:#f8e403 !important; }
+
+@media (max-width:639px) {
+  #announcementBar { display:none !important; }
+  header.glass { position:relative; top:auto; overflow:visible; }
+  header.glass > div { padding:12px 14px 13px; }
+  header.glass > div > div:first-child { position:relative; min-height:104px; justify-content:center; }
+  header.glass > div > div:first-child > div:first-child { justify-content:center; }
+  header.glass > div > div:first-child > div:last-child { position:absolute; right:0; top:0; gap:5px; }
+  .catalog-brand { justify-content:center; }
+  .catalog-brand #mainLogoImg { width:130px; height:91px; border:0; border-radius:6px; box-shadow:none; object-fit:contain; }
+  .catalog-brand-name { display:none; }
+  .carlitos-header-favorites { display:grid; place-items:center; width:34px; height:34px; color:#2b2621; border-radius:50%; background:rgba(255,255,255,.72); }
+  .carlitos-header-favorites svg { width:19px; height:19px; }
+  #headerWhatsAppBtn { width:34px; height:34px; padding:0; justify-content:center; border-radius:50%; background:rgba(255,255,255,.78); border:0; }
+  #headerWhatsAppBtn svg { width:19px; height:19px; }
+  #headerWhatsAppBtn span { display:none; }
+  #cartBtn { display:inline-flex !important; width:34px; height:34px; min-height:34px; padding:0; justify-content:center; border-radius:50%; box-shadow:none; }
+  #cartBtn #headerCartTotal { display:none; }
+  .catalog-search-row { margin-top:8px; gap:7px; grid-template-columns:minmax(0,1fr) auto auto; }
+  #searchInput { height:44px; border-radius:12px; font-size:13px; }
+  .catalog-browse-button,.catalog-packs-button { width:43px; height:44px; min-height:44px; padding:0; border-radius:12px; }
+  .catalog-service-bar { margin-top:9px; padding-top:8px; flex-wrap:nowrap; overflow-x:auto; white-space:nowrap; scrollbar-width:none; font-size:10.5px; }
+  .catalog-service-bar::-webkit-scrollbar { display:none; }
+  #app { padding:14px 14px 130px !important; }
+  .catalog-home { gap:10px; }
+  .carlitos-hero { position:relative; display:block; min-height:0; height:115px; overflow:hidden; border-radius:15px; }
+  .carlitos-hero-visual { position:absolute; inset:0; min-height:100%; max-height:none; border:0; }
+  .carlitos-hero-visual .carlitos-visual-top,.carlitos-hero-visual .carlitos-hero-product,.carlitos-hero-visual .carlitos-hero-emblem,.carlitos-visual-mark { display:none; }
+  .carlitos-hero-copy { position:relative; z-index:4; display:flex; justify-content:center; align-items:flex-start; width:100%; height:100%; padding:11px 18px; background:linear-gradient(90deg,rgba(24,35,44,.76),rgba(24,35,44,.20)); }
+  .carlitos-hero-kicker,.carlitos-hero-copy > p,.carlitos-secondary { display:none; }
+  .carlitos-hero h1 { max-width:none; margin:0; color:#fff; font-size:21px; line-height:1.08; letter-spacing:-.035em; }
+  .carlitos-hero-actions { margin-top:8px; width:auto; }
+  .carlitos-primary { flex:none; min-height:32px; padding:0 12px; border-radius:8px; background:#fff !important; color:var(--carlitos-crimson) !important; box-shadow:none; font-size:11px; }
+  .carlitos-primary span { display:none; }
+  .carlitos-quick-categories { gap:7px; margin:0 -2px; }
+  .carlitos-quick-category { min-height:34px; padding:0 14px; font-size:12px; }
+  .catalog-section-heading { align-items:center; margin-bottom:10px; }
+  .catalog-section-heading p,.catalog-section-heading .category-browse-kicker { display:none; }
+  .catalog-section-heading .section-title { font-size:18px !important; }
+  .catalog-grid { gap:10px; }
+  .product-card.catalog-card { border-radius:13px; }
+  .catalog-card-media { margin:5px 5px 0; border-radius:9px; aspect-ratio:1.12 / 1; }
+  .catalog-card-body { padding:9px; gap:5px; }
+  .catalog-card-eyebrow { font-size:9px; }
+  .catalog-card-title { font-size:13px; }
+  .catalog-card-price strong { font-size:17px; }
+  .catalog-card-add { min-height:37px; padding:0 6px; font-size:11px; }
+  .catalog-card-sku { display:none; }
+  #bottomNav.nav-bottom { background:rgba(255,255,255,.97) !important; }
+}
+
+@media (max-width:360px) {
+  header.glass > div > div:first-child { min-height:88px; }
+  header.glass > div > div:first-child > div:last-child { gap:3px; }
+  .catalog-brand #mainLogoImg { width:96px; height:68px; }
+  .carlitos-header-favorites, #headerWhatsAppBtn, #cartBtn { width:30px; height:30px; min-height:30px; }
+  .carlitos-header-favorites svg, #headerWhatsAppBtn svg { width:17px; height:17px; }
+}

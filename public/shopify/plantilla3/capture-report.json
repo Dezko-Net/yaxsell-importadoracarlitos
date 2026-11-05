@@ -1,0 +1,81 @@
+{
+  "plantilla": 3,
+  "sourceUrl": "https://theking-castle.myshopify.com",
+  "capturedAt": "2026-06-01T02:23:37.868Z",
+  "elapsedSeconds": "20.3",
+  "files": {
+    "html": "C:\\Proyectos\\PROJECT YAXSEL\\web-store\\public\\shopify\\plantilla3\\index.html",
+    "bodyClean": "C:\\Proyectos\\PROJECT YAXSEL\\web-store\\public\\shopify\\plantilla3\\body-clean.html",
+    "manifest": "C:\\Proyectos\\PROJECT YAXSEL\\web-store\\public\\shopify\\plantilla3\\manifest.json",
+    "tsx": "C:\\Proyectos\\PROJECT YAXSEL\\web-store\\src\\templates\\plantilla3\\HomePage.tsx"
+  },
+  "stats": {
+    "cssTotal": 34,
+    "jsTotal": 14,
+    "fontsTotal": 18,
+    "imagesTotal": 316,
+    "videosTotal": 2,
+    "svgMasksTotal": 0,
+    "inlineAnimScripts": 7,
+    "inlineCssKB": 93,
+    "bodyCleanKB": 1488,
+    "downloaded": {
+      "css": {
+        "ok": 1,
+        "skip": 33,
+        "fail": 0,
+        "errors": []
+      },
+      "js": {
+        "ok": 0,
+        "skip": 13,
+        "fail": 1,
+        "errors": [
+          {
+            "url": "https://theking-castle.myshopify.com/cdn/shop/t/36/assets/graphics-font.json?v=5620",
+            "error": "HTTP 404"
+          }
+        ]
+      },
+      "fonts": {
+        "ok": 0,
+        "skip": 18,
+        "fail": 0,
+        "errors": []
+      },
+      "images": {
+        "ok": 0,
+        "skip": 200,
+        "fail": 0,
+        "errors": []
+      },
+      "videos": {
+        "ok": 0,
+        "skip": 2,
+        "fail": 0,
+        "errors": []
+      },
+      "svgMasks": {
+        "ok": 0,
+        "skip": 0,
+        "fail": 0,
+        "errors": []
+      }
+    }
+  },
+  "errors": [
+    {
+      "url": "https://theking-castle.myshopify.com/cdn/shop/t/36/assets/graphics-font.json?v=5620",
+      "error": "HTTP 404"
+    }
+  ],
+  "nextSteps": [
+    "1. Revisar HomePage.tsx — puede necesitar ajustes de orden CSS/JS",
+    "2. Verificar que los CSS críticos estén en el orden correcto (inline → core → secciones)",
+    "3. Verificar que los JS no incluyan scripts de Shopify (perf-kit, account.js)",
+    "4. Registrar plantilla 3 en src/app/preview/plantilla/[id]/page.tsx",
+    "5. Registrar plantilla 3 en src/components/DynamicHomePage.tsx",
+    "6. Probar en http://localhost:3000/preview/plantilla/3",
+    "7. Si hay errores de JS, revisar orden de carga y dependencias"
+  ]
+}

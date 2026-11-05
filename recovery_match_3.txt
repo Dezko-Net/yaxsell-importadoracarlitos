@@ -1,0 +1,31 @@
+  const { addItem } = useCart();
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const { settings: apertura } = useAperturaPromotion();
+
+  const {
+    products: fetchedProducts,
+    total: fetchedTotal,
+    priceRange: fetchedPriceRange,
+    categoryCounts: fetchedCategoryCounts,
+    subcategoryCounts: fetchedSubcategoryCounts,
+    isLoadingInitialData,
+    isLoadingMore,
+    isReachingEnd,
+    loadMore,
+    isMobile
+  } = useProductsCache({
+    categoryId: lockCategoryId || selectedCat || undefined,
+    subcategoryId: selectedSubcat || undefined,
+    sortBy,
+    search: search || undefined,
+    tag: selectedTag || undefined,
+    priceMin: activePriceRange && activePriceRange[0] !== priceRange[0] ? activePriceRange[0] : undefined,
+    priceMax: activePriceRange && activePriceRange[1] !== priceRange[1] ? activePriceRange[1] : undefined
+  });
+
+  const products = fetchedProducts;
+  const isLoading = isLoadingInitialData;
+  const hasMore = !isReachingEnd;
+  const filtered = products; // The API already filters everything!
+  const visibleProducts = products;
+  const catCountMap = fetchedCategoryCounts;

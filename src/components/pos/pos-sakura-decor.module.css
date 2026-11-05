@@ -1,0 +1,379 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Sakura Milk & Coquette — Artisanal Botanical Illustrations & Ambient Physics
+   Strictly scoped to PosSakuraDecor components (zero impact on other skins)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Ambient Floating Sakura Field ("Venta actual", Search, Modal) ────── */
+.ambientField {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+.defsSvg {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.cornerBranch {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  width: 196px;
+  height: 132px;
+  opacity: 0.34;
+  pointer-events: none;
+}
+
+.cornerBranchModal {
+  width: 170px;
+  height: 112px;
+  opacity: 0.24;
+}
+
+.bottomSprig {
+  position: absolute;
+  bottom: -8px;
+  left: -10px;
+  width: 152px;
+  height: 102px;
+  opacity: 0.24;
+  pointer-events: none;
+}
+
+/* Strictly 2-keyframe LINEAR vertical drift — zero pauses, zero stutter */
+.ambientFallTrack {
+  position: absolute;
+  top: -36px;
+  will-change: transform, opacity;
+  animation-name: sakuraAmbientFall, sakuraAmbientFade;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+  pointer-events: none;
+}
+
+.ambientSwayTrack {
+  display: block;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+  animation-name: sakuraAmbientSway;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+.ambientSpinGlyph {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: none !important;
+  will-change: transform;
+  transform-origin: center center;
+  animation-name: sakuraAmbientSpin;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.ambientDew {
+  position: absolute;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(252, 205, 226, 0.65) 50%,
+    rgba(244, 143, 177, 0) 100%
+  );
+  animation-name: sakuraDewTwinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  pointer-events: none;
+}
+
+@keyframes sakuraAmbientFall {
+  0% {
+    transform: translate3d(0px, 0px, 0);
+  }
+  100% {
+    transform: translate3d(var(--drift-x, 28px), var(--fall-dist, 680px), 0);
+  }
+}
+
+@keyframes sakuraAmbientFade {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: var(--p-alpha, 0.56);
+  }
+  82% {
+    opacity: var(--p-alpha, 0.56);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes sakuraAmbientSway {
+  0% {
+    transform: translate3d(calc(var(--sway-x, 14px) * -1), 0, 0) rotate(calc(var(--sway-deg, 12deg) * -1));
+  }
+  100% {
+    transform: translate3d(var(--sway-x, 14px), 0, 0) rotate(var(--sway-deg, 12deg));
+  }
+}
+
+@keyframes sakuraAmbientSpin {
+  0% {
+    transform: rotate3d(0.6, 1, 0.35, 0deg);
+  }
+  100% {
+    transform: rotate3d(0.6, 1, 0.35, 360deg);
+  }
+}
+
+@keyframes sakuraDewTwinkle {
+  0%,
+  100% {
+    opacity: 0.18;
+    transform: scale(0.75);
+  }
+  50% {
+    opacity: 0.72;
+    transform: scale(1.18);
+  }
+}
+
+/* ── 2. "Una venta empieza aquí" — Bespoke Botanical Hero ─────────────────── */
+.sakuraSearchEmpty {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 310px;
+  height: 100%;
+  padding: 32px 22px;
+  text-align: center;
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 340px;
+}
+
+.heroSvgWrap {
+  position: relative;
+  width: 224px;
+  height: 152px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heroSvg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: none !important;
+}
+
+.floatingPetalA {
+  animation: sakuraHeroFloatA 3.8s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.floatingPetalB {
+  animation: sakuraHeroFloatB 4.4s ease-in-out -1.4s infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.floatingBlossomGentle {
+  animation: sakuraBlossomBreathe 5.2s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.scannerPulseLine {
+  animation: sakuraScanSweep 2.8s ease-in-out infinite alternate;
+}
+
+@keyframes sakuraHeroFloatA {
+  0% {
+    transform: translate3d(-3px, -4px, 0) rotate(-8deg);
+  }
+  100% {
+    transform: translate3d(4px, 5px, 0) rotate(10deg);
+  }
+}
+
+@keyframes sakuraHeroFloatB {
+  0% {
+    transform: translate3d(3px, 4px, 0) rotate(9deg);
+  }
+  100% {
+    transform: translate3d(-4px, -5px, 0) rotate(-9deg);
+  }
+}
+
+@keyframes sakuraBlossomBreathe {
+  0% {
+    transform: rotate(-2.5deg) scale(0.985);
+  }
+  100% {
+    transform: rotate(2.5deg) scale(1.02);
+  }
+}
+
+@keyframes sakuraScanSweep {
+  0% {
+    transform: translateY(-7px);
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.92;
+  }
+  100% {
+    transform: translateY(7px);
+    opacity: 0.45;
+  }
+}
+
+.heroBadgePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 11px;
+  margin-bottom: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px dashed #f2a7c5;
+  color: #b44d7b;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.heroTitle {
+  font-size: 19px;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  color: #46172f;
+  line-height: 1.25;
+}
+
+.heroOrnamentRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 6px;
+  color: #e483ab;
+}
+
+.heroOrnamentLine {
+  width: 34px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #f1a1c2, transparent);
+}
+
+.heroSubtitle {
+  max-width: 31ch;
+  font-size: 12px;
+  line-height: 1.65;
+  color: #8b4c6b;
+}
+
+/* ── 3. Empty Cart Botanical Emblem ("Venta actual" when empty) ──────────── */
+.cartEmptyWrap {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 210px;
+  padding: 28px 18px;
+  text-align: center;
+}
+
+.cartEmptySvg {
+  width: 138px;
+  height: 102px;
+  margin-bottom: 8px;
+  overflow: visible;
+  filter: none !important;
+}
+
+.cartEmptyTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #54213b;
+  letter-spacing: -0.015em;
+}
+
+.cartEmptySub {
+  margin-top: 4px;
+  max-width: 26ch;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: #965274;
+}
+
+/* ── 4. "Venta cobrada" Modal Botanical Header Art & Blossom Check Seal ──── */
+.modalHeaderBranch {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 218px;
+  height: 106px;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.modalCheckSeal {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  z-index: 1;
+}
+
+.modalCheckSvg {
+  width: 52px;
+  height: 52px;
+  overflow: visible;
+  filter: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambientFallTrack,
+  .ambientSwayTrack,
+  .ambientSpinGlyph,
+  .ambientDew,
+  .floatingPetalA,
+  .floatingPetalB,
+  .floatingBlossomGentle,
+  .scannerPulseLine {
+    animation: none !important;
+  }
+}

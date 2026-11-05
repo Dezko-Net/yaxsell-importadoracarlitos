@@ -1,0 +1,2087 @@
+/* ── DESACTIVAR POPUP AUTOMÁTICO DE NEWSLETTER ── */
+#NewsletterModal,
+newsletter-modal,
+.newsletter-modal {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ── DRAWERS CERRADOS: completamente inertes y ocultos ── */
+menu-drawer:not([open]):not(.is-open),
+cart-drawer:not([open]):not(.is-open),
+search-drawer:not([open]):not(.is-open),
+.drawer:not([open]):not(.is-open):not([active]) {
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+menu-drawer:not([open]):not(.is-open) .overlay,
+cart-drawer:not([open]):not(.is-open) .overlay,
+search-drawer:not([open]):not(.is-open) .overlay,
+.drawer:not([open]):not(.is-open):not([active]) .overlay {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* ── SCROLL FIX: has-modal-opening/has-modal-open bloquea el scroll en PC ── */
+/* El theme JS añade estas clases al abrir drawers/modals, pero a veces no las
+   quita. Override para que el body SIEMPRE pueda hacer scroll. Los drawers
+   reales gestionan su propio overflow internamente. */
+body.has-modal-opening:not(.drawer-open):not(.modal-open-active) {
+  overflow: auto !important;
+}
+body.has-modal-open:not(.drawer-open):not(.modal-open-active) {
+  overflow: auto !important;
+  touch-action: auto !important;
+}
+
+/* ── MENU DRAWER: z-index mayor que el header para que la cortina quede encima ── */
+menu-drawer#MenuDrawer,
+.menu-drawer#MenuDrawer {
+  z-index: 50 !important;
+}
+menu-drawer#MenuDrawer .overlay,
+.menu-drawer#MenuDrawer .drawer__inner {
+  z-index: 50 !important;
+}
+
+/* ── DRAWERS: botón X circular negro visible (Menu, Search, Cart) ── */
+menu-drawer#MenuDrawer .drawer__close,
+.menu-drawer#MenuDrawer .drawer__close,
+search-drawer#SearchDrawer .drawer__close,
+.search-drawer#SearchDrawer .drawer__close,
+cart-drawer#CartDrawer .drawer__close,
+.cart-drawer#CartDrawer .drawer__close {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+  min-height: 42px !important;
+  margin: 12px 16px 12px auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 9999px !important;
+  background: #000 !important;
+  color: #fff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 10001 !important;
+}
+
+menu-drawer#MenuDrawer .drawer__close .btn-fill,
+menu-drawer#MenuDrawer .drawer__close .btn-loader,
+.menu-drawer#MenuDrawer .drawer__close .btn-fill,
+.menu-drawer#MenuDrawer .drawer__close .btn-loader,
+search-drawer#SearchDrawer .drawer__close .btn-fill,
+search-drawer#SearchDrawer .drawer__close .btn-loader,
+cart-drawer#CartDrawer .drawer__close .btn-fill,
+cart-drawer#CartDrawer .drawer__close .btn-loader {
+  display: none !important;
+}
+
+menu-drawer#MenuDrawer .drawer__close .btn-text,
+.menu-drawer#MenuDrawer .drawer__close .btn-text,
+search-drawer#SearchDrawer .drawer__close .btn-text,
+cart-drawer#CartDrawer .drawer__close .btn-text {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #fff !important;
+}
+
+menu-drawer#MenuDrawer .drawer__close svg,
+.menu-drawer#MenuDrawer .drawer__close svg,
+search-drawer#SearchDrawer .drawer__close svg,
+cart-drawer#CartDrawer .drawer__close svg {
+  width: 20px !important;
+  height: 20px !important;
+  color: #fff !important;
+  stroke: #fff !important;
+  pointer-events: none !important;
+}
+
+menu-drawer#MenuDrawer .drawer__header,
+.menu-drawer#MenuDrawer .drawer__header,
+search-drawer#SearchDrawer .drawer__header,
+cart-drawer#CartDrawer .drawer__header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  position: relative !important;
+  z-index: 10001 !important;
+}
+
+/* ── HIGHLIGHTED-TEXT: animación solo cuando es visible ── */
+.highlighted-text.animated .icon path {
+  opacity: 0 !important;
+  animation: none !important;
+}
+.highlighted-text.animated.in-view .icon path {
+  opacity: 1 !important;
+  animation: strokeAnimation 1.3s cubic-bezier(.65,0,.35,1) forwards !important;
+}
+.highlighted-text.animated[data-style=full_text] {
+  background-size: 0 80% !important;
+}
+.highlighted-text.animated.in-view[data-style=full_text] {
+  background-size: 100% 80% !important;
+}
+.highlighted-text.animated[data-style=half_text] {
+  background-size: 0 28% !important;
+}
+.highlighted-text.animated.in-view[data-style=half_text] {
+  background-size: 100% 28% !important;
+}
+.highlighted-text.animated[data-style=underline] {
+  background-size: 0 3px, 0% 80% !important;
+}
+.highlighted-text.animated.in-view[data-style=underline] {
+  background-size: 100% 3px, 0% 80% !important;
+}
+.highlighted-text.animated[data-style=marker]:before {
+  background-size: 0 80% !important;
+}
+.highlighted-text.animated.in-view[data-style=marker]:before {
+  background-size: 100% 80% !important;
+}
+
+@media screen and (max-width: 1023px) {
+  menu-drawer#MenuDrawer,
+  .menu-drawer#MenuDrawer {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    min-height: 100vh !important;
+    z-index: 9999 !important;
+  }
+
+  menu-drawer#MenuDrawer .drawer__inner,
+  .menu-drawer#MenuDrawer .drawer__inner {
+    z-index: 10000 !important;
+    height: 100dvh !important;
+    min-height: 100vh !important;
+  }
+
+  body:has(menu-drawer#MenuDrawer[open]) .mobile-dock-section,
+  body:has(menu-drawer#MenuDrawer[open]) .mobile-dock {
+    display: none !important;
+  }
+}
+
+/* ── PC NAVBAR: iconos de búsqueda, usuario y carrito siempre visibles ── */
+@media screen and (min-width: 1024px) {
+  header.header .header__icons--start {
+    display: none !important;
+  }
+
+  header.header .header__icons--end {
+    display: flex !important;
+    position: absolute !important;
+    top: 50% !important;
+    right: 24px !important;
+    left: auto !important;
+    width: auto !important;
+    height: auto !important;
+    transform: translateY(-50%) !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 30 !important;
+  }
+
+  header.header .header__icons--end .header__buttons {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  header.header .header__icons--end .search-drawer-button,
+  header.header .header__icons--end .cart-drawer-button,
+  header.header .header__icons--end shopify-account {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  header.header .header__icons--end .menu-drawer-button {
+    display: none !important;
+  }
+}
+
+/* ── MOBILE DOCK: permanecer visible en carrito y cuenta ── */
+@media screen and (max-width: 1023px) {
+  html.keep-mobile-dock .mobile-dock-section,
+  html.keep-mobile-dock .mobile-dock {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: auto !important;
+  }
+}
+
+/* ── CART DRAWER: mantener la cortina visible desde el primer clic ── */
+#CartDrawer[open][active] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+#CartDrawer[open][active] > .drawer__inner {
+  visibility: visible !important;
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) !important;
+  transition: none !important;
+  pointer-events: auto !important;
+}
+
+#CartDrawer[open][active] > .drawer__inner > .drawer__header,
+#CartDrawer[open][active] > .drawer__inner > .drawer__content,
+#CartDrawer[open][active] .drawer__panel {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#CartDrawer[open][active] > .overlay,
+#CartDrawer[open][active] overlay-element {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* ── PC NAVBAR SUBCATEGORY DROPDOWN CURTAIN (SOLUCIÓN FINAL DEFINITIVA) ── */
+/* ── FONDO BLANCO PURO SÓLIDO Y 100% OPACO PARA LA NAVBAR (HEADER) Y CORTINA ── */
+/* ── FORZAR QUE LA NAVBAR NUNCA SE OCULTE AL HACER SCROLL ── */
+.header-hidden .header[is="sticky-header"],
+.header-hidden[data-sticky-type="always"] .header[is="sticky-header"],
+.header-hidden[data-sticky-type="on-scroll-up"] .header[is="sticky-header"],
+.header-hidden[data-sticky-type="reduce-on-scroll"] .header[is="sticky-header"] {
+  transform: none !important;
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.header-hidden {
+  pointer-events: auto !important;
+}
+
+header.header,
+.header,
+.header-section,
+.header-section.header-transparent,
+.header-section.header-transparent .header,
+.header-section:not(.header-scrolled),
+.header-section:not(.header-scrolled) .header,
+.shopify-section-group-header-group,
+[is="sticky-header"],
+sticky-header,
+.header__navigation,
+.header__menu,
+.header__container {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  --gradient-background: #ffffff !important;
+  --color-background: 255 255 255 !important;
+  --header-background-opacity: 1 !important;
+  --header-logo-opacity: 1 !important;
+}
+
+@media screen and (min-width: 1024px) {
+  /* 1. Posicionamiento del menú relativo al botón */
+  .header__menu details.details-dropdown-clone {
+    position: relative !important;
+    overflow: visible !important;
+  }
+
+  /* 2. El puente invisible y la sombra unificada de la cortina */
+  .header__menu details.details-dropdown-clone > .dropdown {
+    position: absolute !important;
+    top: 100% !important; /* Comienza justo debajo del botón */
+    left: 50% !important;
+    transform: translateX(-32%) !important; /* Moderadamente a la derecha */
+    padding-block-start: 46px !important;
+    z-index: 1000 !important;
+    width: 220px !important;
+    min-width: 180px !important;
+    pointer-events: none;
+    transition: opacity 0.3s ease, visibility 0.3s ease !important;
+    overflow: visible !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    /* SOMBRA UNIFICADA EN LA SILUETA ENTERA (Elimina las líneas de intersección) */
+    filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.12)) !important;
+  }
+
+  /* 3. La Caja Blanca */
+  .header__menu .dropdown__container,
+  .details-dropdown-clone .dropdown__container {
+    position: relative !important;
+    background-color: #fefefe !important;
+    background: #fefefe !important;
+    --gradient-background: #fefefe !important;
+    color: rgb(var(--color-foreground, 23 23 23)) !important;
+    border: none !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-left-radius: 20px !important;
+    border-bottom-right-radius: 20px !important;
+    margin-top: -1px !important; 
+    overflow: visible !important;
+    padding: 18px !important;
+    box-shadow: none !important; /* SE ELIMINA PARA QUE NO DIBUJE LA LÍNEA VERTICAL INTERNA */
+  }
+
+
+
+  /* Limpiar pseudo-elementos y resets de listas internas */
+  .details-dropdown-clone .dropdown__container::before,
+  .details-dropdown-clone .dropdown__container::after {
+    display: none !important;
+  }
+  
+  .details-dropdown-clone .dropdown__nav {
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  /* 4. RESTAURAR LOS SVGS ORIGINALES (Superelipse) */
+  .header__menu .dropdown__corner,
+  .dropdown__corner {
+    display: flex !important;
+    visibility: visible !important;
+    position: absolute !important;
+    top: 0 !important; /* Alineado al techo de la caja blanca */
+    width: 20px !important;
+    height: 20px !important;
+    color: #fefefe !important;
+    pointer-events: none !important;
+    z-index: 10 !important;
+  }
+
+  /* Esquina Izquierda */
+  .header__menu .dropdown__corner.left,
+  .dropdown__corner.left {
+    left: -20px !important;
+    right: auto !important;
+    transform: scaleX(-1) !important;
+  }
+
+  /* Esquina Derecha */
+  .header__menu .dropdown__corner.right,
+  .dropdown__corner.right {
+    right: -20px !important;
+    left: auto !important;
+    transform: scaleX(1) !important;
+  }
+
+  /* Forzar que el SVG interior sea blanco puro plano sin sombras ni bordes */
+  .header__menu .dropdown__corner svg,
+  .dropdown__corner svg {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    fill: #fefefe !important;
+    stroke: none !important;
+    stroke-width: 0 !important;
+    border: none !important;
+    outline: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    filter: none !important;
+    box-shadow: none !important;
+  }
+  
+  /* El path sólido de la superelipse se fuerza blanco puro */
+  .header__menu .dropdown__corner svg path[fill-rule],
+  .dropdown__corner svg path[fill-rule] {
+    display: block !important;
+    fill: #fefefe !important;
+    stroke: none !important;
+    stroke-width: 0 !important;
+    opacity: 1 !important;
+  }
+  
+  /* El segundo path (el trazo/borde gris residual) se oculta estrictamente */
+  .header__menu .dropdown__corner svg path[fill="none"],
+  .dropdown__corner svg path[fill="none"],
+  .header__menu .dropdown__corner svg path:not([fill-rule]),
+  .dropdown__corner svg path:not([fill-rule]) {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    stroke: none !important;
+    stroke-width: 0 !important;
+  }
+
+  .header__menu .dropdown__nav li > p,
+  .header__menu .dropdown__nav li > :is(details, p) {
+    padding-inline: 4px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    text-align: center !important;
+  }
+
+  .header__menu .dropdown__nav--2cols {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+    max-width: none !important;
+  }
+
+  .header__menu details.details-dropdown-clone[open] {
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  .header__menu details.details-dropdown-clone[open] > .dropdown,
+  .header__menu details.details-dropdown-clone:hover > .dropdown,
+  .dropdown[open] {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    display: block !important;
+  }
+
+  .header__menu details.details-dropdown-clone[open] > .dropdown .dropdown__container,
+  .header__menu details.details-dropdown-clone:hover > .dropdown .dropdown__container,
+  .dropdown[open] .dropdown__container {
+    transform: translateY(0) scale(1) !important;
+    animation: curtainDrop 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards !important;
+  }
+
+  @keyframes curtainDrop {
+    0% {
+      opacity: 0;
+      transform: translateY(-12px) scale(0.96);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Animación de subcategorías manejada por JS en enhanceConceptHeader.ts */
+  .header__menu details.details-dropdown-clone .dropdown__nav > li {
+    --tw-translate-x: 0;
+  }
+}
+
+
+/* ── HOVER FALLBACKS (funciona aunque theme.js se desactive en táctil) ── */
+@media (hover: hover) {
+  /* Dropdown de subcategorías al hover */
+  .header__menu li:hover > details > .dropdown,
+  .header__menu details.details-dropdown-clone:hover > .dropdown,
+  details.details-dropdown-clone:hover > .dropdown {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    display: block !important;
+  }
+
+  .header__menu details.details-dropdown-clone:hover > .dropdown .dropdown__container,
+  details.details-dropdown-clone:hover > .dropdown .dropdown__container {
+    transform: translateY(0) scale(1) !important;
+  }
+
+  /* Relleno de botones al hover */
+  .button:hover .btn-fill,
+  .button:focus .btn-fill {
+    transform: translate3d(0, 0, 0) !important;
+    opacity: 1 !important;
+  }
+}
+
+/* ── BTN-FILL FIX: la elipse del fill debe ser 150% del ancho del botón
+   para cubrir las esquinas. Algo en el clon le pone max-width:100% y la
+   recorta → deja ~30% sin cubrir con borde curvo. ── */
+.button .btn-fill {
+  width: 150% !important;
+  max-width: none !important;
+  transition: transform 0.45s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
+  will-change: transform;
+}
+
+
+
+/* ── LOGO MÁS GRANDE EN PC ── */
+@media screen and (min-width: 1024px) {
+  .header__logo img,
+  .header__logo-link img {
+    max-height: 120px !important;
+    max-width: 200px !important;
+    width: auto !important;
+    height: auto !important;
+  }
+  .header__logo,
+  .header__logo-link {
+    max-height: 120px !important;
+  }
+}
+
+/* ── LOGO ALINEACIÓN: Izquierda en Desktop, Centrado en Móvil ── */
+@media screen and (min-width: 1024px) {
+  .header__logo {
+    justify-content: flex-start !important;
+    justify-self: start !important;
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+    text-align: left !important;
+  }
+}
+
+@media screen and (max-width: 1023px) {
+  .header__logo {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    justify-self: center !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    text-align: center !important;
+    width: auto !important;
+    max-width: calc(100vw - 120px) !important;
+    z-index: 2 !important;
+  }
+
+  .header__logo-link {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .header__logo img,
+  .header__logo-link img,
+  .header__logo img.logo,
+  .header__logo-link img.logo,
+  .header__logo img:not(.white-logo),
+  .header__logo-link img:not(.white-logo) {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    max-height: 44px !important;
+    max-width: 160px !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+  }
+
+  .header__logo img.white-logo,
+  .header__logo-link img.white-logo {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+}
+
+/* ── BARRA DE ANUNCIO AMARILLA (Edge to edge sin padding en móvil) ── */
+.topbar-section,
+#shopify-section-sections--27619502031129__announcement-bar,
+#shopify-section-sections--27201777467673__announcement-bar {
+  --gradient-background: #facc15 !important;
+  --color-background: 250 204 21 !important;
+  --color-foreground: 30 30 30 !important;
+  --color-highlight: 255 221 191 !important;
+  background: #facc15 !important;
+  background-color: #facc15 !important;
+}
+.topbar-section .topbar,
+.topbar-section .announcement-bar {
+  background: #facc15 !important;
+  color: #1e1e1e !important;
+}
+@media screen and (min-width: 1024px) {
+  .topbar-section .topbar.section--rounded {
+    border-radius: var(--border-radius, 20px) !important;
+  }
+}
+@media screen and (max-width: 1023px) {
+  .topbar-section,
+  #shopify-section-sections--27619502031129__announcement-bar,
+  #shopify-section-sections--27201777467673__announcement-bar {
+    width: 100% !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+  }
+  .topbar-section .topbar,
+  .topbar-section .announcement-bar,
+  .topbar-section nav,
+  .topbar-section .page-width,
+  .topbar-section .section,
+  .topbar-section .section--rounded {
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-inline: 0 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    -webkit-border-radius: 0 !important;
+    background: #facc15 !important;
+    background-color: #facc15 !important;
+  }
+  .topbar-section .topbar:before,
+  .topbar-section .section:before,
+  .js .shopify-section-group-header-group .topbar.section:before {
+    border-radius: 0 !important;
+    -webkit-border-radius: 0 !important;
+    background: #facc15 !important;
+    background-color: #facc15 !important;
+    width: 100% !important;
+  }
+  .header__corner.top,
+  .header-section .header__corner.top {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    visibility: hidden !important;
+  }
+  .header.section--rounded,
+  header.header.section--rounded,
+  .header-section .header.section--rounded {
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    -webkit-border-top-left-radius: 0 !important;
+    -webkit-border-top-right-radius: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+}
+.topbar-section .announcement-text,
+.topbar-section .announcement__content,
+.topbar-section .announcement__content * {
+  color: #1e1e1e !important;
+}
+.topbar-section .topbar a,
+.topbar-section .announcement-bar a {
+  color: #1e1e1e !important;
+}
+.topbar-section .fader svg,
+.topbar-section .slideshow-control svg,
+.topbar-section .localization svg,
+.topbar-section .localization button {
+  color: #1e1e1e !important;
+}
+.topbar-section .localization .leading-tight {
+  color: #1e1e1e !important;
+}
+
+/* ── QUITAR OVERLAY OSCURO DEL PRIMER SLIDE (móvil) ── */
+@media screen and (max-width: 767px) {
+  .slideshow .banner:first-child .banner__overlay,
+  .slideshow .banner:first-of-type .banner__overlay {
+    display: none !important;
+    opacity: 0 !important;
+    background: transparent !important;
+  }
+  .slideshow .banner:first-child .media,
+  .slideshow .banner:first-of-type .media {
+    --color-overlay: 255 255 255 !important;
+    --overlay-opacity: 0 !important;
+  }
+}
+
+/* ── QUITAR OVERLAY OSCURO AL ABRIR DROPDOWN ── */
+.has-dropdown-menu .header ~ .overlay,
+.has-dropdown-menu .overlay {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  background: transparent !important;
+}
+
+/* ── ESQUINAS CIRCULARES SUPERIORES DE LA NAVBAR (debajo de la barra de anuncios) ── */
+.header.section--rounded,
+header.header.section--rounded,
+.header-section.header-scrolled .header.section--rounded,
+.header-section .header.section--rounded {
+  --header-background-opacity: 1 !important;
+  border-top-left-radius: var(--border-radius, 20px) !important;
+  border-top-right-radius: var(--border-radius, 20px) !important;
+  -webkit-border-top-left-radius: var(--border-radius, 20px) !important;
+  -webkit-border-top-right-radius: var(--border-radius, 20px) !important;
+}
+.header .header:before,
+.header-section .header:before,
+.js .shopify-section-group-header-group .section.header:before,
+.js .shopify-section-group-header-group .section.section--last-rounded:before {
+  background: #fdfdfd !important;
+  background-color: #fdfdfd !important;
+  --gradient-background: #fdfdfd !important;
+  --header-background-opacity: 1 !important;
+  opacity: 1 !important;
+  height: 100% !important;
+  top: 0 !important;
+  border-start-start-radius: 0 !important;
+  border-start-end-radius: 0 !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  -webkit-border-top-left-radius: 0 !important;
+  -webkit-border-top-right-radius: 0 !important;
+  transition: opacity var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s), border-radius var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s) !important;
+}
+.header-section.header-scrolled .header:before,
+.header-section.header-scrolled .header-section .header:before {
+  background: #fdfdfd !important;
+  background-color: #fdfdfd !important;
+  border-start-start-radius: var(--border-radius, 20px) !important;
+  border-start-end-radius: var(--border-radius, 20px) !important;
+  border-top-left-radius: var(--border-radius, 20px) !important;
+  border-top-right-radius: var(--border-radius, 20px) !important;
+  -webkit-border-top-left-radius: var(--border-radius, 20px) !important;
+  -webkit-border-top-right-radius: var(--border-radius, 20px) !important;
+  transition: opacity var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s), border-radius var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s) !important;
+}
+.header__corner {
+  --tw-translate-x: 0 !important;
+}
+.header-section:not(.header-scrolled) .header:not(.section--next-rounded) .header__corner,
+.header-section:not(.header-scrolled).header-transparent .header__corner {
+  width: 0 !important;
+  height: 0 !important;
+  color: transparent !important;
+  --tw-translate-x: 0 !important;
+}
+.header-section.header-scrolled .header__corner,
+.has-dropdown-menu .header-section:not(.header-scrolled) .header__corner {
+  width: var(--border-radius, 20px) !important;
+  height: var(--border-radius, 20px) !important;
+  color: #fdfdfd !important;
+  --tw-translate-x: 0 !important;
+}
+.header__corner svg,
+.header__corner path:first-child {
+  fill: #fdfdfd !important;
+  color: #fdfdfd !important;
+}
+
+/* ── ESQUINAS SVG CÓNCAVAS SUPERIORES (amarillas, visibles al inicio, ocultas al scrollear) ── */
+.header__corner.top,
+.header-section:not(.header-scrolled) .header:not(.section--next-rounded) .header__corner.top,
+.header-section:not(.header-scrolled) .header .header__corner.top,
+.header-section:not(.header-scrolled).header-transparent .header .header__corner.top,
+.has-dropdown-menu .header-section:not(.header-scrolled) .header .header__corner.top {
+  width: var(--border-radius, 20px) !important;
+  height: var(--border-radius, 20px) !important;
+  color: #facc15 !important;
+  top: 0 !important;
+  bottom: auto !important;
+  z-index: 999 !important;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  --tw-translate-x: 0 !important;
+  transition: width var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s), height var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s), color var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s) !important;
+}
+.header-section.header-scrolled .header__corner.top {
+  width: 0 !important;
+  height: 0 !important;
+  color: transparent !important;
+  transition: width var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s), height var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s), color var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s) !important;
+}
+
+/* ── ESQUINAS INFERIORES: solo cuando se scrollea, con animación del tema ── */
+.header__corner.bottom,
+.header-section:not(.header-scrolled) .header__corner.bottom {
+  width: 0 !important;
+  height: 0 !important;
+  color: transparent !important;
+  transition: width var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s), height var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s), color var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s) !important;
+}
+.header-section.header-scrolled .header__corner.bottom {
+  width: var(--border-radius, 20px) !important;
+  height: var(--border-radius, 20px) !important;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: #fdfdfd !important;
+  transition: width var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s), height var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s), color var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s) !important;
+}
+.header__corner.top.left {
+  left: 0 !important;
+  right: auto !important;
+  transform: none !important;
+}
+.header__corner.top.right {
+  right: 0 !important;
+  left: auto !important;
+  transform: scaleX(-1) !important;
+}
+.header__corner.top svg,
+.header__corner.top svg path[fill-rule],
+.header__corner.top path:first-child {
+  fill: #facc15 !important;
+  color: #facc15 !important;
+}
+.header__corner.top svg path[fill="none"],
+.header__corner.top svg path:not([fill-rule]) {
+  display: none !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   FEATURED PRODUCT SECTION (PLANTILLA 25) - FIDELIDAD IMAGEN 2
+   ══════════════════════════════════════════════════════════════════ */
+
+#featured-product-section .featured-product {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2rem !important;
+}
+
+@media screen and (min-width: 1024px) {
+  #featured-product-section .featured-product {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr) !important;
+    align-items: start !important;
+    gap: 3.5rem !important;
+  }
+}
+
+/* Galería de medios (Contenedor general) */
+#featured-product-section .product__gallery-container {
+  width: 100% !important;
+  position: relative !important;
+}
+
+#featured-product-section .product__media-container {
+  display: flex !important;
+  flex-direction: column-reverse !important;
+  gap: 1.25rem !important;
+  width: 100% !important;
+  position: relative !important;
+}
+
+@media screen and (min-width: 1024px) {
+  #featured-product-section .product__media-container {
+    flex-direction: row !important;
+    align-items: flex-start !important;
+  }
+}
+
+/* Slider de imagen principal (derecha/centro) */
+#featured-product-section .product__media-container > div:first-child,
+#featured-product-section slider-element {
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+#featured-product-section .product__media-list {
+  display: flex !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  border-radius: 24px !important;
+  background-color: #f8fafc !important;
+}
+
+#featured-product-section .product__media {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 420px !important;
+  max-height: 560px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 24px !important;
+  background: #f8fafc !important;
+  padding: 1.5rem !important;
+  position: relative !important;
+}
+
+#featured-product-section .product__media img {
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 500px !important;
+  object-fit: contain !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transition: opacity 0.25s ease-in-out !important;
+  display: block !important;
+}
+
+/* Columna de Miniaturas (Thumbnails a la IZQUIERDA en Desktop) */
+#featured-product-section .product__thumbnails {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: flex !important;
+  order: 0 !important;
+}
+
+@media screen and (min-width: 1024px) {
+  #featured-product-section .product__thumbnails {
+    width: 84px !important;
+    min-width: 84px !important;
+    flex-shrink: 0 !important;
+    order: -1 !important; /* Miniaturas a la izquierda */
+  }
+}
+
+#featured-product-section .product__thumbnails-list {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 0.75rem !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 4px !important;
+  width: 100% !important;
+}
+
+@media screen and (min-width: 1024px) {
+  #featured-product-section .product__thumbnails-list {
+    flex-direction: column !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    max-height: 520px !important;
+  }
+}
+
+/* Botón individual de miniaturas (cuadraditos limpios como Imagen 2) */
+#featured-product-section .product__thumbnail {
+  width: 72px !important;
+  height: 72px !important;
+  min-width: 72px !important;
+  min-height: 72px !important;
+  max-width: 72px !important;
+  max-height: 72px !important;
+  border-radius: 14px !important;
+  border: 1px solid #e2e8f0 !important;
+  background-color: #ffffff !important;
+  padding: 4px !important;
+  overflow: hidden !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  aspect-ratio: 1 / 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+}
+
+#featured-product-section .product__thumbnail:hover {
+  border-color: #94a3b8 !important;
+  transform: translateY(-1px) !important;
+}
+
+#featured-product-section .product__thumbnail[aria-current="true"],
+#featured-product-section .product__thumbnail.is-active {
+  border: 2px solid #0f172a !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.14) !important;
+}
+
+#featured-product-section .product__thumbnail img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 10px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+}
+
+/* Botón "Añadir al carrito" elegante en negro redondeado */
+#featured-product-section .product-form__submit,
+#featured-product-section button[name="add"] {
+  border-radius: 9999px !important;
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  padding: 1.1rem 2rem !important;
+  font-size: 1rem !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Eliminar cajas de texto o sombras rectangulares internas */
+#featured-product-section .product-form__submit .btn-text,
+#featured-product-section .product-form__submit .btn-text *,
+#featured-product-section .product-form__submit span,
+#featured-product-section .product-form__submit div,
+#featured-product-section button[name="add"] .btn-text,
+#featured-product-section button[name="add"] span {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+#featured-product-section .product-form__submit:hover,
+#featured-product-section button[name="add"]:hover {
+  background-color: #ffffff !important;
+  border: 1px solid #000000 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18) !important;
+}
+
+#featured-product-section .product-form__submit:hover *,
+#featured-product-section button[name="add"]:hover * {
+  color: #000000 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Ocultar selectores de colores y variantes demo en las tarjetas de "Arma tu combo" */
+#shopify-section-template--27619508257049__product-bundle variant-picker,
+#shopify-section-template--27619508257049__product-bundle fieldset[data-option-slug="color"],
+#shopify-section-template--27619508257049__product-bundle .swatches {
+  display: none !important;
+}
+
+/* Product bundle sidebar: full width on mobile to avoid right-side gap */
+@media screen and (max-width: 1023px) {
+  #shopify-section-template--27619508257049__product-bundle .page-width {
+    padding-inline: 0 !important;
+    max-width: 100% !important;
+  }
+  #shopify-section-template--27619508257049__product-bundle .product-bundle,
+  .product-bundle:not(.product-bundle__sidebar) {
+    margin-inline: 0 !important;
+    width: 100% !important;
+  }
+  #shopify-section-template--27619508257049__product-bundle .product-bundle__sidebar,
+  .product-bundle__sidebar {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-inline: 0 !important;
+    padding-inline: 0 !important;
+    border-radius: var(--rounded-block, 16px) 16px 0 0 !important;
+  }
+  #shopify-section-template--27619508257049__product-bundle .product-bundle__sidebar .title-wrapper,
+  #shopify-section-template--27619508257049__product-bundle .product-bundle__sidebar .product-bundle__body,
+  #shopify-section-template--27619508257049__product-bundle .product-bundle__sidebar .product-bundle__footer {
+    padding-inline: var(--sp-5, 20px) !important;
+  }
+}
+
+/* Product bundle: forzar visibilidad del body cuando .active */
+#shopify-section-template--27619508257049__product-bundle .product-bundle.active .product-bundle__body {
+  display: flex !important;
+  max-height: none !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+#shopify-section-template--27619508257049__product-bundle .product-bundle.active {
+  max-height: none !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
+}
+#shopify-section-template--27619508257049__product-bundle .product-bundle.active .product-bundle__sidebar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow-y: auto !important;
+  z-index: 60 !important;
+  border-radius: 0 !important;
+  padding-top: 20px !important;
+  animation: yaxsell-slide-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes yaxsell-slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+#shopify-section-template--27619508257049__product-bundle .product-bundle:not(.active) .product-bundle__sidebar {
+  animation: yaxsell-slide-down 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes yaxsell-slide-down {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+/* Slider: wider cards on mobile to avoid large right-side gap */
+@media screen and (max-width: 767px) {
+  .slider--tablet .mobile\:card-grid--1,
+  .slider--desktop .mobile\:card-grid--1 {
+    --slider-item-width: 90vw !important;
+  }
+}
+
+/* Ocultar sección demo Antes/Después "Sound in Spectrum" */
+#shopify-section-template--27619508257049__f2e92fa2-5b20-410e-8bf3-110086f3e646,
+image-comparison,
+.image-comparison {
+  display: none !important;
+}
+
+/* Ocultar pestaña y sección "Vistos recientemente" / Historial */
+button[aria-controls*="RecentlyViewed"],
+[id*="RecentlyViewed"],
+recently-viewed,
+.cart__recent,
+li:has(button[aria-controls*="RecentlyViewed"]) {
+  display: none !important;
+}
+
+/* Ocultar sección demo "Últimas Historias" (Blog) */
+#shopify-section-template--27619508257049__b961e2b0-2f28-45fb-9664-549114d9a961,
+.blog-grid,
+.blog-collage {
+  display: none !important;
+}
+
+/* Marquesina de Logos Personalizados (Capa blanca en cinta amarilla, capa negra en cinta blanca) */
+#shopify-section-template--27619508257049__2b953df0-1be3-4463-ba29-1f87f345dcc9,
+.scrolling-text-section {
+  display: block !important;
+}
+
+#shopify-section-template--27619508257049__2b953df0-1be3-4463-ba29-1f87f345dcc9 .scrolling-text__item {
+  margin: 0 14px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* En la cinta amarilla (scrolling-text--right): Capa Blanca alrededor del logo */
+#shopify-section-template--27619508257049__2b953df0-1be3-4463-ba29-1f87f345dcc9 .scrolling-text--right .scrolling-text__item {
+  background-color: #ffffff !important;
+  padding: 8px 24px !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+}
+
+#shopify-section-template--27619508257049__2b953df0-1be3-4463-ba29-1f87f345dcc9 .scrolling-text--right .scrolling-text__item img {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  max-height: 40px !important;
+  height: 40px !important;
+  width: auto !important;
+  object-fit: contain !important;
+}
+
+/* En la cinta blanca (scrolling-text--left): Capa Negra alrededor del logo */
+#shopify-section-template--27619508257049__2b953df0-1be3-4463-ba29-1f87f345dcc9 .scrolling-text--left .scrolling-text__item {
+  background-color: #0f172a !important;
+  padding: 8px 24px !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.16) !important;
+  border: 1px solid #0f172a !important;
+}
+
+#shopify-section-template--27619508257049__2b953df0-1be3-4463-ba29-1f87f345dcc9 .scrolling-text--left .scrolling-text__item img {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  max-height: 40px !important;
+  height: 40px !important;
+  width: auto !important;
+  object-fit: contain !important;
+  filter: brightness(0) invert(1) !important;
+}
+
+/* ── FIX DEFINITIVO MARQUESINA: Animación CSS GPU Ultra-Fluida (sin clumping ni retrocesos) ── */
+#shopify-section-template--27619508257049__2b953df0-1be3-4463-ba29-1f87f345dcc9 marquee-element,
+.scrolling-text-section marquee-element,
+marquee-element.scrolling-text {
+  display: flex !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+}
+
+#shopify-section-template--27619508257049__2b953df0-1be3-4463-ba29-1f87f345dcc9 .scrolling-wrapper,
+.scrolling-text-section .scrolling-wrapper {
+  display: flex !important;
+  overflow: hidden !important;
+  width: 100% !important;
+}
+
+#shopify-section-template--27619508257049__2b953df0-1be3-4463-ba29-1f87f345dcc9 .marquee,
+.scrolling-text-section .marquee,
+marquee-element .marquee {
+  display: flex !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+  min-width: 200% !important;
+  will-change: transform !important;
+}
+
+/* Logo del Footer en Blanco Puro (sin fondo contenedor) y Tamaño Más Grande */
+.footer__logo a {
+  background: transparent !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+  display: inline-block !important;
+}
+
+.footer__logo img {
+  max-height: 95px !important;
+  max-width: 260px !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  filter: brightness(0) invert(1) !important;
+}
+
+/* Centrar logo del footer en móviles */
+@media screen and (max-width: 767px) {
+  .footer__logo {
+    align-items: center !important;
+    text-align: center !important;
+  }
+  .footer__logo p {
+    text-align: center !important;
+  }
+}
+
+/* Ocultar selectores de Idioma y Moneda (Navbar, Drawer Móvil y Footer) */
+.localization,
+dropdown-localization,
+[id*="Localization"],
+[id*="localization_language"],
+[id*="localization_country"],
+.drawer__footer-top {
+  display: none !important;
+}
+
+/* ── FIX DEFINITIVO MARQUESINA: Animación CSS GPU 60FPS sin interferencia JS ── */
+.custom-marquee-wrapper,
+.scrolling-text-section .scrolling-text,
+#shopify-section-template--27619508257049__2b953df0-1be3-4463-ba29-1f87f345dcc9 marquee-element {
+  display: flex !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  position: relative !important;
+}
+
+.custom-marquee-wrapper .scrolling-wrapper,
+.scrolling-text-section .scrolling-wrapper {
+  display: flex !important;
+  overflow: hidden !important;
+  width: 100% !important;
+}
+
+.custom-marquee-wrapper .marquee,
+.scrolling-text-section .marquee,
+marquee-element .marquee {
+  display: flex !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+  min-width: 200% !important;
+  will-change: transform !important;
+}
+
+/* Cinta Amarilla: Desliza continuo hacia la Derecha */
+.scrolling-text--right .marquee {
+  animation: marqueeRightGPU 18s linear infinite !important;
+}
+
+/* Cinta Blanca: Desliza continuo hacia la Izquierda */
+.scrolling-text--left .marquee {
+  animation: marqueeLeftGPU 18s linear infinite !important;
+}
+
+@keyframes marqueeLeftGPU {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+@keyframes marqueeRightGPU {
+  0% { transform: translate3d(-50%, 0, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+/* Pastillas de los logos en las cintas — SOLO sección de logos (2b953df0) */
+/* Cinta Amarilla: Pastilla Blanca */
+#shopify-section-template--27619508257049__2b953df0-1be3-4463-ba29-1f87f345dcc9 .scrolling-text--right .scrolling-text__item {
+  background-color: #ffffff !important;
+  opacity: 1 !important;
+  padding: 8px 24px !important;
+  border-radius: 9999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 12px !important;
+}
+#shopify-section-template--27619508257049__2b953df0-1be3-4463-ba29-1f87f345dcc9 .scrolling-text--right img {
+  max-height: 38px !important;
+  width: auto !important;
+  object-fit: contain !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+/* Cinta Blanca: Pastilla NEGRA pura (#000000) con Logo Blanco Puro */
+#shopify-section-template--27619508257049__2b953df0-1be3-4463-ba29-1f87f345dcc9 .scrolling-text--left .scrolling-text__item {
+  background-color: #000000 !important;
+  opacity: 1 !important;
+  padding: 8px 24px !important;
+  border-radius: 9999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 12px !important;
+}
+#shopify-section-template--27619508257049__2b953df0-1be3-4463-ba29-1f87f345dcc9 .scrolling-text--left img {
+  max-height: 38px !important;
+  width: auto !important;
+  object-fit: contain !important;
+  opacity: 1 !important;
+  filter: brightness(0) invert(1) !important;
+}
+
+/* ── CORTINA DE MENÚ MÓVIL (MENU DRAWER): Submenú contenido DENTRO del drawer ── */
+.menu-drawer .drawer__inner {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.menu-drawer details .drawer__submenu {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  z-index: 50 !important;
+  transform: translate3d(100%, 0, 0) !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), opacity 0.25s ease, visibility 0.3s !important;
+  box-sizing: border-box !important;
+  overflow-y: auto !important;
+  padding: 20px !important;
+}
+
+.menu-drawer details[open] > .drawer__submenu,
+.menu-drawer details.is-open > .drawer__submenu,
+.menu-drawer .drawer__submenu.is-open,
+.menu-drawer .drawer__submenu.active {
+  transform: translate3d(0, 0, 0) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+/* Quitar chevron duplicado de Theme CSS en el botón de retroceso del submenú */
+.drawer__close-submenu::before,
+.drawer__close-submenu::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Estilos de la vitrina de productos recomendados de cada subcategoría en el drawer */
+.drawer__preview {
+  margin-top: 16px !important;
+  padding-top: 12px !important;
+  border-top: 1px solid #e2e8f0 !important;
+}
+
+.drawer__preview-title {
+  font-size: 0.75rem !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  color: #0f172a !important;
+  margin: 0 !important;
+}
+
+.drawer__preview-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 12px !important;
+}
+
+.drawer__preview-card {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  padding: 10px !important;
+  border-radius: 16px !important;
+  text-decoration: none !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  transition: all 0.25s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
+}
+
+.drawer__preview-card:hover {
+  transform: translateY(-2px) !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04) !important;
+}
+
+.drawer__preview-img {
+  position: relative !important;
+  width: 100% !important;
+  aspect-ratio: 1 / 1 !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  background: #f8fafc !important;
+}
+
+.drawer__preview-img img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  transition: transform 0.4s ease !important;
+}
+
+.drawer__preview-card:hover .drawer__preview-img img {
+  transform: scale(1.06) !important;
+}
+
+.drawer__preview-tag {
+  position: absolute !important;
+  bottom: 6px !important;
+  left: 6px !important;
+  background: rgba(15, 23, 42, 0.85) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+  color: #ffffff !important;
+  font-size: 0.625rem !important;
+  font-weight: 700 !important;
+  padding: 2px 8px !important;
+  border-radius: 9999px !important;
+  white-space: nowrap !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ── RESPONSIVE MOBILE OPTIMIZATIONS FOR DRAWER PRODUCT CARDS ── */
+.menu-drawer .drawer__submenu {
+  padding: 16px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+@media (max-width: 480px) {
+  .menu-drawer .drawer__submenu {
+    padding: 12px 14px 32px 14px !important;
+  }
+
+  .drawer__preview {
+    margin-top: 12px !important;
+    padding-top: 10px !important;
+  }
+  
+  .drawer__preview-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+  
+  .drawer__preview-card {
+    padding: 8px !important;
+    border-radius: 12px !important;
+    gap: 4px !important;
+  }
+  
+  .drawer__preview-img {
+    border-radius: 8px !important;
+  }
+  
+  .drawer__preview-tag {
+    font-size: 0.55rem !important;
+    padding: 1.5px 6px !important;
+    bottom: 4px !important;
+    left: 4px !important;
+  }
+  
+  .drawer__preview-name {
+    font-size: 0.7rem !important;
+    line-height: 1.2 !important;
+  }
+  
+  .drawer__preview-price {
+    font-size: 0.75rem !important;
+  }
+
+  .drawer__close-submenu {
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+}
+
+/* ── REDUCCIÓN ULTRA-COMPACTA DE ALTURA DEL BANNER 'CALIDAD. PARA TU HOGAR' EN MÓVILES ── */
+@media screen and (max-width: 767px) {
+  #shopify-section-template--27619508257049__836190ae-9193-4a52-91a5-e807d0417201,
+  #shopify-section-template--27619508257049__836190ae-9193-4a52-91a5-e807d0417201 .section,
+  #shopify-section-template--27619508257049__836190ae-9193-4a52-91a5-e807d0417201 .video-hero,
+  #shopify-section-template--27619508257049__836190ae-9193-4a52-91a5-e807d0417201 .banner,
+  #shopify-section-template--27619508257049__836190ae-9193-4a52-91a5-e807d0417201 .media,
+  #shopify-section-template--27619508257049__836190ae-9193-4a52-91a5-e807d0417201 .media--height,
+  #shopify-section-template--27619508257049__836190ae-9193-4a52-91a5-e807d0417201 picture,
+  #shopify-section-template--27619508257049__836190ae-9193-4a52-91a5-e807d0417201 img {
+    min-height: 160px !important;
+    max-height: 200px !important;
+    height: 180px !important;
+  }
+
+  #shopify-section-template--27619508257049__836190ae-9193-4a52-91a5-e807d0417201 .banner__box {
+    padding: 8px 12px !important;
+    max-width: 95% !important;
+  }
+
+  #shopify-section-template--27619508257049__836190ae-9193-4a52-91a5-e807d0417201 .banner__title {
+    font-size: 1.15rem !important;
+    line-height: 1.1 !important;
+    margin-bottom: 4px !important;
+  }
+
+  #shopify-section-template--27619508257049__836190ae-9193-4a52-91a5-e807d0417201 .rte p {
+    font-size: 0.725rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 6px !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 1 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  #shopify-section-template--27619508257049__836190ae-9193-4a52-91a5-e807d0417201 .button {
+    padding: 5px 12px !important;
+    font-size: 0.75rem !important;
+    min-height: 30px !important;
+    height: 30px !important;
+  }
+}
+
+/* ── FORMATO RESPONSIVO DE MINIATURAS DEL PRODUCTO DESTACADO ── */
+@media screen and (max-width: 767px) {
+  .featured-product .product__thumbnails,
+  #featured-product-section .product__thumbnails {
+    width: 100% !important;
+    overflow-x: auto !important;
+    padding: 8px 0 !important;
+    margin-bottom: 12px !important;
+  }
+
+  .featured-product .product__thumbnails-list,
+  #featured-product-section .product__thumbnails-list {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .featured-product .product__thumbnail,
+  #featured-product-section .product__thumbnail {
+    width: 52px !important;
+    height: 52px !important;
+    min-width: 52px !important;
+    flex-shrink: 0 !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    border: 1px solid #e2e8f0 !important;
+    margin: 0 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    z-index: 20 !important;
+    position: relative !important;
+  }
+}
+
+/* Animación de rotación para la insignia circular */
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spinSlow 18s linear infinite;
+}
+
+/* Eliminar cursor de mano personalizado y restaurar el cursor estándar del navegador */
+mouse-cursor,
+.mouse-cursor {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+body {
+  cursor: auto !important;
+}
+
+a, button, [role="button"], input[type="submit"], input[type="button"], select, label, summary, .pointer-events-auto {
+  cursor: pointer !important;
+}
+
+input, textarea {
+  cursor: text !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
+
+/* ── OCULTAR botones de búsqueda y menú en navbar desktop ── */
+@media (min-width: 1024px) {
+  .header__buttons {
+    display: none !important;
+  }
+}
+
+/* ── ENTRADA SUAVE Y ALTO RENDIMIENTO PARA HERO BANNERS Y SLIDESHOW ── */
+@keyframes heroSoftFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.995);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.video-hero.banner,
+.banner__media,
+#shopify-section-template--27619508257049__836190ae-9193-4a52-91a5-e807d0417201 .banner,
+#shopify-section-template--27619508257049__slideshow .banner {
+  background-color: #f8fafc !important;
+}
+
+.banner__image,
+.banner picture img,
+.video-hero img {
+  animation: heroSoftFadeIn 0.35s ease-out forwards !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   MOBILE FIXES: navbar, imágenes, botón hover, overflow horizontal
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── 1. NAVBAR EN MÓVIL: FONDO BLANCO PURO SÓLIDO, LOGO CENTRADO Y MENÚ VISIBLE ── */
+@media screen and (max-width: 1023px) {
+  #shopify-section-sections--27619502031129__header,
+  #shopify-section-sections--27201777467673__header,
+  .header-section,
+  .header-section.header-transparent,
+  .header-section:not(.header-scrolled),
+  .header-section .shopify-section-group-header-group,
+  .shopify-section-group-header-group {
+    --section-padding-top: 0px !important;
+    --section-padding-bottom: 0px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    --gradient-background: #ffffff !important;
+    --color-background: 255 255 255 !important;
+    --header-background-opacity: 1 !important;
+    --header-logo-opacity: 1 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    top: 0 !important;
+    position: sticky !important;
+    position: -webkit-sticky !important;
+    z-index: 25 !important;
+  }
+
+  .header-section .header,
+  .header-section.header-transparent .header,
+  .header-section:not(.header-scrolled) .header,
+  header.header,
+  .header {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    --gradient-background: #ffffff !important;
+    --color-background: 255 255 255 !important;
+    --header-background-opacity: 1 !important;
+    --header-logo-opacity: 1 !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    min-height: 54px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .header-section .header:before,
+  .header-section.header-transparent .header:before,
+  .header-section:not(.header-scrolled) .header:before,
+  .header:before,
+  .js .shopify-section-group-header-group .section.header:before {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    --gradient-background: #ffffff !important;
+    --header-background-opacity: 1 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .header .menu-drawer-button,
+  .menu-drawer-button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: absolute !important;
+    left: 14px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 30 !important;
+    color: #171717 !important;
+    background: transparent !important;
+    border: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    cursor: pointer !important;
+  }
+
+  .header .menu-drawer-button svg,
+  .menu-drawer-button svg {
+    width: 26px !important;
+    height: 26px !important;
+    color: #171717 !important;
+    stroke: #171717 !important;
+    stroke-width: 2.2 !important;
+    display: block !important;
+  }
+}
+
+/* ── 2. IMÁGENES QUE NO CUBREN TODO EL ANCHO EN MÓVIL ── */
+@media screen and (max-width: 767px) {
+  .banner__image,
+  .banner picture img,
+  .video-hero img,
+  .banner__media img,
+  .banner__media picture img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    max-width: 100vw !important;
+  }
+
+  .banner__media,
+  .video-hero .media,
+  .banner .media,
+  .banner picture.media {
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+
+  .banner,
+  .video-hero,
+  .video-hero.banner {
+    width: 100% !important;
+    max-width: 100vw !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
+
+/* ── 3. BOTÓN "VER PRODUCTOS": texto negro al hover ── */
+.button--primary:hover .btn-text,
+.button--primary:hover .btn-text *,
+.button--primary:hover .btn-text svg,
+.button--primary:focus .btn-text,
+.button--primary:focus .btn-text * {
+  color: #000000 !important;
+  stroke: #000000 !important;
+  fill: #000000 !important;
+}
+
+/* ── 3a. BOTÓN "AÑADIR AL CARRITO" DEL PRODUCT-BUNDLE: texto blanco al hover ── */
+[data-product-bundle-submit]:hover .btn-text,
+[data-product-bundle-submit]:hover .btn-text *,
+[data-product-bundle-submit]:hover .btn-price,
+[data-product-bundle-submit]:focus .btn-text,
+[data-product-bundle-submit]:focus .btn-text *,
+[data-product-bundle-submit]:focus .btn-price {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+.button.icon-with-text:hover .btn-text,
+.button.icon-with-text:hover .btn-text * {
+  color: #000000 !important;
+}
+
+/* ── 3b. BOTONES HERO BANNER (button--blur) Y "NUESTRA HISTORIA" (button--secondary): texto blanco al hover ── */
+.button--blur:hover .btn-text,
+.button--blur:hover .btn-text *,
+.button--blur:hover .btn-text svg,
+.button--blur:focus .btn-text,
+.button--blur:focus .btn-text * {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+.button.button--secondary:hover .btn-text,
+.button.button--secondary:hover .btn-text *,
+.button.button--secondary:hover .btn-text svg,
+.button.button--secondary:focus .btn-text,
+.button.button--secondary:focus .btn-text * {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+/* ── 3c. BOTÓN "VER PRODUCTOS" EN BANNER "CALIDAD PARA TU HOGAR": texto blanco al hover ── */
+.banner .button--primary:hover .btn-text,
+.banner .button--primary:hover .btn-text *,
+.banner .button--primary:hover .btn-text svg,
+.banner .button--primary:focus .btn-text,
+.banner .button--primary:focus .btn-text * {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+/* ── 4. ESPACIO/PADDING HORIZONTAL A LA DERECHA EN MÓVIL ── */
+@media screen and (max-width: 767px) {
+  html,
+  body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .page-width {
+    max-width: 100vw !important;
+    width: 100% !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    box-sizing: border-box !important;
+  }
+
+  .shopify-section,
+  .section {
+    max-width: 100vw !important;
+    /* ⚠️ NUNCA usar overflow-x:hidden aquí: al combinarse con overflow-y:visible
+       el y computa a 'auto' → CADA SECCIÓN se vuelve un scroll container propio
+       y los gestos táctiles mueren dentro de la sección (el "mini scroll interno").
+       'clip' evita el desborde horizontal SIN crear scroll container. */
+    overflow-x: clip !important;
+    overflow-y: visible !important;
+    box-sizing: border-box !important;
+  }
+
+  .banner__content,
+  .banner__box {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}
+
+/* ── 5. OCULTAR SCROLLBAR GRIS EN MÓVIL ── */
+@media screen and (max-width: 767px) {
+  ::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+    background: transparent !important;
+  }
+
+  html,
+  body {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  * {
+    scrollbar-width: none !important;
+    scrollbar-color: transparent transparent !important;
+  }
+
+  *::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+    background: transparent !important;
+  }
+}
+
+/* ── 6. SCROLL VERTICAL TOCANDO IMÁGENES Y SLIDERS EN MÓVIL ── */
+/* touch-action pan-y en contenedores de sliders para permitir scroll vertical */
+@media screen and (max-width: 767px) {
+  .slideshow-element,
+  .slideshow,
+  .slideshow .banner,
+  .slideshow .banner__media,
+  .slideshow .media-element,
+  .slideshow animate-element,
+  .slideshow .media,
+  .slideshow picture,
+  .slideshow .banner__image,
+  .slideshow img {
+    touch-action: pan-y !important;
+  }
+
+  .video-hero,
+  .video-hero .banner__media,
+  .video-hero .media,
+  .video-hero picture,
+  .video-hero img {
+    touch-action: pan-y !important;
+  }
+
+  slider-element,
+  .slider,
+  .slider-element,
+  .card-grid,
+  .media-card,
+  .media-card__link,
+  .media-card .media,
+  .collage,
+  .collage-small,
+  .rich-text,
+  .title-wrapper,
+  .banner__box,
+  .banner__content {
+    touch-action: pan-y !important;
+  }
+}
+
+/* ── 7. ANIMACIÓN HIGHLIGHTED-TEXT VISIBLE EN MÓVIL ── */
+/* El JS del tema no añade .in-view en móvil, por lo que la animación
+   del subrayado amarillo no se dispara. Forzarla siempre. */
+@media screen and (max-width: 767px) {
+  .highlighted-text.animated .icon path {
+    opacity: 1 !important;
+    animation: strokeAnimation 1.3s cubic-bezier(.65,0,.35,1) forwards !important;
+  }
+
+  .highlighted-text.animated[data-style=full_text] {
+    background-size: 100% 80% !important;
+  }
+
+  .highlighted-text.animated[data-style=half_text] {
+    background-size: 100% 28% !important;
+  }
+
+  .highlighted-text.animated[data-style=underline] {
+    background-size: 100% 3px, 0% 80% !important;
+  }
+
+  .highlighted-text.animated[data-style=marker]:before {
+    background-size: 100% 80% !important;
+  }
+}
+
+
+
+
+/* ════════════════════════════════════════════════════════════════════
+   7. FIX RESPONSIVE MÓVIL (solo < 1024px)
+   7.1 Clases variante "mobile:*" que el tema generaba con Tailwind JIT
+       y se perdieron en la captura → la home no era responsive en móvil.
+   7.2 Eliminación del "mini scroll interno" de la sección Arma tu combo.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── 7.1 Variantes mobile:* faltantes ─────────────────────────────── */
+@media screen and (max-width: 767px) {
+  /* Hero/banners: el tema escala las alturas fijas ×0.65 en móvil
+     (.media--500px base = 500px → 325px; .media--750px = 487.5px).
+     Sin esta regla los banners "media--750px mobile:media--500px"
+     quedaban con 487.5px fijos en vez de 325px. */
+  .mobile\:media--500px { height: 325px !important; }
+  .mobile\:media--300px { height: 195px !important; }
+
+  /* Altura automática (sin !important para no pisar el fix del banner
+     'CALIDAD. PARA TU HOGAR' de más arriba, que usa !important) */
+  .mobile\:media--auto { height: auto; }
+
+  /* Banner con altura adaptada al ratio de la imagen */
+  .mobile\:media--adapt {
+    height: 0 !important;
+    padding-block-end: var(--ratio-percent) !important;
+  }
+
+  /* Grids de 1 columna en móvil (sin !important: en el product-bundle
+     el propio tema fuerza 2 columnas con un selector más específico
+     y respetamos ese diseño original) */
+  .mobile\:card-grid--1 { --card-grid-per-row: 1; }
+
+  /* Aspect ratio según primera imagen (contextos no cubiertos por theme.css) */
+  .mobile\:media--adapt_first > :is(img, svg, video-media),
+  .mobile\:aspect-adapt_first { aspect-ratio: var(--aspect-ratio); }
+
+  /* Título mediano de producto */
+  .mobile\:product-title-md {
+    font-size: clamp(var(--sp-10), 2.526vw, var(--sp-12)) !important;
+  }
+
+  /* Header centrado */
+  .mobile\:header--center .list-menu { justify-content: center !important; }
+}
+
+/* ── 7.2 REVERTIDO: se restauró la cortina animada original del "Arma tu combo".
+   El comportamiento sticky/expandible ya funciona bien porque la causa raíz
+   (secciones convertidas en scroll containers por overflow-x:hidden → clip)
+   y el jank (41 animaciones preloading infinitas) ya fueron corregidos. */
+
+/* ── 7.3 SCROLL JANK: apagar shimmer "preloading" infinito (solo móvil/tablet) ──
+   El clon nunca quita la clase .loading de los <img is="lazy-image"> ni remueve
+   la .loading-bar fija a pantalla completa → 41 animaciones CSS infinitas
+   (transform + transform-origin → repaint constante del main thread) que hacían
+   que el scroll táctil/wheel se "trabe" y se sienta por secciones. */
+@media screen and (max-width: 1023px) {
+  /* Barra de carga fija a pantalla completa que nunca se removió */
+  .loading-bar { display: none !important; }
+
+  /* Shimmer infinito sobre TODAS las imágenes "loading" */
+  .media.loading:after,
+  [data-lazy-image] .media.loading:after,
+  .scrolling-text__item:after,
+  .scrolling-text__item .media:after {
+    content: none !important;
+    animation: none !important;
+  }
+
+  /* Por si algún elemento (no pseudo) quedó con la animación */
+  .media.loading,
+  .scrolling-text__item,
+  .preloading {
+    animation: none !important;
+  }
+}

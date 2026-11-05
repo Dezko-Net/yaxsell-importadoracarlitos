@@ -1,0 +1,74 @@
+.rainViewport {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 99999;
+}
+
+/* Outer track: 100% continuous linear vertical drop from top to bottom */
+.dropFallTrack {
+  position: absolute;
+  top: 0;
+  left: var(--left, 50%);
+  width: var(--size, 26px);
+  height: var(--size, 26px);
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation: jasmineSmoothLinearFall var(--fall-duration, 4.4s) linear var(--fall-delay, 0s) both;
+}
+
+/* Middle track: smooth sinusoidal horizontal pendulum sway */
+.dropSwayTrack {
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+  animation: jasmineSmoothPendulumSway var(--sway-duration, 2.2s) ease-in-out var(--fall-delay, 0s) infinite alternate;
+}
+
+/* Inner visual SVG: gentle 3D tumble + spin */
+.dropVisualSvg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  user-select: none;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 10px rgba(15, 118, 110, 0.24));
+  will-change: transform;
+  animation: jasmineSmoothTumble var(--spin-duration, 3.4s) ease-in-out var(--fall-delay, 0s) infinite alternate;
+}
+
+@keyframes jasmineSmoothLinearFall {
+  0% {
+    transform: translate3d(0, -14vh, 0);
+    opacity: 0;
+  }
+  7% {
+    opacity: var(--peak-opacity, 0.96);
+  }
+  88% {
+    opacity: var(--peak-opacity, 0.96);
+  }
+  100% {
+    transform: translate3d(var(--wind-drift, 42px), 112vh, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes jasmineSmoothPendulumSway {
+  0% {
+    transform: translate3d(calc(var(--sway-amp, 28px) * -1), 0, 0);
+  }
+  100% {
+    transform: translate3d(var(--sway-amp, 28px), 0, 0);
+  }
+}
+
+@keyframes jasmineSmoothTumble {
+  0% {
+    transform: rotate(var(--rot-start, -22deg)) rotateX(8deg) rotateY(-12deg) scale(0.95);
+  }
+  100% {
+    transform: rotate(var(--rot-end, 32deg)) rotateX(-10deg) rotateY(16deg) scale(1.05);
+  }
+}

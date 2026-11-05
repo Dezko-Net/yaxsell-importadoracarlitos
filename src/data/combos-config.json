@@ -1,0 +1,16 @@
+[
+  {
+    "id": "combo-default-1",
+    "title": "Arma tu Combo Pro",
+    "subtitle": "Selecciona tus productos favoritos y obtén un descuento exclusivo en tu paquete.",
+    "discountPercent": 0,
+    "badge": "PACK DESTACADO",
+    "isActive": true,
+    "mainProductId": "6a630779000120e5ea52",
+    "bundleProductIds": [
+      "6a63077900301d50a1c2",
+      "6a6307790024a59b58cb",
+      "6a67d1f00028546a65a2"
+    ]
+  }
+]

@@ -1,0 +1,34 @@
+Entiendo tu frustración. Aquí está el contexto claro del problema para que se lo des a otra IA:
+
+---
+
+## Contexto del problema
+
+**Stack**: Next.js + React + TypeScript. La página carga un HTML estático ([body-clean.html](cci:7://file:///c:/Proyectos/PROYECTO%20DON%20BALATO%20IVAN/PROJECT%20YAXSEL%20%28PRODUCCION%29%20-%2014-06-2026%20%283GB%29/public/shopify/plantilla25/body-clean.html:0:0-0:0)) que incluye el theme.js de RoarTheme Concept 6.0.0 (minificado).
+
+**Problema**: El theme.js registra **custom elements** (`product-bundle`, `product-bundle-toggle-button`) con `customElements.define()` que interceptan los eventos de click y submit **antes** que cualquier handler que ponemos nosotros. Cuando el theme.js carga (a los ~500ms), sobrescribe los handlers.
+
+**Lo que se ha intentado (sin éxito)**:
+1. `addEventListener` con `capture: true` + `stopImmediatePropagation()` — el theme usa custom elements con `connectedCallback` que registran handlers internos
+2. [onclick](cci:1://file:///c:/Proyectos/PROYECTO%20DON%20BALATO%20IVAN/PROJECT%20YAXSEL%20%28PRODUCCION%29%20-%2014-06-2026%20%283GB%29/src/templates/plantilla25/enhanceConceptHeader.ts:2045:6-2057:8) directo — el theme lo sobrescribe al cargar
+3. `cloneNode(true)` para limpiar handlers — no funciona con custom elements (el navegador los re-inicializa)
+4. Reemplazar el custom element por un `<div>` — el theme.js lo vuelve a convertir o rompe
+5. Re-aplicar handlers a 0ms, 600ms y 1200ms — hay una ventana donde los botones no funcionan
+6. Quitar el `<form>` y reemplazarlo por un `<div>` — el theme aún intercepta
+
+**Error en consola del theme.js**:
+```
+Uncaught TypeError: Cannot read properties of null (reading 'value')
+  at ProductBundle.updateTotal (theme.js:27)
+  at ProductBundle.onAddHandler (theme.js:27)
+  at HTMLFormElement.onSubmitHandler (theme.js:27)
+```
+El theme.js tiene un `onSubmitHandler` en el `HTMLFormElement` que se ejecuta **antes** que nuestro handler.
+
+**Archivos involucrados**:
+- [src/templates/plantilla25/enhanceConceptHeader.ts](cci:7://file:///c:/Proyectos/PROYECTO%20DON%20BALATO%20IVAN/PROJECT%20YAXSEL%20%28PRODUCCION%29%20-%2014-06-2026%20%283GB%29/src/templates/plantilla25/enhanceConceptHeader.ts:0:0-0:0) — función [enhanceConceptCombos](cci:1://file:///c:/Proyectos/PROYECTO%20DON%20BALATO%20IVAN/PROJECT%20YAXSEL%20%28PRODUCCION%29%20-%2014-06-2026%20%283GB%29/src/templates/plantilla25/enhanceConceptHeader.ts:1828:0-2090:1) (líneas ~1830-2100)
+- [src/templates/plantilla25/HomePage.tsx](cci:7://file:///c:/Proyectos/PROYECTO%20DON%20BALATO%20IVAN/PROJECT%20YAXSEL%20%28PRODUCCION%29%20-%2014-06-2026%20%283GB%29/src/templates/plantilla25/HomePage.tsx:0:0-0:0) — useEffect que ejecuta [enhanceConceptCombos](cci:1://file:///c:/Proyectos/PROYECTO%20DON%20BALATO%20IVAN/PROJECT%20YAXSEL%20%28PRODUCCION%29%20-%2014-06-2026%20%283GB%29/src/templates/plantilla25/enhanceConceptHeader.ts:1828:0-2090:1) (líneas ~692-736)
+- [public/shopify/plantilla25/body-clean.html](cci:7://file:///c:/Proyectos/PROYECTO%20DON%20BALATO%20IVAN/PROJECT%20YAXSEL%20%28PRODUCCION%29%20-%2014-06-2026%20%283GB%29/public/shopify/plantilla25/body-clean.html:0:0-0:0) — HTML estático con la estructura
+- [public/shopify/plantilla25/clone-fixes.css](cci:7://file:///c:/Proyectos/PROYECTO%20DON%20BALATO%20IVAN/PROJECT%20YAXSEL%20%28PRODUCCION%29%20-%2014-06-2026%20%283GB%29/public/shopify/plantilla25/clone-fixes.css:0:0-0:0) — CSS overrides
+
+**Lo que se necesita**: Que los botones "Ver detalle" de las tarjetas de producto y el botón chevron del sidebar funcionen **inmediatamente** al cargar la página, sin que el theme.js los sobrescriba. El chevron debe subir/bajar la cortina del sidebar mostrando todos los productos del pack.

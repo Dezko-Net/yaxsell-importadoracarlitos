@@ -1,0 +1,70 @@
+{
+  "plantilla": 25,
+  "sourceUrl": "https://concept-theme-tech.myshopify.com",
+  "capturedAt": "2026-07-25T10:55:38.948Z",
+  "elapsedSeconds": "16.6",
+  "files": {
+    "html": "C:\\Proyectos\\PROJECT YAXSEL (PRODUCCION) - 14-06-2026 (3GB)\\public\\shopify\\plantilla25\\index.html",
+    "bodyClean": "C:\\Proyectos\\PROJECT YAXSEL (PRODUCCION) - 14-06-2026 (3GB)\\public\\shopify\\plantilla25\\body-clean.html",
+    "manifest": "C:\\Proyectos\\PROJECT YAXSEL (PRODUCCION) - 14-06-2026 (3GB)\\public\\shopify\\plantilla25\\manifest.json",
+    "tsx": "C:\\Proyectos\\PROJECT YAXSEL (PRODUCCION) - 14-06-2026 (3GB)\\src\\templates\\plantilla25\\HomePage.tsx"
+  },
+  "stats": {
+    "cssTotal": 6,
+    "jsTotal": 11,
+    "fontsTotal": 10,
+    "imagesTotal": 851,
+    "videosTotal": 9,
+    "svgMasksTotal": 0,
+    "inlineAnimScripts": 3,
+    "inlineCssKB": 30,
+    "bodyCleanKB": 688,
+    "downloaded": {
+      "css": {
+        "ok": 6,
+        "skip": 0,
+        "fail": 0,
+        "errors": []
+      },
+      "js": {
+        "ok": 11,
+        "skip": 0,
+        "fail": 0,
+        "errors": []
+      },
+      "fonts": {
+        "ok": 0,
+        "skip": 10,
+        "fail": 0,
+        "errors": []
+      },
+      "images": {
+        "ok": 4,
+        "skip": 847,
+        "fail": 0,
+        "errors": []
+      },
+      "videos": {
+        "ok": 0,
+        "skip": 9,
+        "fail": 0,
+        "errors": []
+      },
+      "svgMasks": {
+        "ok": 0,
+        "skip": 0,
+        "fail": 0,
+        "errors": []
+      }
+    }
+  },
+  "errors": [],
+  "nextSteps": [
+    "1. Editar piezas en public/shopify/plantilla25/sections/*.html (una sección por archivo)",
+    "2. Recompilar: node shopify-folla.js join 25  (regenera body-clean.html)",
+    "3. Plantilla auto-registrada en DynamicHomePage.tsx y preview (si no, registrá a mano)",
+    "4. Probar en http://localhost:3000/preview/plantilla/25",
+    "5. Para subir a una tienda Shopify real: usar public/shopify/plantilla25/sections-liquid/*.liquid",
+    "6. Si algo se ve mal, probar FOLLA_VARS=1 para inyectar variables :root capturadas"
+  ]
+}

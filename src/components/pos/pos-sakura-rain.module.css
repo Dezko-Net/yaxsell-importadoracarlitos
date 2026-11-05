@@ -1,0 +1,101 @@
+.rainOverlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 99999;
+}
+
+.defsSvg {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* 1. Outer track: strictly 2-keyframe LINEAR gravity — zero intermediate stops, zero pauses */
+.fallTrack {
+  position: absolute;
+  top: 0;
+  will-change: transform, opacity;
+  animation-name: sakuraSmoothFall, sakuraSmoothFade;
+  animation-timing-function: linear, ease-in-out;
+  animation-fill-mode: both, both;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* 2. Middle track: gentle sinusoidal pendulum breeze */
+.swayTrack {
+  display: block;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+  animation-name: sakuraPendulumSway;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+/* 3. Inner SVG glyph: continuous 360-degree 3D flutter without turnaround stops */
+.tumbleGlyph {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: none !important;
+  will-change: transform;
+  transform-origin: center center;
+  animation-name: sakuraContinuousTumble;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes sakuraSmoothFall {
+  0% {
+    transform: translate3d(0px, -12vh, 0);
+  }
+  100% {
+    transform: translate3d(var(--wind-drift, 36px), 112vh, 0);
+  }
+}
+
+@keyframes sakuraSmoothFade {
+  0% {
+    opacity: 0;
+  }
+  8% {
+    opacity: var(--p-opacity, 0.92);
+  }
+  88% {
+    opacity: var(--p-opacity, 0.92);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes sakuraPendulumSway {
+  0% {
+    transform: translate3d(calc(var(--sway-amp, 24px) * -1), 0, 0) rotate(calc(var(--sway-deg, 18deg) * -1));
+  }
+  100% {
+    transform: translate3d(var(--sway-amp, 24px), 0, 0) rotate(var(--sway-deg, 18deg));
+  }
+}
+
+@keyframes sakuraContinuousTumble {
+  0% {
+    transform: rotate3d(0.8, 1, 0.35, 0deg);
+  }
+  100% {
+    transform: rotate3d(0.8, 1, 0.35, 360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rainOverlay {
+    display: none !important;
+  }
+}

@@ -1,0 +1,296 @@
+.ambientContainer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.ambientCart {
+  opacity: 0.95;
+}
+
+.ambientModal {
+  opacity: 0.85;
+}
+
+.ambientItem {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform, opacity;
+  animation-name: capyAmbientFloat;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.ambientSvg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+@keyframes capyAmbientFloat {
+  0%,
+  100% {
+    opacity: var(--capy-amb-opacity, 0.4);
+    transform: translate3d(0, 0, 0) rotate(var(--capy-rot-start, -10deg)) scale(0.95);
+  }
+  50% {
+    opacity: calc(var(--capy-amb-opacity, 0.4) * 1.18);
+    transform: translate3d(var(--capy-drift-x, 14px), var(--capy-drift-y, -14px), 0)
+      rotate(var(--capy-rot-end, 12deg)) scale(1.05);
+  }
+}
+
+/* ── Search Empty Hero ("Una venta empieza aquí") ─────────────────────────── */
+.heroWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 16px;
+  min-height: 320px;
+}
+
+.heroCard {
+  position: relative;
+  max-width: 400px;
+  width: 100%;
+  padding: 22px 24px 24px;
+  border-radius: 28px;
+  border: 1.5px dashed #7bc494;
+  background: linear-gradient(
+    180deg,
+    rgba(250, 255, 251, 0.92) 0%,
+    rgba(238, 250, 241, 0.88) 100%
+  );
+  box-shadow:
+    inset 0 0 0 3px #ffffff,
+    0 14px 34px rgba(38, 92, 56, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.heroRibbonSvg {
+  width: 146px;
+  height: 34px;
+  margin-top: -32px;
+  margin-bottom: 2px;
+  overflow: visible;
+  filter: drop-shadow(0 3px 6px rgba(45, 106, 79, 0.14));
+}
+
+.heroArtStage {
+  width: 216px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.heroArtSvg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.capyBobGroup {
+  transform-origin: 110px 85px;
+  animation: capyHeroBob 4.2s ease-in-out infinite;
+}
+
+.yuzuWobble {
+  transform-origin: 110px 36px;
+  animation: capyYuzuBalance 3.2s ease-in-out infinite;
+}
+
+.steamCurlA {
+  animation: capySteamRise 3.4s ease-in-out infinite;
+}
+
+.steamCurlB {
+  animation: capySteamRise 3.4s ease-in-out infinite -1.7s;
+}
+
+.floatA {
+  animation: capyFloatItemA 4.6s ease-in-out infinite;
+}
+
+.floatB {
+  animation: capyFloatItemB 5.2s ease-in-out infinite;
+}
+
+@keyframes capyHeroBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(2.5px);
+  }
+}
+
+@keyframes capyYuzuBalance {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(4deg);
+  }
+}
+
+@keyframes capySteamRise {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(2px);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes capyFloatItemA {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(-6deg);
+  }
+  50% {
+    transform: translate(4px, -6px) rotate(8deg);
+  }
+}
+
+@keyframes capyFloatItemB {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(6deg);
+  }
+  50% {
+    transform: translate(-5px, -5px) rotate(-8deg);
+  }
+}
+
+.heroEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid #8bd4a4;
+  color: #276741;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.heroTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #173d26;
+  letter-spacing: -0.02em;
+}
+
+.heroSubtitle {
+  margin: 6px 0 14px;
+  font-size: 12px;
+  line-height: 1.48;
+  color: #3f6e52;
+  max-width: 310px;
+}
+
+.heroSubtitle strong {
+  color: #1c4d30;
+  font-weight: 800;
+}
+
+.heroPills {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.heroPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid #9adbb0;
+  color: #245c3a;
+  font-size: 10.5px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(39, 103, 65, 0.07);
+}
+
+/* ── Cart Empty Art ──────────────────────────────────────────────────────── */
+.cartEmptyWrap {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 32px 16px;
+  text-align: center;
+}
+
+.cartEmptySvg {
+  width: 124px;
+  height: 94px;
+  margin-bottom: 6px;
+  overflow: visible;
+  filter: drop-shadow(0 4px 10px rgba(39, 103, 65, 0.1));
+}
+
+.cartEmptyTitle {
+  font-size: 14px;
+  font-weight: 800;
+  color: #1d4d30;
+}
+
+.cartEmptyText {
+  font-size: 11.5px;
+  color: #467859;
+  margin-top: 3px;
+  max-width: 220px;
+}
+
+/* ── Sale Result Medallion & Header Art ──────────────────────────────────── */
+.medallionWrap {
+  position: relative;
+  z-index: 2;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.medallionSvg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 4px 10px rgba(45, 106, 79, 0.22));
+}
+
+.modalHeaderSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}

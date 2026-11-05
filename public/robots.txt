@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /cuenta
+Disallow: /carrito
+Disallow: /favoritos
+Disallow: /pedido/
+Disallow: /preview/
+Disallow: /cotizacion/
+Disallow: /lista/
+

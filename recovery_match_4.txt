@@ -1,0 +1,13 @@
+  const {
+    products: fetchedProducts,
+    total: fetchedTotal,
+    priceRange: fetchedPriceRange,
+    categoryCounts: fetchedCategoryCounts,
+    subcategoryCounts: fetchedSubcategoryCounts,
+    allTags: fetchedAllTags,
+    isLoadingInitialData,
+    isLoadingMore,
+    isReachingEnd,
+    loadMore,
+    isMobile
+  } = useProductsCache({

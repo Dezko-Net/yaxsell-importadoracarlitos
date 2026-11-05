@@ -1,0 +1,455 @@
+/* ── SCROLL FIX: has-modal-opening/has-modal-open bloquea el scroll en PC ── */
+/* El theme JS añade estas clases al abrir drawers/modals, pero a veces no las
+   quita. Override para que el body SIEMPRE pueda hacer scroll. Los drawers
+   reales gestionan su propio overflow internamente. */
+body.has-modal-opening:not(.drawer-open):not(.modal-open-active) {
+  overflow: auto !important;
+}
+body.has-modal-open:not(.drawer-open):not(.modal-open-active) {
+  overflow: auto !important;
+  touch-action: auto !important;
+}
+
+/* ── PC NAVBAR SUBCATEGORY DROPDOWN CURTAIN (SOLUCIÓN FINAL DEFINITIVA) ── */
+/* ── FONDO BLANCO PURO SÓLIDO Y 100% OPACO PARA LA NAVBAR (HEADER) Y CORTINA ── */
+header.header,
+.header,
+.header-section,
+.shopify-section-group-header-group,
+[is="sticky-header"],
+sticky-header,
+.header__navigation,
+.header__menu,
+.header__container {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  --gradient-background: #ffffff !important;
+  --color-background: 255 255 255 !important;
+}
+
+@media screen and (min-width: 1024px) {
+  /* 1. Posicionamiento del menú relativo al botón */
+  .header__menu details.details-dropdown-clone {
+    position: relative !important;
+    overflow: visible !important;
+  }
+
+  /* 2. El puente invisible y la sombra unificada de la cortina */
+  .header__menu details.details-dropdown-clone > .dropdown {
+    position: absolute !important;
+    top: 100% !important; /* Comienza justo debajo del botón */
+    left: 50% !important;
+    transform: translateX(-32%) !important; /* Moderadamente a la derecha */
+    padding-block-start: 46px !important;
+    z-index: 1000 !important;
+    width: 220px !important;
+    min-width: 180px !important;
+    pointer-events: none;
+    transition: opacity 0.3s ease, visibility 0.3s ease !important;
+    overflow: visible !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    /* SOMBRA UNIFICADA EN LA SILUETA ENTERA (Elimina las líneas de intersección) */
+    filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.12)) !important;
+  }
+
+  /* 3. La Caja Blanca */
+  .header__menu .dropdown__container,
+  .details-dropdown-clone .dropdown__container {
+    position: relative !important;
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    --gradient-background: #ffffff !important;
+    color: rgb(var(--color-foreground, 23 23 23)) !important;
+    border: none !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-left-radius: 20px !important;
+    border-bottom-right-radius: 20px !important;
+    margin-top: -1px !important; 
+    overflow: visible !important;
+    padding: 18px !important;
+    box-shadow: none !important; /* SE ELIMINA PARA QUE NO DIBUJE LA LÍNEA VERTICAL INTERNA */
+  }
+
+
+
+  /* Limpiar pseudo-elementos y resets de listas internas */
+  .details-dropdown-clone .dropdown__container::before,
+  .details-dropdown-clone .dropdown__container::after {
+    display: none !important;
+  }
+  
+  .details-dropdown-clone .dropdown__nav {
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  /* 4. RESTAURAR LOS SVGS ORIGINALES (Superelipse) */
+  .header__menu .dropdown__corner,
+  .dropdown__corner {
+    display: flex !important;
+    visibility: visible !important;
+    position: absolute !important;
+    top: 0 !important; /* Alineado al techo de la caja blanca */
+    width: 20px !important;
+    height: 20px !important;
+    color: rgb(var(--color-background, 255 255 255)) !important;
+    pointer-events: none !important;
+    z-index: 10 !important;
+  }
+
+  /* Esquina Izquierda */
+  .header__menu .dropdown__corner.left,
+  .dropdown__corner.left {
+    left: -20px !important;
+    right: auto !important;
+    transform: scaleX(-1) !important;
+  }
+
+  /* Esquina Derecha */
+  .header__menu .dropdown__corner.right,
+  .dropdown__corner.right {
+    right: -20px !important;
+    left: auto !important;
+    transform: scaleX(1) !important;
+  }
+
+  /* Forzar que el SVG interior sea blanco puro plano sin sombras ni bordes */
+  .header__menu .dropdown__corner svg,
+  .dropdown__corner svg {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    fill: #ffffff !important;
+    stroke: none !important;
+    stroke-width: 0 !important;
+    border: none !important;
+    outline: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    filter: none !important;
+    box-shadow: none !important;
+  }
+  
+  /* El path sólido de la superelipse se fuerza blanco puro */
+  .header__menu .dropdown__corner svg path[fill-rule],
+  .dropdown__corner svg path[fill-rule] {
+    display: block !important;
+    fill: #ffffff !important;
+    stroke: none !important;
+    stroke-width: 0 !important;
+    opacity: 1 !important;
+  }
+  
+  /* El segundo path (el trazo/borde gris residual) se oculta estrictamente */
+  .header__menu .dropdown__corner svg path[fill="none"],
+  .dropdown__corner svg path[fill="none"],
+  .header__menu .dropdown__corner svg path:not([fill-rule]),
+  .dropdown__corner svg path:not([fill-rule]) {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    stroke: none !important;
+    stroke-width: 0 !important;
+  }
+
+  .header__menu .dropdown__nav li > p,
+  .header__menu .dropdown__nav li > :is(details, p) {
+    padding-inline: 4px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    text-align: center !important;
+  }
+
+  .header__menu .dropdown__nav--2cols {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+    max-width: none !important;
+  }
+
+  .header__menu details.details-dropdown-clone[open] {
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  .header__menu details.details-dropdown-clone[open] > .dropdown,
+  .header__menu details.details-dropdown-clone:hover > .dropdown,
+  .dropdown[open] {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    display: block !important;
+  }
+
+  .header__menu details.details-dropdown-clone[open] > .dropdown .dropdown__container,
+  .header__menu details.details-dropdown-clone:hover > .dropdown .dropdown__container,
+  .dropdown[open] .dropdown__container {
+    transform: translateY(0) scale(1) !important;
+    animation: curtainDrop 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards !important;
+  }
+
+  @keyframes curtainDrop {
+    0% {
+      opacity: 0;
+      transform: translateY(-12px) scale(0.96);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Animación de subcategorías manejada por JS en enhanceConceptHeader.ts */
+  .header__menu details.details-dropdown-clone .dropdown__nav > li {
+    --tw-translate-x: 0;
+  }
+}
+
+
+/* ── HOVER FALLBACKS (funciona aunque theme.js se desactive en táctil) ── */
+@media (hover: hover) {
+  /* Dropdown de subcategorías al hover */
+  .header__menu li:hover > details > .dropdown,
+  .header__menu details.details-dropdown-clone:hover > .dropdown,
+  details.details-dropdown-clone:hover > .dropdown {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    display: block !important;
+  }
+
+  .header__menu details.details-dropdown-clone:hover > .dropdown .dropdown__container,
+  details.details-dropdown-clone:hover > .dropdown .dropdown__container {
+    transform: translateY(0) scale(1) !important;
+  }
+
+  /* Relleno de botones al hover */
+  .button:hover .btn-fill,
+  .button:focus .btn-fill {
+    transform: translate3d(0, 0, 0) !important;
+    opacity: 1 !important;
+  }
+}
+
+/* ── BTN-FILL FIX: la elipse del fill debe ser 150% del ancho del botón
+   para cubrir las esquinas. Algo en el clon le pone max-width:100% y la
+   recorta → deja ~30% sin cubrir con borde curvo. ── */
+.button .btn-fill {
+  width: 150% !important;
+  max-width: none !important;
+  transition: transform 0.45s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
+  will-change: transform;
+}
+
+
+
+/* ── LOGO MÁS GRANDE EN PC ── */
+@media screen and (min-width: 1024px) {
+  .header__logo img,
+  .header__logo-link img {
+    max-height: 120px !important;
+    max-width: 200px !important;
+    width: auto !important;
+    height: auto !important;
+  }
+  .header__logo,
+  .header__logo-link {
+    max-height: 120px !important;
+  }
+}
+
+/* ── BARRA DE ANUNCIO AMARILLA ── */
+.topbar-section {
+  --gradient-background: #facc15 !important;
+  --color-background: 250 204 21 !important;
+  --color-foreground: 30 30 30 !important;
+  --color-highlight: 255 221 191 !important;
+  background: #facc15 !important;
+}
+.topbar-section .topbar,
+.topbar-section .announcement-bar {
+  background: #facc15 !important;
+  color: #1e1e1e !important;
+}
+.topbar-section .topbar.section--rounded {
+  border-radius: var(--border-radius, 20px) !important;
+}
+.topbar-section .announcement-text,
+.topbar-section .announcement__content,
+.topbar-section .announcement__content * {
+  color: #1e1e1e !important;
+}
+.topbar-section .topbar a,
+.topbar-section .announcement-bar a {
+  color: #1e1e1e !important;
+}
+.topbar-section .fader svg,
+.topbar-section .slideshow-control svg,
+.topbar-section .localization svg,
+.topbar-section .localization button {
+  color: #1e1e1e !important;
+}
+.topbar-section .localization .leading-tight {
+  color: #1e1e1e !important;
+}
+
+/* ── QUITAR OVERLAY OSCURO DEL PRIMER SLIDE (móvil) ── */
+@media screen and (max-width: 767px) {
+  .slideshow .banner:first-child .banner__overlay,
+  .slideshow .banner:first-of-type .banner__overlay {
+    display: none !important;
+    opacity: 0 !important;
+    background: transparent !important;
+  }
+  .slideshow .banner:first-child .media,
+  .slideshow .banner:first-of-type .media {
+    --color-overlay: 255 255 255 !important;
+    --overlay-opacity: 0 !important;
+  }
+}
+
+/* ── QUITAR OVERLAY OSCURO AL ABRIR DROPDOWN ── */
+.has-dropdown-menu .header ~ .overlay,
+.has-dropdown-menu .overlay {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  background: transparent !important;
+}
+
+/* ── ESQUINAS CIRCULARES SUPERIORES DE LA NAVBAR (debajo de la barra de anuncios) ── */
+.header.section--rounded,
+header.header.section--rounded,
+.header-section.header-scrolled .header.section--rounded,
+.header-section .header.section--rounded {
+  border-top-left-radius: var(--border-radius, 20px) !important;
+  border-top-right-radius: var(--border-radius, 20px) !important;
+  -webkit-border-top-left-radius: var(--border-radius, 20px) !important;
+  -webkit-border-top-right-radius: var(--border-radius, 20px) !important;
+}
+.header .header:before,
+.header-section .header:before,
+.js .shopify-section-group-header-group .section.header:before,
+.js .shopify-section-group-header-group .section.section--last-rounded:before {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  --gradient-background: #ffffff !important;
+  height: 100% !important;
+  top: 0 !important;
+  border-start-start-radius: 0 !important;
+  border-start-end-radius: 0 !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  -webkit-border-top-left-radius: 0 !important;
+  -webkit-border-top-right-radius: 0 !important;
+  transition: opacity var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s), border-radius var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s) !important;
+}
+.header-section.header-scrolled .header:before,
+.header-section.header-scrolled .header-section .header:before {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border-start-start-radius: var(--border-radius, 20px) !important;
+  border-start-end-radius: var(--border-radius, 20px) !important;
+  border-top-left-radius: var(--border-radius, 20px) !important;
+  border-top-right-radius: var(--border-radius, 20px) !important;
+  -webkit-border-top-left-radius: var(--border-radius, 20px) !important;
+  -webkit-border-top-right-radius: var(--border-radius, 20px) !important;
+  transition: opacity var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s), border-radius var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s) !important;
+}
+.header__corner {
+  --tw-translate-x: 0 !important;
+}
+.header-section:not(.header-scrolled) .header:not(.section--next-rounded) .header__corner,
+.header-section:not(.header-scrolled).header-transparent .header__corner {
+  width: 0 !important;
+  height: 0 !important;
+  color: transparent !important;
+  --tw-translate-x: 0 !important;
+}
+.header-section.header-scrolled .header__corner,
+.has-dropdown-menu .header-section:not(.header-scrolled) .header__corner {
+  width: var(--border-radius, 20px) !important;
+  height: var(--border-radius, 20px) !important;
+  color: #ffffff !important;
+  --tw-translate-x: 0 !important;
+}
+.header__corner svg,
+.header__corner path:first-child {
+  fill: #ffffff !important;
+  color: #ffffff !important;
+}
+
+/* ── ESQUINAS SVG CÓNCAVAS SUPERIORES (amarillas, visibles al inicio, ocultas al scrollear) ── */
+.header__corner.top,
+.header-section:not(.header-scrolled) .header:not(.section--next-rounded) .header__corner.top,
+.header-section:not(.header-scrolled) .header .header__corner.top,
+.header-section:not(.header-scrolled).header-transparent .header .header__corner.top,
+.has-dropdown-menu .header-section:not(.header-scrolled) .header .header__corner.top {
+  width: var(--border-radius, 20px) !important;
+  height: var(--border-radius, 20px) !important;
+  color: #facc15 !important;
+  top: 0 !important;
+  bottom: auto !important;
+  z-index: 999 !important;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  --tw-translate-x: 0 !important;
+  transition: width var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s), height var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s), color var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s) !important;
+}
+.header-section.header-scrolled .header__corner.top {
+  width: 0 !important;
+  height: 0 !important;
+  color: transparent !important;
+  transition: width var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s), height var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s), color var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s) !important;
+}
+
+/* ── ESQUINAS INFERIORES: solo cuando se scrollea, con animación del tema ── */
+.header__corner.bottom,
+.header-section:not(.header-scrolled) .header__corner.bottom {
+  width: 0 !important;
+  height: 0 !important;
+  color: transparent !important;
+  transition: width var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s), height var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s), color var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s) !important;
+}
+.header-section.header-scrolled .header__corner.bottom {
+  width: var(--border-radius, 20px) !important;
+  height: var(--border-radius, 20px) !important;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: #ffffff !important;
+  transition: width var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s), height var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s), color var(--animation-nav, 0.6s) var(--animation-nav-delay, 0s) !important;
+}
+.header__corner.top.left {
+  left: 0 !important;
+  right: auto !important;
+  transform: none !important;
+}
+.header__corner.top.right {
+  right: 0 !important;
+  left: auto !important;
+  transform: scaleX(-1) !important;
+}
+.header__corner.top svg,
+.header__corner.top svg path[fill-rule],
+.header__corner.top path:first-child {
+  fill: #facc15 !important;
+  color: #facc15 !important;
+}
+.header__corner.top svg path[fill="none"],
+.header__corner.top svg path:not([fill-rule]) {
+  display: none !important;
+}
+
+
+
+

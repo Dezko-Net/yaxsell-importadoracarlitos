@@ -1,0 +1,265 @@
+# TASK: Reduce Appwrite reads in admin panel pages (per-document billing)
+
+## CRITICAL CONTEXT
+
+Appwrite charges **per document RETURNED**, not per API call:
+- `listDocuments(limit=100)` returning 100 docs = **100 reads**
+- `listDocuments(limit=2000)` returning 800 docs = **800 reads**
+- `getDocument()` returning 1 doc = **1 read**
+- `listDocuments(limit=1)` returning 1 doc = **1 read** (but `total` count is free)
+
+The admin panel makes direct Appwrite SDK calls from the browser (client-side `getServices()` + `databases.listDocuments()`). There is NO server-side cache for these calls. Every page load = full reads.
+
+## PROBLEM 1: `/admin/orders` — ~3000 reads per page load (WORST)
+
+### File: `src/app/admin/(panel)/orders/page.tsx`
+
+### What happens:
+The `loadStats` function (line ~135) downloads ALL orders using a cursor loop to calculate today's stats:
+
+```typescript
+// line 148-157
+const allOrders: any[] = [];
+let cursor: string | null = null;
+while (true) {
+  const q: any[] = [Query.orderDesc('CREATEDAT'), Query.limit(100)];
+  if (cursor) q.push(Query.cursorAfter(cursor));
+  const resp = await databases.listDocuments(databaseId, ORDERS_COLLECTION_ID, q);
+  allOrders.push(...resp.documents);
+  if (resp.documents.length < 100) break;
+  cursor = resp.documents[resp.documents - 1].$id;
+  if (allOrders.length > 3000) break;
+}
+```
+
+Then it filters client-side:
+```typescript
+const todayOrders = allOrders.filter(o => (o.CREATEDAT || ...) >= startToday);
+const yesterdayOrders = allOrders.filter(o => ...);
+```
+
+### Why it's wrong:
+- Downloads up to 3000 orders just to count today's and yesterday's orders
+- Only needs orders from the last 2-3 days, but downloads ALL historical orders
+- An order document is large (items JSON, customer data, tracking, etc.) = heavy payload + heavy reads
+
+### Solution:
+Use Appwrite queries to filter server-side. The `CREATEDAT` field is a numeric timestamp (milliseconds).
+
+```typescript
+// Only fetch orders from last 3 days (enough for today + yesterday + day before)
+const threeDaysAgo = startDayBefore; // already calculated as startToday - 2 * 86400000
+const q: any[] = [
+  Query.orderDesc('CREATEDAT'),
+  Query.greaterThanEqual('CREATEDAT', threeDaysAgo),
+  Query.limit(200) // 3 days of orders should be < 200
+];
+const resp = await databases.listDocuments(databaseId, ORDERS_COLLECTION_ID, q);
+const allOrders = resp.documents;
+```
+
+This reduces ~3000 reads → ~50-100 reads (typical 3-day order volume).
+
+**IMPORTANT**: Verify that `CREATEDAT` is stored as a number (integer timestamp), not a string. If it's a string, use `Query.greaterThanEqual('CREATEDAT', String(threeDaysAgo))` or filter by `$createdAt` instead.
+
+Also check: the `load` function (line ~234) already paginates correctly with PAGE_SIZE and cursorAfter — that part is fine. The problem is ONLY `loadStats`.
+
+### Additional issue in same file:
+`autoDeliverShippedOrders` (line ~279) fetches shipped orders with limit=20. This is fine (20 reads max).
+
+`bulkUpdateStatus` (line ~336) calls `getDocument` per item in selected orders. This is on-demand (admin action), not on page load — acceptable.
+
+---
+
+## PROBLEM 2: `/admin/por-mayor` and `/admin/por-unidad` — ~800 reads each
+
+### Files:
+- `src/app/admin/(panel)/por-mayor/page.tsx`
+- `src/app/admin/(panel)/por-unidad/page.tsx`
+
+### What happens:
+Both pages download ALL products using a cursor loop:
+
+```typescript
+// por-mayor/page.tsx lines 98-107
+const all: Product[] = [];
+let cursor: string | undefined;
+while (true) {
+  const queries: string[] = [Query.limit(100)];
+  if (cursor) queries.push(Query.cursorAfter(cursor));
+  const res = await databases.listDocuments(databaseId, PRODUCTS_COLLECTION_ID, queries);
+  all.push(...(res.documents as unknown as Product[]));
+  if (res.documents.length < 100) break;
+  cursor = res.documents[res.documents.length - 1].$id;
+}
+setProducts(all);
+```
+
+They have localStorage cache, but:
+- First visit = 800 reads
+- "Recargar" button = 800 reads
+- Cache expires/gets cleared = 800 reads
+
+### Why it's wrong:
+These are admin editing pages. The admin edits product prices/stock in a table. They need ALL products to filter/search/sort client-side. But downloading 800 products = 800 reads every time cache is missed.
+
+### Solution:
+**Option A (recommended): Server-side pagination with search**
+- Load 50 products at a time with `Query.limit(50)` + `Query.cursorAfter()`
+- Search sends queries to Appwrite instead of filtering client-side
+- Category filter uses `Query.equal('CATEGORYID', catId)` server-side
+- The table shows 50 at a time with a "Load More" button or infinite scroll
+- This is the same pattern already used in `/admin/products/page.tsx` (line 578: `Query.limit(PAGE_SIZE)` + cursor pagination)
+
+**Option B (simpler but less optimal): Keep client-side filter but cache server-side**
+- Create an API route `/api/admin/products-all` with `unstable_cache` (revalidate 24h since products rarely change)
+- The hook calls the API route instead of direct Appwrite SDK calls
+- First load = 800 reads, but cached for 24h for ALL admin users
+- With 5 admin users opening the page 10 times/day = 800 reads instead of 40,000
+
+**Option A is better for reads. Option B is easier to implement. Choose based on effort tolerance.**
+
+### Key difference from `/admin/products`:
+`/admin/products` already paginates correctly (PAGE_SIZE=20, cursorAfter). These two pages don't — they download everything. The fix is to make them follow the same pattern as `/admin/products`.
+
+---
+
+## PROBLEM 3: `/admin/orders/[id]` — N reads per order item
+
+### File: `src/app/admin/(panel)/orders/[id]/page.tsx`
+
+### What happens:
+When viewing an order, it fetches each product in the order individually:
+
+```typescript
+// lines 1093-1103
+await Promise.all(productIds.map(async (pid) => {
+  try {
+    const product = await databases.getDocument(databaseId, PRODUCTS_COLLECTION_ID, pid);
+    stocks[pid] = doc.STOCK || 0;
+    locs[pid] = getWarehouseLocationFromFeatures(doc.FEATURES, doc.section);
+    skus[pid] = getSkuFromFeatures(doc.FEATURES, doc.TAGS, doc.jumpseller_id, doc.sku);
+    prices[pid] = doc.PRICE || 0;
+    barcodes[pid] = getBarcodeFromFeatures(doc.FEATURES, doc.barcode);
+  } catch {}
+}));
+```
+
+If an order has 15 items = 15 reads. Not terrible, but can be optimized.
+
+### Solution:
+Use `Query.equal('$id', productIds)` to batch-fetch all products in ONE call:
+
+```typescript
+if (productIds.length > 0) {
+  // Batch fetch all products in one query instead of N getDocument calls
+  const productsResp = await databases.listDocuments(databaseId, PRODUCTS_COLLECTION_ID, [
+    Query.equal('$id', productIds),
+    Query.limit(productIds.length)
+  ]);
+  for (const doc of productsResp.documents) {
+    const pid = doc.$id;
+    stocks[pid] = doc.STOCK || 0;
+    locs[pid] = getWarehouseLocationFromFeatures(doc.FEATURES, doc.section);
+    skus[pid] = getSkuFromFeatures(doc.FEATURES, doc.TAGS, doc.jumpseller_id, doc.sku);
+    prices[pid] = doc.PRICE || 0;
+    barcodes[pid] = getBarcodeFromFeatures(doc.FEATURES, doc.barcode);
+  }
+}
+```
+
+**Note**: `Query.equal('$id', array)` returns the same number of documents as N `getDocument` calls, so reads are the same. BUT it's 1 network round-trip instead of N, which is much faster. The reads count doesn't change here — this is a performance optimization, not a reads optimization.
+
+**For reads optimization**: The order document itself already contains item data (name, price, qty) in the `ITEMS` JSON field. The only reason to fetch products is to get LIVE stock and SKU. Consider:
+- If stock doesn't need to be live, use the stock from the order's ITEMS JSON (0 extra reads)
+- If stock needs to be live, batch fetch as above (same reads, faster)
+
+---
+
+## PROBLEM 4: `/admin/catalog-products` — ~2000+ reads
+
+### File: `src/app/admin/(panel)/catalog-products/page.tsx`
+
+### What happens:
+1. Downloads ALL stock alerts with cursor loop (limit=2000):
+```typescript
+// lines 59-66
+const allDocs: any[] = [];
+let offset = 0;
+while (true) {
+  const r = await databases.listDocuments(databaseId, STOCK_ALERTS_COLLECTION_ID, [Query.limit(2000), Query.offset(offset)]);
+  allDocs.push(...r.documents);
+  if (r.documents.length < 2000) break;
+  offset += 2000;
+}
+```
+
+2. Then for each unique product ID, fetches from PRODUCTS, CATALOG_PRODUCTS, and INVENTORY_PRODUCTS in chunks of 100 (lines 94-163).
+
+3. Then for each unique user ID, fetches from USERS collection in chunks (lines 278-280).
+
+### Why it's wrong:
+- If there are 500 stock alerts = 500 reads just for alerts
+- Then ~500 product lookups across 3 collections (most won't be found in 2 of 3) = up to 1500 reads
+- Then user lookups = more reads
+- Total: easily 2000+ reads per page load
+
+### Solution:
+- Paginate stock alerts (50 at a time) instead of downloading all
+- Only fetch product details for the current page of alerts
+- Use `Query.equal('$id', chunk)` batch fetch (already doing this, which is good)
+- Skip collections that likely won't have the product (e.g., if found in PRODUCTS, skip CATALOG_PRODUCTS and INVENTORY_PRODUCTS lookups for that ID)
+
+---
+
+## PROBLEM 5: `/admin/products` `checkDuplicates` — ~6000 reads
+
+### File: `src/app/admin/(panel)/products/page.tsx`
+
+### What happens:
+```typescript
+// lines 352-354
+const prodResp = await databases.listDocuments(databaseId, PRODUCTS_COLLECTION_ID, [Query.limit(2000)]);
+const catResp = await databases.listDocuments(databaseId, CATALOG_PRODUCTS_COLLECTION_ID, [Query.limit(2000)]);
+const invResp = await databases.listDocuments(databaseId, INVENTORY_PRODUCTS_COLLECTION_ID, [Query.limit(2000)]);
+```
+
+Downloads 3 full collections to find duplicate SKUs.
+
+### Solution:
+This is triggered manually (button click), not on page load. Lower priority. But when clicked = 6000 reads.
+
+Options:
+- Move duplicate detection to a server-side API route with `unstable_cache` (24h revalidate)
+- Or only check duplicates within one collection at a time (3 separate checks of 2000 each, but user picks which collection)
+- Or use Appwrite's search to find duplicates by SKU without downloading everything
+
+---
+
+## PRIORITY ORDER
+
+1. **`/admin/orders` loadStats** — ~3000 reads → ~100 reads (HIGH IMPACT, LOW EFFORT, 1 function change)
+2. **`/admin/por-mayor` + `/admin/por-unidad`** — ~800 reads each → ~50 reads (HIGH IMPACT, MEDIUM EFFORT, rewrite load function)
+3. **`/admin/catalog-products`** — ~2000 reads → ~100 reads (HIGH IMPACT, MEDIUM EFFORT, add pagination)
+4. **`/admin/products` checkDuplicates** — ~6000 reads → less (LOW PRIORITY, manual trigger)
+5. **`/admin/orders/[id]`** — N reads → same reads but faster (LOW PRIORITY, performance only)
+
+## KEY FILES TO READ
+
+- `src/app/admin/(panel)/orders/page.tsx` — focus on `loadStats` function (line ~135)
+- `src/app/admin/(panel)/por-mayor/page.tsx` — focus on `loadFreshData` (line ~88)
+- `src/app/admin/(panel)/por-unidad/page.tsx` — same pattern as por-mayor
+- `src/app/admin/(panel)/products/page.tsx` — reference for good pagination (PAGE_SIZE + cursorAfter)
+- `src/app/admin/(panel)/catalog-products/page.tsx` — focus on `load` function (line ~54)
+- `src/app/admin/(panel)/orders/[id]/page.tsx` — focus on `load` function (line ~1072)
+- `src/lib/appwrite-admin.ts` — collection IDs and config
+- `src/lib/appwrite.ts` — `getServices()`, `getAppwriteConfig()`, collection constants
+
+## IMPORTANT NOTES
+
+- These pages use CLIENT-SIDE Appwrite SDK (`getServices()` from `src/lib/appwrite.ts`). They call Appwrite directly from the browser, NOT through API routes.
+- There is NO server-side cache for these calls. Every page load = full reads.
+- The `cached()` function used in some pages (e.g., `products/page.tsx` line 648) is a client-side localStorage cache, not server-side.
+- Products rarely change. Consider creating server-side API routes with `unstable_cache` for admin data that doesn't need to be real-time.
+- The `CREATEDAT` field in orders is a numeric timestamp (milliseconds since epoch). Verify this before using `Query.greaterThanEqual`.
+- Appwrite's `Query.equal('$id', arrayOfIds)` is the correct way to batch-fetch by IDs. It returns matching documents in 1 API call (but reads = number of documents returned).

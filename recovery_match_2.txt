@@ -1,0 +1,6 @@
+import { useAperturaPromotion } from '@/hooks/useAperturaPromotion';
+import { resolveProductDisplayPrice } from '@/lib/apertura-promo';
+import AperturaDiscountBadge from '@/components/AperturaDiscountBadge';
+import CountdownTimer from '@/components/CountdownTimer';
+import { getSkuFromFeatures } from '@/lib/product-features';
+import { useProductsCache } from '@/hooks/useProductsCache';

@@ -1,0 +1,476 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Mikan Neko & Neko Nocturno de Fernanda — Artisanal Cat Illustrations & Physics
+   Strictly scoped to PosNekoDecor components (zero impact on other skins)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Ambient Floating Neko Field ("Venta actual", Search, Modal) ─────── */
+.ambientField {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+.defsSvg {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.cornerNeko {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  width: 204px;
+  height: 134px;
+  opacity: 0.38;
+  pointer-events: none;
+}
+
+.cornerNekoModal {
+  width: 172px;
+  height: 112px;
+  opacity: 0.26;
+}
+
+.bottomPawTrail {
+  position: absolute;
+  bottom: -6px;
+  left: -6px;
+  width: 168px;
+  height: 110px;
+  opacity: 0.30;
+  pointer-events: none;
+}
+
+/* Strictly 2-keyframe LINEAR vertical drift — zero pauses, zero stutter */
+.ambientFallTrack {
+  position: absolute;
+  top: -36px;
+  will-change: transform, opacity;
+  animation-name: nekoAmbientFall, nekoAmbientFade;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+  pointer-events: none;
+}
+
+.ambientSwayTrack {
+  display: block;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+  animation-name: nekoAmbientSway;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+.ambientRockGlyph {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: none !important;
+  will-change: transform;
+  transform-origin: center center;
+  animation-name: nekoAmbientRock;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+.ambientSparkle {
+  position: absolute;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.94) 0%,
+    rgba(254, 215, 170, 0.7) 52%,
+    rgba(251, 146, 60, 0) 100%
+  );
+  animation-name: nekoSparkleTwinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  pointer-events: none;
+}
+
+.ambientSparkleFernanda {
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(254, 240, 138, 0.78) 48%,
+    rgba(225, 29, 72, 0) 100%
+  );
+}
+
+@keyframes nekoAmbientFall {
+  0% {
+    transform: translate3d(0px, 0px, 0);
+  }
+  100% {
+    transform: translate3d(var(--drift-x, 26px), var(--fall-dist, 680px), 0);
+  }
+}
+
+@keyframes nekoAmbientFade {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: var(--p-alpha, 0.62);
+  }
+  82% {
+    opacity: var(--p-alpha, 0.62);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes nekoAmbientSway {
+  0% {
+    transform: translate3d(calc(var(--sway-x, 14px) * -1), 0, 0);
+  }
+  100% {
+    transform: translate3d(var(--sway-x, 14px), 0, 0);
+  }
+}
+
+@keyframes nekoAmbientRock {
+  0% {
+    transform: rotate(calc(var(--sway-deg, 15deg) * -1));
+  }
+  100% {
+    transform: rotate(var(--sway-deg, 15deg));
+  }
+}
+
+@keyframes nekoSparkleTwinkle {
+  0%,
+  100% {
+    opacity: 0.18;
+    transform: scale(0.75);
+  }
+  50% {
+    opacity: 0.82;
+    transform: scale(1.22);
+  }
+}
+
+/* ── 2. "Una venta empieza aquí" — Bespoke Neko Hero ─────────────────────── */
+.nekoSearchEmpty {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+  height: 100%;
+  padding: 28px 20px;
+  text-align: center;
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 356px;
+}
+
+.heroSvgWrap {
+  position: relative;
+  width: 248px;
+  height: 170px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heroSvg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: none !important;
+}
+
+/* Real photo cameo badge in Fernanda's hero */
+.fernandaPhotoCameo {
+  position: absolute;
+  top: 4px;
+  right: 14px;
+  width: 54px;
+  height: 54px;
+  border-radius: 999px;
+  padding: 2.5px;
+  background: linear-gradient(135deg, #facc15 0%, #e11d48 55%, #1e293b 100%);
+  box-shadow:
+    0 6px 16px rgba(15, 23, 42, 0.22),
+    0 0 0 2px rgba(255, 255, 255, 0.92);
+  z-index: 3;
+  animation: nekoHeroFloatB 4.2s ease-in-out infinite alternate;
+}
+
+.fernandaPhotoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 22%;
+  border-radius: 999px;
+  display: block;
+}
+
+.fernandaPhotoTag {
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #be123c;
+  color: #ffffff;
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  border: 1px solid #fff1f2;
+  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.25);
+}
+
+.floatingItemA {
+  animation: nekoHeroFloatA 3.6s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.floatingItemB {
+  animation: nekoHeroFloatB 4.2s ease-in-out -1.3s infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.waggingTail {
+  animation: nekoTailWag 2.6s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: left center;
+}
+
+.michiBreathe {
+  animation: nekoMichiBob 4.2s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: bottom center;
+}
+
+.scannerPulseLine {
+  animation: nekoScanSweep 2.8s ease-in-out infinite alternate;
+}
+
+@keyframes nekoHeroFloatA {
+  0% {
+    transform: translate3d(-2.5px, -3.5px, 0) rotate(-7deg);
+  }
+  100% {
+    transform: translate3d(3.5px, 4px, 0) rotate(9deg);
+  }
+}
+
+@keyframes nekoHeroFloatB {
+  0% {
+    transform: translate3d(3px, 3.5px, 0) rotate(8deg);
+  }
+  100% {
+    transform: translate3d(-3.5px, -4px, 0) rotate(-8deg);
+  }
+}
+
+@keyframes nekoTailWag {
+  0% {
+    transform: rotate(-7deg);
+  }
+  100% {
+    transform: rotate(9deg);
+  }
+}
+
+@keyframes nekoMichiBob {
+  0% {
+    transform: translateY(0px) rotate(-1.5deg);
+  }
+  100% {
+    transform: translateY(-2.5px) rotate(1.5deg);
+  }
+}
+
+@keyframes nekoScanSweep {
+  0% {
+    transform: translateY(-7px);
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.92;
+  }
+  100% {
+    transform: translateY(7px);
+    opacity: 0.45;
+  }
+}
+
+.heroBadgePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 11px;
+  margin-bottom: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px dashed #f4a86c;
+  color: #b85318;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.heroBadgePillFernanda {
+  background: rgba(255, 241, 244, 0.9);
+  border: 1px dashed #e11d48;
+  color: #9f1239;
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.1);
+}
+
+.heroTitle {
+  font-size: 19px;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  color: #431c06;
+  line-height: 1.25;
+}
+
+.heroTitleFernanda {
+  color: #0f172a;
+}
+
+.heroOrnamentRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 6px;
+  color: #e67e35;
+}
+
+.heroOrnamentLine {
+  width: 34px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #f3a66b, transparent);
+}
+
+.heroOrnamentLineFernanda {
+  background: linear-gradient(90deg, transparent, #e11d48, transparent);
+}
+
+.heroSubtitle {
+  max-width: 31ch;
+  font-size: 12px;
+  line-height: 1.65;
+  color: #8c4f2b;
+}
+
+.heroSubtitleFernanda {
+  color: #334155;
+}
+
+/* ── 3. Empty Cart Michi Basket Emblem ("Venta actual" when empty) ────────── */
+.cartEmptyWrap {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 225px;
+  padding: 26px 18px;
+  text-align: center;
+}
+
+.cartEmptySvg {
+  width: 158px;
+  height: 118px;
+  margin-bottom: 8px;
+  overflow: visible;
+  filter: none !important;
+}
+
+.cartEmptyTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #4d220a;
+  letter-spacing: -0.015em;
+}
+
+.cartEmptyTitleFernanda {
+  color: #0f172a;
+}
+
+.cartEmptySub {
+  margin-top: 4px;
+  max-width: 26ch;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: #945630;
+}
+
+.cartEmptySubFernanda {
+  color: #475569;
+}
+
+/* ── 4. "Venta cobrada" Modal Cat Header Art & Michi Check Seal ───────────── */
+.modalHeaderNeko {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 220px;
+  height: 106px;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.modalCheckSeal {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  z-index: 1;
+}
+
+.modalCheckSvg {
+  width: 52px;
+  height: 52px;
+  overflow: visible;
+  filter: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambientFallTrack,
+  .ambientSwayTrack,
+  .ambientRockGlyph,
+  .ambientSparkle,
+  .floatingItemA,
+  .floatingItemB,
+  .waggingTail,
+  .michiBreathe,
+  .scannerPulseLine,
+  .fernandaPhotoCameo {
+    animation: none !important;
+  }
+}

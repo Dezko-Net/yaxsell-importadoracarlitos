@@ -1,0 +1,63 @@
+.surface {
+  --pos-ink: #405566;
+  --pos-muted: #61736f;
+  --pos-accent: #087f73;
+  --pos-positive: #08a88f;
+  --pos-soft: #eaf5f1;
+  --pos-canvas: #f4f6f3;
+  --pos-line: #dce5e0;
+  --pos-warning: #f3c437;
+  --pos-danger: #b72449;
+  color: var(--pos-ink);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  accent-color: var(--pos-accent);
+  color-scheme: light;
+}
+
+.surface *, .surface *::before, .surface *::after { box-sizing: border-box; }
+.surface :is(button, a, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--pos-accent) !important;
+  outline-offset: 3px !important;
+  box-shadow: none !important;
+}
+.surface :is(input, select, textarea):focus { border-color: var(--pos-accent); box-shadow: none !important; }
+.surface :is(button, a, input, select, textarea) { touch-action: manipulation; }
+.surface button:disabled { cursor: not-allowed; }
+.surface :is(input, textarea) { user-select: text; }
+.surface :is(h1, h2, h3) { text-wrap: balance; }
+.surface :is(button, a) { -webkit-tap-highlight-color: transparent; }
+
+.primary, .secondary {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--pos-line);
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.3;
+  transition: background-color 140ms, border-color 140ms;
+}
+.primary { background: var(--pos-accent); border-color: var(--pos-accent); color: white; }
+.primary:hover { background: #06695f; }
+.secondary { background: white; color: var(--pos-ink); }
+.secondary:hover { border-color: #a0c4b9; background: var(--pos-soft); }
+.primary:disabled, .secondary:disabled { opacity: .5; }
+.empty { padding: 36px 20px; text-align: center; color: var(--pos-muted); font-size: 14px; }
+.empty svg { margin: 0 auto 12px; color: var(--pos-accent); }
+.empty strong { display: block; margin-bottom: 6px; color: var(--pos-ink); font-size: 16px; }
+.empty p { max-width: 38ch; margin: 0 auto; line-height: 1.6; }
+.notice { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border: 1px solid #e8cf77; border-radius: 12px; background: #fff9e7; font-size: 13px; }
+.notice p { flex: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .surface *, .surface *::before, .surface *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,1 @@
+﻿src/templates/plantilla1/HomePage.tsx(708,22): error TS2339: Property 'href' does not exist on type 'Element'.

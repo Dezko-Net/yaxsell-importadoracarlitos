@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/risk-velocity",
+      "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/expire-orders",
+      "schedule": "*/5 * * * *"
+    }
+  ]
+}

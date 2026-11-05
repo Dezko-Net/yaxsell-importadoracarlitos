@@ -1,0 +1,1 @@
+function t(t=""){return t?t.charAt(0).toUpperCase()+t.slice(1):t}function e(t){return"string"==typeof t&&""!==t.trim()}function r(t){return t.toLowerCase().trim()}function n(t){return t.replace(/([A-Z])/g,(e,r,n)=>0===n&&t.length>1?r.toLowerCase():`_${r.toLowerCase()}`)}export{e as i,r as n,n as t,t as u};

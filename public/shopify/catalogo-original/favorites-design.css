@@ -1,0 +1,49 @@
+/* Favoritos: a saved selection that feels at home in the Importadora 3B catalog. */
+.favorites-page { color:#234b78; padding-bottom:12px; }
+.favorites-breadcrumb { display:flex; align-items:center; gap:9px; margin:0 0 14px; color:#89a1b9; font-size:12px; font-weight:700; }
+.favorites-breadcrumb a { color:#6385a9; }
+.favorites-breadcrumb a:hover { color:#234b78; }
+.favorites-breadcrumb [aria-current] { color:#234b78; }
+.favorites-hero { position:relative; overflow:hidden; display:flex; align-items:center; justify-content:space-between; min-height:250px; padding:28px 34px; border:1px solid #d8e7f4; border-radius:26px; background:linear-gradient(120deg,#eef7ff 0%,#e2f0fc 72%,#d9eafa 100%); }
+.favorites-hero-copy { position:relative; z-index:1; max-width:470px; }
+.favorites-eyebrow { display:inline-flex; align-items:center; gap:7px; padding:6px 11px; border-radius:99px; background:#fff; color:#52799f; font-size:11px; font-weight:800; box-shadow:0 2px 8px #234b780b; }
+.favorites-eyebrow span { color:#e87780; font-size:12px; }
+.favorites-hero h1 { margin:13px 0 8px; color:#234b78; font-family:'Plus Jakarta Sans',sans-serif; font-size:clamp(28px,3.5vw,40px); font-weight:800; line-height:1.08; letter-spacing:-1.5px; }
+.favorites-hero p { max-width:370px; color:#607f9d; font-size:13px; line-height:1.6; font-weight:500; }
+.favorites-count { display:inline-flex; align-items:center; gap:8px; margin-top:18px; padding:7px 12px 7px 7px; border:1px solid #f3dfa0; border-radius:99px; background:#fff9e6; color:#785d20; font-size:11px; font-weight:800; }
+.favorites-count strong { display:grid; place-items:center; min-width:27px; height:27px; padding:0 5px; border-radius:50%; background:#ffdf76; color:#234b78; font-size:13px; }
+.favorites-art { position:relative; width:210px; height:190px; flex:none; display:grid; place-items:center; }
+.favorites-art::before { content:'♥'; display:grid; place-items:center; width:126px; height:126px; border:1px solid #fff; border-radius:42px; background:#fff9e9; box-shadow:0 16px 35px #6686a229; color:#f0a5a5; font-size:58px; transform:rotate(-8deg); }
+.favorites-art[data-animation-ready]::before { display:none; }
+.favorites-art > * { width:100%; height:100%; }
+.favorites-empty { display:flex; flex-direction:column; align-items:center; text-align:center; padding:42px 24px 46px; margin-top:20px; border:1px solid #e1edf7; border-radius:24px; background:#fff; }
+.favorites-empty-icon { display:grid; place-items:center; width:50px; height:50px; margin-bottom:15px; border-radius:17px; color:#6e93b6; background:#eef6fd; }
+.favorites-empty-icon svg { width:24px; height:24px; }
+.favorites-empty h2 { color:#234b78; font-size:19px; font-weight:800; letter-spacing:-.5px; }
+.favorites-empty p { max-width:310px; margin:8px 0 19px; color:#718aa3; font-size:13px; line-height:1.6; }
+.favorites-explore { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:46px; padding:0 20px; border-radius:14px; background:#ffdf76; color:#234b78; font-size:13px; font-weight:800; box-shadow:0 4px 12px #b78e2430; }
+.favorites-explore:hover { background:#ffe997; }
+.favorites-explore svg { width:16px; height:16px; }
+.favorites-section-heading { display:flex; align-items:end; justify-content:space-between; gap:12px; margin:28px 0 15px; }
+.favorites-section-heading h2 { color:#234b78; font-size:20px; line-height:1.2; font-weight:800; letter-spacing:-.6px; }
+.favorites-section-heading p { margin-top:5px; color:#7890a8; font-size:12px; }
+.favorites-section-heading a { flex:none; color:#397ec1; font-size:12px; font-weight:800; }
+.favorites-section-heading a:hover { color:#234b78; }
+.favorites-page a:focus-visible { outline:3px solid #4b91d6; outline-offset:3px; }
+@media (max-width:639px) {
+  .favorites-breadcrumb { margin-bottom:11px; font-size:11px; }
+  .favorites-hero { min-height:210px; padding:20px; border-radius:22px; }
+  .favorites-hero-copy { max-width:65%; }
+  .favorites-hero h1 { margin-top:12px; font-size:25px; letter-spacing:-1px; }
+  .favorites-hero p { font-size:11px; line-height:1.5; }
+  .favorites-count { margin-top:13px; font-size:10px; }
+  .favorites-art { position:absolute; right:-5px; bottom:3px; width:38%; height:155px; }
+  .favorites-art::before { width:90px; height:90px; border-radius:30px; font-size:45px; }
+  .favorites-empty { margin-top:14px; padding:32px 20px 35px; border-radius:20px; }
+  .favorites-empty h2 { font-size:17px; }
+  .favorites-empty p { font-size:12px; }
+  .favorites-section-heading { margin:23px 0 12px; align-items:flex-start; }
+  .favorites-section-heading h2 { font-size:18px; }
+  .favorites-section-heading p { font-size:11px; }
+  .favorites-section-heading a { padding-top:3px; font-size:11px; }
+}
