@@ -55,6 +55,7 @@ import { invalidatePosWebReservations } from '@/lib/pos-web-reservations';
 import { getPublicSiteUrl } from '@/lib/public-site-url';
 
 // ─── Config ────────────────────────────────────────────────────────────────────
+const SITE_URL = getPublicSiteUrl();
 const WA_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN || "";
 const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN || "";
 const ENV_ADMINS = process.env.ADMIN_WHATSAPP_NUMBER || "";
