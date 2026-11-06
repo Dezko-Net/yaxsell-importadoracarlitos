@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import CatalogoClient from './CatalogoClient';
 import { getCachedAllProducts, isMainStoreProduct } from '@/lib/catalog-cache';
 
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function ProductosPage() {
+async function CatalogSeo() {
   let products: any[] = [];
   try {
     const all = (await getCachedAllProducts()) as any[];
@@ -50,9 +51,11 @@ export default async function ProductosPage() {
         </ul>
       </div>
 
-      {/* Componente interactivo del lado del cliente */}
-      <CatalogoClient />
     </>
   );
 }
 
+
+export default function ProductosPage() {
+  return <><Suspense fallback={null}><CatalogSeo /></Suspense><CatalogoClient /></>;
+}

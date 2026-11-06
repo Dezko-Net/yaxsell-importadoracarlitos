@@ -154,6 +154,7 @@ async function unmarkOrderPaid(orderId) {
 
 // State
 let allProducts = [];
+let catalogLoadError = false;
 let _vendors = [];           // tiendas activas con logo/color/nombre
 let selectedStore = '';      // '' = todas · '__main__' = Yaxsell Demo · vendorId
 let currentMode = 'public'; // 'public' | 'admin'
@@ -3732,8 +3733,9 @@ function renderHome() {
         <div class="w-16 h-16 mx-auto rounded-full mb-3 flex items-center justify-center" style="background: linear-gradient(135deg,#e3f2ff,#f5fbff);">
           <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
         </div>
-        <h3 class="font-display font-extrabold text-blue-800 text-lg">Catálogo vacío</h3>
-        <p class="text-blue-500 text-sm mt-1 mb-4">Aún no se han cargado productos. Ingresa al panel para crear tus categorías y productos.</p>
+        <h3 class="font-display font-extrabold text-blue-800 text-lg">${catalogLoadError ? 'No pudimos cargar los productos' : 'Catálogo vacío'}</h3>
+        <p class="text-blue-500 text-sm mt-1 mb-4">${catalogLoadError ? 'Revisa tu conexión y vuelve a intentarlo.' : 'Aún no se han cargado productos.'}</p>
+        ${catalogLoadError ? '<button type="button" onclick="refreshData()" class="px-5 py-2 rounded-xl bg-blue-700 text-white font-bold">Reintentar</button>' : ''}
       </div>` : ''}
 
       <!-- Store (tienda) filter band — logo + nombre -->
@@ -5739,17 +5741,17 @@ function fetchAppwriteProducts(forceRefresh) {
 
 async function loadAppwriteProducts() {
   var apiBase = window.location.origin;
-  // Fetch products, catalog (categories/subcategories) and vendors in parallel
-  var [prodRes, catRes, venRes] = await Promise.all([
-    fetch(apiBase + '/api/public-data/products?limit=1000&includeVendorProducts=true&minimal=true'),
-    fetch(apiBase + '/api/public-data/catalog?categoriesOnly=true'),
-    fetch(apiBase + '/api/public-data/vendors').catch(function(){ return { json: function(){ return { vendors: [] }; } }; })
-  ]);
+  // Categorías y tiendas se actualizan aparte: no deben bloquear los productos.
+  var categoriesPromise = fetch(apiBase + '/api/public-data/catalog?categoriesOnly=true')
+    .then(function(res) { return res.ok ? res.json() : null; }).catch(function() { return null; });
+  var vendorsPromise = fetch(apiBase + '/api/public-data/vendors')
+    .then(function(res) { return res.ok ? res.json() : null; }).catch(function() { return null; });
+  var prodRes = await fetch(apiBase + '/api/public-data/products?limit=1000&includeVendorProducts=true&minimal=true');
+  if (!prodRes.ok) throw new Error('No se pudieron cargar los productos (HTTP ' + prodRes.status + ').');
   var prodData = await prodRes.json();
+  if (!Array.isArray(prodData) && !Array.isArray(prodData.products)) throw new Error('Respuesta de productos inválida.');
   var raw = Array.isArray(prodData) ? prodData : (prodData.products || []);
-  var catData = await catRes.json();
-  // Vendors
-  try { var venData = await venRes.json(); _vendors = (venData && Array.isArray(venData.vendors)) ? venData.vendors.map(function(v){ return { id: v.id, name: v.name || 'Tienda asociada', color: v.color || '#f97316', logoUrl: v.logoUrl || '', phone: v.phone || '', minPurchaseAmount: v.minPurchaseAmount || 0 }; }) : []; } catch(e) { _vendors = []; }
+  var catData = await Promise.race([categoriesPromise, new Promise(function(resolve) { setTimeout(function() { resolve(null); }, 350); })]);
   // Build lookup maps: id -> name, and store category/subcategory data with images
   var catMap = {};
   var subMap = {};
@@ -5772,7 +5774,7 @@ async function loadAppwriteProducts() {
     });
   }
   var mainProdEarly = raw.find(function(p) { return !p.VENDOR_ID && p.VENDOR_NAME && p.VENDOR_NAME !== 'Yaxsell Demo'; });
-  if (mainProdEarly && mainProdEarly.VENDOR_NAME) {
+  if (!_settings.webConfig && mainProdEarly && mainProdEarly.VENDOR_NAME) {
     MAIN_STORE_NAME = String(mainProdEarly.VENDOR_NAME).trim();
   }
   var mappedProducts = raw.map(function(p) {
@@ -5842,9 +5844,33 @@ async function loadAppwriteProducts() {
       _createdAt: p.$createdAt || p.createdAt || 0
     };
   });
+  if (!catData) categoriesPromise.then(function(data) { setTimeout(function() {
+    if (!data || allProducts !== mappedProducts) return;
+    _appwriteCategories = Array.isArray(data.categories) ? data.categories : [];
+    _appwriteSubcategories = Array.isArray(data.subcategories) ? data.subcategories : [];
+    mappedProducts.forEach(function(product) {
+      var sub = _appwriteSubcategories.find(function(s) { return String(s.$id || s.id) === String(product.subcategoryId); });
+      var catId = product.CATEGORYID || (sub && (sub.categoryId || sub.category_id));
+      var category = _appwriteCategories.find(function(c) { return String(c.$id || c.id) === String(catId); });
+      var categoryName = category && category.name || product.category;
+      var subName = sub && sub.name || product.subcategory;
+      product.category = categoryName || 'Sin Categoria';
+      product.subcategory = subName || '';
+      product.path = [product.category, product.subcategory].filter(function(value) { return value && value !== 'Sin Categoria'; });
+      if (!product.path.length) product.path = [product.category];
+    });
+    try { sessionStorage.removeItem(IFRAME_CATALOG_CACHE_KEY); } catch (e) {}
+    if (_firestoreReady) render();
+  }, 0); });
+  vendorsPromise.then(function(data) { setTimeout(function() {
+    if (allProducts !== mappedProducts || !data || !Array.isArray(data.vendors)) return;
+    _vendors = data.vendors.map(function(v) { return { id: v.id, name: v.name || 'Tienda asociada', color: v.color || '#f97316', logoUrl: v.logoUrl || '', phone: v.phone || '', minPurchaseAmount: v.minPurchaseAmount || 0 }; });
+    try { sessionStorage.removeItem(IFRAME_CATALOG_CACHE_KEY); } catch (e) {}
+    if (_firestoreReady) render();
+  }, 0); });
   // Actualizar MAIN_STORE_NAME desde la API (viene de la BD correcta)
   var mainProd = raw.find(function(p) { return !p.VENDOR_ID && p.VENDOR_NAME && p.VENDOR_NAME !== 'Yaxsell Demo'; });
-  if (mainProd && mainProd.VENDOR_NAME) {
+  if (!_settings.webConfig && mainProd && mainProd.VENDOR_NAME) {
     MAIN_STORE_NAME = String(mainProd.VENDOR_NAME).trim();
     try { localStorage.setItem('store_name', MAIN_STORE_NAME); } catch (e) {}
   }
@@ -5868,8 +5894,10 @@ async function init() {
   renderSkeleton();
   try {
     allProducts = await fetchAppwriteProducts();
+    catalogLoadError = false;
   } catch (e) {
     allProducts = [];
+    catalogLoadError = true;
     console.error('No se pudieron cargar productos desde Appwrite', e);
   }
   await loadFirestoreData();
@@ -5954,7 +5982,8 @@ async function refreshData() {
   try { sessionStorage.removeItem(IFRAME_CATALOG_CACHE_KEY); } catch (e) {}
   try {
     allProducts = await fetchAppwriteProducts();
-  } catch (e) { /* keep current data on failure */ }
+    catalogLoadError = false;
+  } catch (e) { catalogLoadError = true; /* conservar productos ya mostrados */ }
   await loadFirestoreData();
   updateCartCount();
   render();

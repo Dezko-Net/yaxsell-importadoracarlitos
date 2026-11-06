@@ -64,9 +64,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
-        {/* Force one-time hard reload for all users after deploy to clear stale chunks */}
-        {/* biome-ignore lint: intentional dangerouslySetInnerHTML for cache-busting */}
-        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var v='kc_force_reload_v2';var s=sessionStorage.getItem(v);if(!s){sessionStorage.setItem(v,'1');if(window.performance&&window.performance.navigation&&window.performance.navigation.type!==1){window.location.reload(true);}}}catch(e){}})();` }} />
         {/* Handler global: oculta imágenes rotas con placeholder de iniciales */}
         {/* biome-ignore lint: intentional dangerouslySetInnerHTML for global img error handler */}
         <script dangerouslySetInnerHTML={{ __html: `document.addEventListener('error',function(e){var el=e.target;if(el&&el.tagName==='IMG'&&!el.dataset.badImg){el.dataset.badImg='1';el.style.visibility='hidden';el.setAttribute('aria-hidden','true');}},true);` }} />

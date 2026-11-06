@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { TIMED_OFFERS_COLLECTION, PRODUCTS_COLLECTION } from '@/lib/db';
-import { isProductPublishedOnWeb } from '@/lib/product-publication';
+import { TIMED_OFFERS_COLLECTION } from '@/lib/db';
 import { unstable_cache } from 'next/cache';
 import { resolveProductDisplayPrice } from '@/lib/apertura-promo';
 import { fetchAperturaSettings } from '@/lib/apertura-promo-server';
 import { getSkuFromFeatures } from '@/lib/product-features';
 import { productMatchesBrand } from '@/lib/brands';
-import { getCachedAllProducts, applyWebPrice, isMainStoreProduct } from '@/lib/catalog-cache';
-import { normalizeProductImages } from '@/lib/product-images';
+import { getCachedAllProducts } from '@/lib/catalog-cache';
 import { serverListDocuments } from '@/lib/db-server';
 import { getProductNewestTimestamp } from '@/lib/product-sort-date';
-import { getInventoryConnectionMode, getInventoryStock } from '@/lib/inventory-mode';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,21 +64,6 @@ async function getCachedAperturaSettings(): Promise<any> {
   return settings;
 }
 
-// Si el catálogo no tiene productos publicados, evita repetir el fetch directo
-// de recuperación en cada visita. El fallback queda corto para reflejar altas.
-const getCachedEmptyCatalogFallback = unstable_cache(
-  async () => {
-    const directRes = await serverListDocuments(PRODUCTS_COLLECTION, [
-      JSON.stringify({ method: 'limit', values: [500] }),
-    ]);
-    // Cachear documentos crudos: el stock visible se proyecta después según el
-    // modo vigente, evitando conservar STOCK si se cambia a Web independiente.
-    return (directRes.documents as any[]).filter((p: any) => isMainStoreProduct(p));
-  },
-  ['public-products-empty-fallback-v2'],
-  { revalidate: 60, tags: ['products'] }
-);
-
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -129,29 +111,12 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0', 10);
 
     // Fetch cached data
-    let [allProductsRaw, activeOffers, apertura] = await Promise.all([
+    const [allProductsRaw, activeOffers, apertura] = await Promise.all([
       getCachedAllProducts(),
       minimal && !ofertasOnly ? Promise.resolve([]) : getCachedActiveOffers(),
       minimal ? Promise.resolve(null) : getCachedAperturaSettings()
     ]);
 
-    // Fail-safe: si el cache viene vacío, consultar directo a Firestore vía REST fallback
-    if (!allProductsRaw || (allProductsRaw as any[]).length === 0) {
-      try {
-        const fallbackRaw = await getCachedEmptyCatalogFallback();
-        const inventoryMode = await getInventoryConnectionMode();
-        allProductsRaw = (fallbackRaw as any[])
-          .filter((p: any) => getInventoryStock(p, inventoryMode, true) >= 0 && isProductPublishedOnWeb(p))
-          .map((p: any) => {
-            const product = normalizeProductImages(p as any) as any;
-            product.STOCK = getInventoryStock(p, inventoryMode, true);
-            product.stock = product.STOCK;
-            return applyWebPrice(product);
-          });
-      } catch (errDirect) {
-        console.error('[products/route] Direct fetch error:', errDirect);
-      }
-    }
     // En el catálogo, los clientes pueden explorar todos los productos disponibles y agotados.
     // El stock real se muestra en cada tarjeta (Stock: X unid. o Stock: 0 · Agotado).
     // Si explícitamente se pide inStockOnly=true, se filtran solo los con stock > 0.
@@ -366,6 +331,9 @@ export async function GET(request: NextRequest) {
 
   } catch (error: any) {
     console.error('[API public-data/products] Error:', error);
-    return NextResponse.json({ products: [], total: 0, priceRange: [0, 0], categoryCounts: {}, subcategoryCounts: {}, subSubcategoryCounts: {}, allTags: [], offerCount: 0, apurateCount: 0 }, { status: 200 });
+    return NextResponse.json({ error: 'No se pudo cargar el catálogo. Intenta de nuevo.', products: [] }, {
+      status: 503,
+      headers: { 'Cache-Control': 'no-store', 'Vercel-CDN-Cache-Control': 'no-store', 'CDN-Cache-Control': 'no-store' },
+    });
   }
 }

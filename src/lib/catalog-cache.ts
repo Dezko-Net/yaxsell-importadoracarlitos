@@ -345,15 +345,18 @@ async function fetchAllProductsFromDb(inventoryModeOverride?: InventoryConnectio
       let activeVendorIds: Set<string>;
       let vendorProfiles: Record<string, any>;
       const vNow = Date.now();
+      const vendorIds = new Set(allProducts
+        .map((p: any) => String(p.VENDOR_ID || p.vendorId || p.SELLERID || p.sellerId || '').trim())
+        .filter((id: string) => id && !MAIN_STORE_OWNER_IDS.has(id.toLowerCase()))
+      );
 
-      if (state.memoryCacheVendors && (vNow - state.memoryCacheVendors.time < VENDOR_CACHE_TTL)) {
+      if (!vendorIds.size) {
+        activeVendorIds = new Set<string>();
+        vendorProfiles = {};
+      } else if (state.memoryCacheVendors && (vNow - state.memoryCacheVendors.time < VENDOR_CACHE_TTL)) {
         activeVendorIds = state.memoryCacheVendors.data.activeVendorIds;
         vendorProfiles = state.memoryCacheVendors.data.profiles;
       } else {
-        const vendorIds = new Set(allProducts
-          .map((p: any) => String(p.VENDOR_ID || p.vendorId || p.SELLERID || p.sellerId || '').trim())
-          .filter((id: string) => id && !MAIN_STORE_OWNER_IDS.has(id.toLowerCase()))
-        );
         const publicVendors = await getPublicVendors();
         vendorProfiles = {};
         activeVendorIds = new Set<string>();

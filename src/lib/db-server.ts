@@ -417,7 +417,10 @@ async function fallbackClientListDocuments(
   while (url) {
     try {
       const res = await fetch(url);
-      if (!res.ok) break;
+      if (!res.ok) {
+        if (collectionId === PRODUCTS_COLLECTION) throw new Error(`No se pudieron consultar los productos en Firestore (HTTP ${res.status}).`);
+        break;
+      }
       const data: any = await res.json();
       if (data.documents) {
         for (const d of data.documents) {
@@ -429,7 +432,8 @@ async function fallbackClientListDocuments(
       } else {
         url = null;
       }
-    } catch {
+    } catch (error) {
+      if (collectionId === PRODUCTS_COLLECTION) throw error;
       break;
     }
   }
