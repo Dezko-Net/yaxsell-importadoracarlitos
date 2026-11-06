@@ -157,10 +157,10 @@ async function getBankDetails() {
       } as any;
       const details = {
         holder: doc.bankAccountHolder || doc.BANKACCOUNTHOLDER || "Importadora Carlitos",
-        rut: doc.bankRut || doc.BANKRUT || "78267426-9",
-        bank: doc.bankName || doc.BANKNAME || "Banco de Chile",
-        type: doc.bankAccountType || doc.BANKACCOUNTTYPE || "Cuenta Corriente",
-        account: doc.bankAccountNumber || doc.BANKACCOUNTNUMBER || "4081220201",
+        rut: doc.bankRut || doc.BANKRUT || "",
+        bank: doc.bankName || doc.BANKNAME || "",
+        type: doc.bankAccountType || doc.BANKACCOUNTTYPE || "",
+        account: doc.bankAccountNumber || doc.BANKACCOUNTNUMBER || "",
         email: doc.bankEmail || doc.BANKEMAIL || "",
       };
       cachedBankDetails = details;
@@ -172,11 +172,11 @@ async function getBankDetails() {
   }
   return {
     holder: "Importadora Carlitos",
-    rut: "78267426-9",
-    bank: "Banco de Chile",
-    type: "Cuenta Corriente",
-    account: "4081220201",
-    email: "contacto@yaxsell.cl",
+    rut: "",
+    bank: "",
+    type: "",
+    account: "",
+    email: "",
   };
 }
 
@@ -314,7 +314,7 @@ Tú misma tomas los pedidos conversando, como si fueras la cajera. NUNCA envíes
 3. Pídele su NOMBRE COMPLETO (nada más por ahora, el teléfono ya lo tienes tú automáticamente).
 4. En cuanto tengas los productos + el nombre, genera EXACTAMENTE este bloque oculto al final de tu respuesta (no esperes a tener dirección ni nada más):
 [ACTION:CREATE_ORDER]{"items":[{"id":"ID_REAL_DEL_PRODUCTO","qty":2}],"customerName":"Nombre Completo"}[/ACTION]
-Dile al cliente que registraste su pedido y que el stock quedó confirmado y reservado automáticamente. Envíale los datos de transferencia y explícale el plazo de pago configurado; ya no existe una etapa de espera por confirmación de la cajera.
+Dile al cliente que registraste su pedido y que el stock quedó confirmado y reservado automáticamente. Indícale que el equipo le enviará los datos de pago confirmados y explícale el plazo configurado; ya no existe una etapa de espera por confirmación de la cajera.
 5. A partir de ahí, tu trabajo es recolectar los datos de envío UNO A LA VEZ de forma conversacional (nunca los pidas todos juntos en una lista fría).
 6. Si el cliente escribe un dato incompleto o ambiguo (ej. le falta el número de la casa, o pone una comuna que no existe), pídele amablemente que lo repita o aclare antes de seguir con el siguiente dato.
 7. Cada vez que el cliente te dé uno o más datos de envío nuevos, guárdalos de inmediato generando este bloque oculto (solo incluye los campos que el cliente te acaba de dar, no inventes los demás):
@@ -323,12 +323,8 @@ Dile al cliente que registraste su pedido y que el stock quedó confirmado y res
 9. Cuando el cliente envíe una imagen para un pedido pendiente, el sistema le preguntará si es el comprobante. No afirmes que está recibido, asociado ni en revisión hasta que el cliente confirme "Sí"; si confirma, el sistema lo adjunta y le comparte el enlace de despacho.
 10. El stock se confirma automáticamente al crear el pedido. Si por alguna razón un producto no tiene stock, el sistema te avisará y activarás la sección "Negociación de productos faltantes" con ese cliente.
 
-## Información de pago (el stock ya está confirmado al crear el pedido, envía estos datos de inmediato):
-- Titular: Importadora Carlitos
-- RUT: 78267426-9
-- Banco: Banco de Chile (Cuenta Corriente)
-- Número de cuenta: 4081220201
-- Email: contacto@yaxsell.cl
+## Información de pago:
+Los datos de transferencia de Importadora Carlitos están pendientes de confirmación. No entregues números de cuenta, RUT ni datos bancarios; informa que el equipo proporcionará los datos correctos.
 
 ## ⛔ REGLAS ABSOLUTAS (PROHIBIDO ROMPER):
 1. NUNCA inventes nombres de productos. Solo menciona productos que aparezcan EXACTAMENTE en el catálogo que se te inyecta como contexto. Si no hay productos en el contexto, di que puedes mostrarle el catálogo en la web.
@@ -1337,15 +1333,11 @@ export async function POST(req: NextRequest) {
 
           let confirmStockMsg = "";
           const hasVendorBank = isVendorOrder && Boolean(bank?.account && String(bank.account).trim());
-          if (isVendorOrder && hasVendorBank) {
+          if (!isVendorOrder || !hasVendorBank) {
+            confirmStockMsg = `${greeting}Recibimos tu pedido *#${orderCode}* por un total de *$${orderTotal.toLocaleString("es-CL")}*. El stock está confirmado y reservado.\n\n${deadlineText}\n\nEl equipo te enviará los datos de transferencia confirmados para continuar con el pago.`;
+          } else if (isVendorOrder && hasVendorBank) {
             const emailPart = bank.email ? `\n- Correo: ${bank.email}` : "";
             confirmStockMsg = `${greeting}Te saluda el equipo de Importadora Carlitos. Recibimos tu pedido de la tienda aliada *${vendorName}* con código *#${orderCode}* por un total de *$${orderTotal.toLocaleString("es-CL")}*. El stock está confirmado y reservado.\n\n${deadlineText}\n\n*Datos para transferir a la tienda (${vendorName}):*\n- Banco: ${bank.bank} (${bank.type})\n- N° Cuenta: ${bank.account}\n- RUT: ${bank.rut}\n- Titular: ${bank.holder}${emailPart}\n\nPor favor realiza la transferencia directamente a la cuenta bancaria de la tienda indicada arriba y *envía la foto de tu comprobante por este chat* para que podamos validar tu pago y continuar con el despacho.`;
-          } else if (isVendorOrder) {
-            const centralBank = await getBankDetails();
-            const emailPart = centralBank.email ? `\n- Correo: ${centralBank.email}` : "";
-            confirmStockMsg = `${greeting}Te saluda el equipo de Importadora Carlitos. Recibimos tu pedido de la tienda aliada *${vendorName}* con código *#${orderCode}* por un total de *$${orderTotal.toLocaleString("es-CL")}*. El stock está confirmado y reservado.\n\n${deadlineText}\n\n*Datos para transferir:*\n- Banco: ${centralBank.bank} (${centralBank.type})\n- N° Cuenta: ${centralBank.account}\n- RUT: ${centralBank.rut}\n- Titular: ${centralBank.holder}${emailPart}\n\nPor favor realiza la transferencia y *envía la foto de tu comprobante por este chat* para validar tu pago y continuar con el despacho.`;
-          } else {
-            confirmStockMsg = `${greeting}Te saluda Iván de Importadora Carlitos. El stock de tu pedido *#${orderCode}* por un total de *$${orderTotal.toLocaleString("es-CL")}* está confirmado y reservado.\n\n${deadlineText}\n\n*Datos para transferir:*\n- Banco: ${bank.bank} (${bank.type})\n- N° Cuenta: ${bank.account}\n- RUT: ${bank.rut}\n- Titular: ${bank.holder}\n- Correo: ${bank.email || "contacto@yaxsell.cl"}\n\nPor favor realiza el pago y *envía la foto de tu comprobante por este chat* para validar el pago y continuar con el despacho.`;
           }
 
           await sendWhatsAppMessage(fromPhone, confirmStockMsg, WA_TOKEN);

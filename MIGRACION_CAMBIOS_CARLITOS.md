@@ -48,3 +48,8 @@ Esto solo cambia la navegación visible. No elimina sus rutas ni sus datos.
 
 - Al elegir WhatsApp se abre el formulario de nombre y teléfono y se usa el número configurado del bot; se elimina la selección de asesor en los dos flujos del carrito.
 - Se conserva la barra de anuncios amarilla y se actualiza la versión de los archivos del catálogo. Los cambios necesitan publicarse para aparecer en producción.
+
+### Enlaces y datos de pago del bot
+
+- Los enlaces públicos generados por el bot apuntan a `https://www.importadoracarlitos.cl`.
+- Los datos bancarios antiguos se retiraron del texto del bot; para la tienda principal, el bot informa que el equipo entregará datos confirmados hasta que Carlitos los proporcione. Revisar la configuración de pago y otras pantallas al recibirlos.
