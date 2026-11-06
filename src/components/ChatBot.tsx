@@ -6,7 +6,7 @@ import { CHATBOT_ENABLED } from '@/lib/feature-flags';
 import { useKeniaStatus } from '@/hooks/useKeniaStatus';
 
 // Numero y datos de Importadora Carlitos
-const KENIA_PHONE = '56936599658';
+const KENIA_PHONE = '56954592656';
 const KENIA_WA_URL = `https://wa.me/${KENIA_PHONE}?text=${encodeURIComponent('Hola Importadora Carlitos! Te escribo desde la tienda, quiero hacer una consulta.')}`;
 
 export default function ChatBot() {

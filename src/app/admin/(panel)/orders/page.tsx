@@ -177,8 +177,7 @@ const SHORT_LABEL: Record<string, string> = {
 const STATUS_KEYS = Object.keys(STATUS_CONFIG);
 
 const CASHIERS = [
-  { name: 'Lissy', phone: '56962293893' },
-  { name: 'Fernanda', phone: '56967294975' },
+  { name: 'Importadora Carlitos', phone: '56954592656' },
 ];
 
 type DateFilter = 'all' | 'today' | 'yesterday' | 'day_before' | 'custom';

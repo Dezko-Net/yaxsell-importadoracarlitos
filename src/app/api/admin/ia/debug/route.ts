@@ -3,7 +3,7 @@ import { AI_ENABLED } from '@/lib/feature-flags';
 import { getKeniaConfig, saveKeniaConfig, getKeniaUsage, resetKeniaUsage } from '@/lib/kenia-runtime';
 import { clearHistory } from '@/lib/whatsapp';
 
-const DEBUG_PHONE = '56992139185';
+const DEBUG_PHONE = '56985520703';
 
 export async function GET() {
   if (!AI_ENABLED) return NextResponse.json({ error: 'Feature no disponible' }, { status: 404 });

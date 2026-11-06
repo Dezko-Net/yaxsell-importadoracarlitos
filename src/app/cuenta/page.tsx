@@ -533,7 +533,7 @@ function ActualCuentaPage() {
             Importadora Carlitos <span>·</span> Cerca de ti, en cada compra.
           </span>
           <a
-            href="https://wa.me/56936599658"
+            href="https://wa.me/56954592656"
             target="_blank"
             rel="noopener noreferrer"
           >

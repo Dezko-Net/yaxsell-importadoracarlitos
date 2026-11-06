@@ -71,27 +71,18 @@ export default function StoreSettingsPage() {
   const [waContacts, setWaContacts] = useState<WhatsAppContact[]>([
     {
       id: 0,
-      name: 'Lissy',
-      number: '56936302521',
-      img: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/08/1785997439696-pegada-1785997429956.png',
-      sub: 'Personalizado',
-      active: true,
-    },
-    {
-      id: 1,
-      name: 'Fernanda',
-      number: '56945892576',
-      img: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/08/1785998075009-pegada-1785998072451.png',
-      sub: 'Personalizado',
+      name: 'Importadora Carlitos',
+      number: '56954592656',
+      sub: 'Atención por WhatsApp',
       active: true,
     },
   ]);
   const [balatin, setBalatin] = useState<BalatinContact>({
     name: 'Importadora Carlitos',
-    number: '56936599658',
+    number: '56954592656',
     img: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/09/1789051062597-pegada-1789051061671.png',
     active: true,
-    sub: 'Dueño Importadora Carlitos',
+    sub: 'Bot de atención Importadora Carlitos',
   });
   const [attendantMode, setAttendantMode] = useState<'choice' | 'direct' | 'rotation' | 'yexi'>('choice');
   const [allowWhatsappOrders, setAllowWhatsappOrders] = useState(true);
@@ -150,9 +141,9 @@ export default function StoreSettingsPage() {
         if (doc.balatinContact && typeof doc.balatinContact === 'object') {
           setBalatin({
             name: doc.balatinContact.name || 'Importadora Carlitos',
-            number: doc.balatinContact.number || '56936599658',
+            number: doc.balatinContact.number || '56954592656',
             img: doc.balatinContact.img || 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/09/1789051062597-pegada-1789051061671.png',
-            sub: doc.balatinContact.sub || 'Dueño Importadora Carlitos',
+            sub: doc.balatinContact.sub || 'Bot de atención Importadora Carlitos',
             active: doc.balatinContact.active !== false,
           });
         }
@@ -854,7 +845,7 @@ export default function StoreSettingsPage() {
                   {/* Teléfono */}
                   <div>
                     <label style={{ fontSize: 10, fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: 4 }}>Número de WhatsApp</label>
-                    <input value={c.number} onChange={e => setWaContacts(waContacts.map((x, i) => i === idx ? { ...x, number: e.target.value } : x))} placeholder="Ej: 56936302521" style={{
+                    <input value={c.number} onChange={e => setWaContacts(waContacts.map((x, i) => i === idx ? { ...x, number: e.target.value } : x))} placeholder="Ej: 56954592656" style={{
                       width: '100%', padding: '8px 12px', border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 13, outline: 'none', boxSizing: 'border-box',
                     }} />
                   </div>
@@ -918,7 +909,7 @@ export default function StoreSettingsPage() {
               </div>
               <div>
                 <label style={{ fontSize: 10, fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: 4 }}>Número de WhatsApp de Importadora Carlitos</label>
-                <input value={balatin.number} onChange={e => setBalatin({ ...balatin, number: e.target.value })} placeholder="Ej: 56936599658" style={{
+                <input value={balatin.number} onChange={e => setBalatin({ ...balatin, number: e.target.value })} placeholder="Ej: 56954592656" style={{
                   width: '100%', padding: '8px 12px', border: '1px solid #c7d2fe', borderRadius: 8, fontSize: 13, outline: 'none', boxSizing: 'border-box',
                 }} />
               </div>

@@ -721,7 +721,7 @@ export default function CatalogoMayoristaAdminPage() {
                   value={balatin.number}
                   onChange={(e) => setBalatin({ ...balatin, number: e.target.value })}
                   className="w-full px-4 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                  placeholder="Ej: 56936599658"
+                  placeholder="Ej: 56954592656"
                 />
               </div>
             </div>
@@ -1078,7 +1078,7 @@ export default function CatalogoMayoristaAdminPage() {
                     value={modalForm.number}
                     onChange={(e) => setModalForm({ ...modalForm, number: e.target.value })}
                     className="w-full pl-9 pr-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:outline-none text-sm font-mono font-bold text-gray-900"
-                    placeholder="56936302521"
+                    placeholder="56954592656"
                   />
                 </div>
                 <p className="text-[11px] text-gray-400 mt-1">

@@ -828,7 +828,7 @@ export default function PedidosMultiChannelSection({
           <a
             className={styles.helpLink}
             aria-label="Hablar con soporte por WhatsApp"
-            href="https://wa.me/56936599658"
+            href="https://wa.me/56954592656"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -1268,7 +1268,7 @@ export default function PedidosMultiChannelSection({
                             Ver detalle <ArrowRight size={14} />
                           </button>
                           <a
-                            href={`https://wa.me/56936599658?text=${encodeURIComponent(
+                            href={`https://wa.me/56954592656?text=${encodeURIComponent(
                               `Hola Importadora Carlitos, tengo una consulta sobre mi pedido #${order.code} (Estado: ${statusInfo.label})`,
                             )}`}
                             target="_blank"
@@ -1743,7 +1743,7 @@ export default function PedidosMultiChannelSection({
                       {/* WHATSAPP SUPPORT LINK */}
                       <a
                         className={styles.orderHelp}
-                        href={`https://wa.me/56936599658?text=${encodeURIComponent(
+                        href={`https://wa.me/56954592656?text=${encodeURIComponent(
                           `Hola Importadora Carlitos, tengo una consulta sobre mi pedido #${selected.code} (${meta.label})`,
                         )}`}
                         target="_blank"

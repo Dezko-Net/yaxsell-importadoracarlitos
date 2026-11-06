@@ -1,7 +1,9 @@
 /** Contacto de la tienda (WhatsApp, soporte). */
-export const WHATSAPP_PHONE = '56962293893';
-export const WHATSAPP_DISPLAY = '+56 9 6229 3893';
-export const WHATSAPP_E164 = '+56962293893';
+export const BOT_WHATSAPP_PHONE = '56954592656';
+export const OWNER_WHATSAPP_PHONE = '56985520703';
+export const WHATSAPP_PHONE = BOT_WHATSAPP_PHONE;
+export const WHATSAPP_DISPLAY = '+56 9 5459 2656';
+export const WHATSAPP_E164 = `+${BOT_WHATSAPP_PHONE}`;
 export const STORE_NAME = 'Importadora Carlitos';
 export const SUPPORT_HOURS = 'Lunes a sábado, 9:00 – 19:00 hrs';
 

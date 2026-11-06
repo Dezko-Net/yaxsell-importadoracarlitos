@@ -45,31 +45,15 @@ interface Attendant {
 const WHATSAPP_CONTACTS: Attendant[] = [
   {
     id: 0,
-    name: 'Lissy',
-    number: '56936302521',
-    img: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/08/1785997439696-pegada-1785997429956.png',
-    border: 'border-red-400',
-    hover: 'hover:border-red-500',
-    text: 'text-red-500',
-    sub: 'Personalizado',
-    floatingEmojis: ['❤️', '💖', '💕'],
-  },
-  {
-    id: 1,
-    name: 'Fernanda',
-    number: '56945892576',
-    img: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/08/1785998075009-pegada-1785998072451.png',
-    border: 'border-gray-500',
-    hover: 'hover:border-gray-600',
-    text: 'text-gray-600',
-    sub: 'Personalizado',
-    floatingEmojis: ['🖤', '🖤', '🖤'],
+    name: 'Importadora Carlitos',
+    number: '56954592656',
+    sub: 'Atención por WhatsApp',
   },
 ];
 
 const BALATIN_CONTACT = {
   name: 'Importadora Carlitos',
-  number: '56936599658',
+  number: '56954592656',
   img: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/09/1789051062597-pegada-1789051061671.png',
 };
 
@@ -391,7 +375,7 @@ export default function CartDrawer({ open, onClose }: Props) {
     waMsg += `*Total: ${formatPrice(subtotal)}*\n`;
     waMsg += `*Codigo: ${orderCode}*`;
 
-    const cleanNumber = normalizeChileanPhone(balatinConfig.number || '56936599658') || '56936599658';
+    const cleanNumber = normalizeChileanPhone(balatinConfig.number || '56954592656') || '56954592656';
     const waUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(waMsg)}`;
 
     try {
@@ -443,10 +427,10 @@ export default function CartDrawer({ open, onClose }: Props) {
 
     const isVendorOrder = Boolean(currentVendor && commonVendorId);
     const attendant = isVendorOrder || selectedAttendant === 'balatin' || selectedAttendant === 'yexi'
-      ? { name: balatinConfig.name || 'Importadora Carlitos', number: balatinConfig.number || '56936599658' }
+      ? { name: balatinConfig.name || 'Importadora Carlitos', number: balatinConfig.number || '56954592656' }
       : typeof selectedAttendant === 'number' && contactsList[selectedAttendant]
         ? contactsList[selectedAttendant]
-        : { name: balatinConfig.name || 'Importadora Carlitos', number: balatinConfig.number || '56936599658' };
+        : { name: balatinConfig.name || 'Importadora Carlitos', number: balatinConfig.number || '56954592656' };
 
     const apiBase = typeof window !== 'undefined' ? window.location.origin : '';
     const orderItems = items.map(i => ({
@@ -541,7 +525,7 @@ export default function CartDrawer({ open, onClose }: Props) {
     waMsg += `*Total: ${formatPrice(subtotal)}*\n`;
     waMsg += `*Codigo: ${orderCode}*`;
 
-    const targetNumber = normalizeChileanPhone(attendant.number || balatinConfig.number || '56936599658') || '56936599658';
+    const targetNumber = normalizeChileanPhone(attendant.number || balatinConfig.number || '56954592656') || '56954592656';
     const waUrl = `https://wa.me/${targetNumber}?text=${encodeURIComponent(waMsg)}`;
 
     try {

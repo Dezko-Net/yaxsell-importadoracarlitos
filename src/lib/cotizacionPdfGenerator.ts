@@ -328,14 +328,14 @@ export async function buildCotizacionPdf(
   doc.setTextColor(...C.gray600)
 
   const empNombre = cleanPdfText(data.empresaNombre) || 'Importadora Carlitos'
-  const empRut = cleanPdfText(data.empresaRut) || '77.890.123-4'
+  const empRut = cleanPdfText(data.empresaRut) || '77.862.693-4'
   doc.text(`${empNombre}  |  RUT: ${empRut}`, infoStartX, headerY + 8)
 
   const empDir = cleanPdfText(data.empresaDireccion) || 'Chacabuco #8, Estación Central, Santiago'
   const empDirFinal = empDir.toLowerCase().includes('chile') ? empDir : `${empDir}  |  Chile`
   doc.text(empDirFinal, infoStartX, headerY + 11.5)
 
-  const empTel = cleanPdfText(data.empresaTelefono) || '+56 9 6729 4975'
+  const empTel = cleanPdfText(data.empresaTelefono) || '+56 9 8552 0703'
   doc.text(`Tel/WhatsApp: ${empTel}`, infoStartX, headerY + 15)
 
   // ─── Badge de Cotización Formal (Lado Derecho) ───────────────────────────────

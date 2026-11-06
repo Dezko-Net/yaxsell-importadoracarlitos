@@ -3092,7 +3092,7 @@ export default function OrderDetailPage() {
                   <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">RUT</label>
                   <input className="cust-input px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" value={customerForm.rut} onChange={e => setCustomerForm(f => ({ ...f, rut: e.target.value }))} placeholder="Ej: 13.266.051-4" />
                   <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Teléfono</label>
-                  <input className="cust-input px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" value={customerForm.phone} onChange={e => setCustomerForm(f => ({ ...f, phone: e.target.value }))} placeholder="Ej: +56912345678" />
+                  <input className="cust-input px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" value={customerForm.phone} onChange={e => setCustomerForm(f => ({ ...f, phone: e.target.value }))} placeholder="Ej: +56954592656" />
                   <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Email</label>
                   <input className="cust-input px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" value={customerForm.email} onChange={e => setCustomerForm(f => ({ ...f, email: e.target.value }))} placeholder="Ej: marcela@gmail.com" />
                   <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Dirección</label>

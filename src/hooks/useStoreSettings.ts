@@ -26,36 +26,19 @@ export interface BalatinContact {
 export const DEFAULT_WHATSAPP_CONTACTS: Attendant[] = [
   {
     id: 0,
-    name: 'Lissy',
-    number: '56936302521',
-    img: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/08/1785997439696-pegada-1785997429956.png',
-    border: 'border-red-400',
-    hover: 'hover:border-red-500',
-    text: 'text-red-500',
-    sub: 'Personalizado',
+    name: 'Importadora Carlitos',
+    number: '56954592656',
+    sub: 'Atención por WhatsApp',
     active: true,
-    floatingEmojis: ['❤️', '💖', '💕'],
-  },
-  {
-    id: 1,
-    name: 'Fernanda',
-    number: '56945892576',
-    img: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/08/1785998075009-pegada-1785998072451.png',
-    border: 'border-gray-500',
-    hover: 'hover:border-gray-600',
-    text: 'text-gray-600',
-    sub: 'Personalizado',
-    active: true,
-    floatingEmojis: ['🖤', '🖤', '🖤'],
   },
 ];
 
 export const DEFAULT_BALATIN_CONTACT: BalatinContact = {
   name: 'Importadora Carlitos',
-  number: '56936599658',
+  number: '56954592656',
   img: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/09/1789051062597-pegada-1789051061671.png',
   active: true,
-  sub: 'Dueño Importadora Carlitos',
+  sub: 'Bot de atención Importadora Carlitos',
 };
 
 export interface HomeMarketing {
@@ -250,24 +233,10 @@ export function useStoreSettings() {
     return 50000;
   })() : 50000);
 
-  const effectiveWhatsappContacts = settings?.whatsappContacts || (typeof window !== 'undefined' ? (() => {
-    try {
-      const stored = localStorage.getItem('store_whatsapp_contacts');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch {}
-    return null;
-  })() : null) || DEFAULT_WHATSAPP_CONTACTS;
-
-  const effectiveBalatinContact = settings?.balatinContact || (typeof window !== 'undefined' ? (() => {
-    try {
-      const stored = localStorage.getItem('store_balatin_contact');
-      if (stored) return JSON.parse(stored);
-    } catch {}
-    return null;
-  })() : null) || DEFAULT_BALATIN_CONTACT;
+  // Esta copia de Carlitos utiliza un solo canal público: el número del bot.
+  // No recuperar contactos antiguos de localStorage ni de configuraciones heredadas.
+  const effectiveWhatsappContacts = DEFAULT_WHATSAPP_CONTACTS;
+  const effectiveBalatinContact = DEFAULT_BALATIN_CONTACT;
 
   return {
     settings,

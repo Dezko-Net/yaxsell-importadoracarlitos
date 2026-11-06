@@ -53,15 +53,15 @@ import { PAYMENT_PROOF_GRACE_MS } from "@/lib/payment-deadline";
 import { reserveOrderCode, resolveOrderByCode, resolveOrderById } from "@/lib/order-identity";
 import { invalidatePosWebReservations } from '@/lib/pos-web-reservations';
 import { getPublicSiteUrl } from '@/lib/public-site-url';
+import { BOT_WHATSAPP_PHONE, OWNER_WHATSAPP_PHONE } from '@/lib/store-contact';
 
 // ─── Config ────────────────────────────────────────────────────────────────────
 const SITE_URL = getPublicSiteUrl();
 const WA_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN || "";
 const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN || "";
-const ENV_ADMINS = process.env.ADMIN_WHATSAPP_NUMBER || "";
-const ADMIN_PHONES = ENV_ADMINS.split(",").map((num) => num.replace(/\D/g, "").trim()).filter(Boolean);
-const CUSTOMER_SUPPORT_PHONE = (process.env.CUSTOMER_SUPPORT_WHATSAPP_NUMBER || "").replace(/\D/g, "");
-const WORKER_WHATSAPP_PHONE = (process.env.WHATSAPP_WORKER_NUMBER || "").replace(/\D/g, "");
+const ADMIN_PHONES = [OWNER_WHATSAPP_PHONE];
+const CUSTOMER_SUPPORT_PHONE = BOT_WHATSAPP_PHONE;
+const WORKER_WHATSAPP_PHONE = "";
 
 async function resolveWebhookOrder(reference: string) {
   const cleanReference = String(reference || '').trim();
@@ -71,7 +71,7 @@ async function resolveWebhookOrder(reference: string) {
 }
 const CUSTOMER_SITE_URL = SITE_URL.replace(/\/+$/, "");
 // Número histórico del flujo de confirmación manual; se conserva para compatibilidad con pedidos antiguos.
-const STOCK_VERIFIER_PHONE = (process.env.STOCK_VERIFIER_WHATSAPP_NUMBER || "").replace(/\D/g, "");
+const STOCK_VERIFIER_PHONE = OWNER_WHATSAPP_PHONE;
 const PAYMENT_PROOF_ELIGIBLE_STATUSES = new Set([
   "pending",
   "pending_stock",
@@ -1596,9 +1596,7 @@ export async function POST(req: NextRequest) {
       } else if (interactiveId === "func_negociacion") {
         interceptReply = customerSupportReply();
       } else if (interactiveId === "func_humano") {
-        const MAIN_ADMIN_PHONE = (
-          keniaConfig.adminAlertPhone || ADMIN_PHONES[0] || ""
-        ).replace(/\D/g, "");
+        const MAIN_ADMIN_PHONE = ADMIN_PHONES[0];
         const alertMsg = `🚨 *ASISTENCIA REQUERIDA*\n\nEl cliente +${fromPhone} presionó el botón de "Hablar con persona".\n ${SITE_URL}/admin/ia/whatsapp`;
         await sendWhatsAppMessage(MAIN_ADMIN_PHONE, alertMsg, WA_TOKEN);
 
@@ -2629,9 +2627,7 @@ ${products.join("\n") || "Sin productos."}`;
       ) {
         // Auto-bloquear por spam
         await setKeniaBlocked(fromPhone, true, "spam");
-        const MAIN_ADMIN_PHONE = (
-          keniaConfig.adminAlertPhone || ADMIN_PHONES[0] || ""
-        ).replace(/\D/g, "");
+        const MAIN_ADMIN_PHONE = ADMIN_PHONES[0];
         const spamAlert = `🚫 *ALERTA ANTI-SPAM*\nEl número +${fromPhone} fue bloqueado automáticamente por enviar ${recentTimestamps.length} mensajes en menos de 2 minutos.\n\nÚltimo mensaje: "${userText}"\n\n🔗 Revisa en el panel: ${SITE_URL}/admin/ia/whatsapp`;
         await sendWhatsAppMessage(MAIN_ADMIN_PHONE, spamAlert, WA_TOKEN);
         return NextResponse.json({ status: "spam_blocked" });
@@ -2646,9 +2642,7 @@ ${products.join("\n") || "Sin productos."}`;
           return NextResponse.json({ status: "spam_blocked" });
         }
         if (usageCheck.adminTakeover || usageCheck.escalated) {
-          const MAIN_ADMIN_PHONE = (
-            keniaConfig.adminAlertPhone || ADMIN_PHONES[0] || ""
-          ).replace(/\D/g, "");
+          const MAIN_ADMIN_PHONE = ADMIN_PHONES[0];
           const adminNotif = `📩 *Cliente esperando respuesta*\n+${fromPhone} escribió: "${userText.slice(0, 300)}"\n\n🔗 Conversación: ${SITE_URL}/admin/ia/whatsapp?phone=${encodeURIComponent(fromPhone)}\n💬 WhatsApp: https://wa.me/${fromPhone}`;
           const nowWaiting = Date.now();
           const lastWaitingNotice = usageCheck.lastStallReplyTs || 0;
@@ -2663,9 +2657,7 @@ ${products.join("\n") || "Sin productos."}`;
         const lastBlockedTs = usageCheck.lastStallReplyTs || 0;
         const BLOCKED_NOTIFY_COOLDOWN = 3 * 60 * 1000; // 3 min
         if (nowBlocked - lastBlockedTs > BLOCKED_NOTIFY_COOLDOWN) {
-          const MAIN_ADMIN_PHONE = (
-            keniaConfig.adminAlertPhone || ADMIN_PHONES[0] || ""
-          ).replace(/\D/g, "");
+          const MAIN_ADMIN_PHONE = ADMIN_PHONES[0];
           const adminNotifBlocked = `⚠️ *Cliente pausado escribió*\n+${fromPhone}: "${userText}"\n\n🔗 Atiéndelo en: ${SITE_URL}/admin/ia/whatsapp`;
           await sendWhatsAppMessage(
             MAIN_ADMIN_PHONE,
@@ -2897,9 +2889,7 @@ El cliente te mandó todos sus datos de envío juntos. Debes EXTRAER los datos y
     // If all Gemini models failed, notify admin
     if (!rawText && !isAdmin) {
       try {
-        const MAIN_ADMIN_PHONE = (
-          keniaConfig.adminAlertPhone || ADMIN_PHONES[0] || ""
-        ).replace(/\D/g, "");
+        const MAIN_ADMIN_PHONE = ADMIN_PHONES[0];
         const failAlert = `⚠️ *BALATIN: Error de Gemini*\n\nNo pude responder a +${fromPhone}. Todos los modelos fallaron.\n\nMensaje del cliente: "${userText.substring(0, 100)}"\n\nRevisa el log del servidor para más detalles.`;
         await sendWhatsAppMessage(MAIN_ADMIN_PHONE, failAlert, WA_TOKEN);
       } catch {}
@@ -3520,9 +3510,7 @@ El cliente te mandó todos sus datos de envío juntos. Debes EXTRAER los datos y
 
     // ── Report to main admin if from customer ────────────────────────────────
     if (!isAdmin) {
-      const MAIN_ADMIN_PHONE = (
-        keniaConfig.adminAlertPhone || ADMIN_PHONES[0] || ""
-      ).replace(/\D/g, "");
+      const MAIN_ADMIN_PHONE = ADMIN_PHONES[0];
       const askAdminRegex = /\[ACTION:ASK_ADMIN\]([\s\S]*?)\[\/ACTION\]/;
       const askAdminMatch = rawText.match(askAdminRegex);
       const escalateRegex = /\[ACTION:ESCALATE_ADMIN\]([\s\S]*?)\[\/ACTION\]/;

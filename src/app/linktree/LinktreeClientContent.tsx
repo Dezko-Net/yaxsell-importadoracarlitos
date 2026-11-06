@@ -110,7 +110,7 @@ export default function LinktreeClientContent() {
 
           {/* ── Atención por WhatsApp con Cortina de Chat IA ── */}
           <a
-            href="https://wa.me/56962293893"
+            href="https://wa.me/56954592656"
             onClick={(e) => {
               e.preventDefault();
               setShowChatDrawer(true);

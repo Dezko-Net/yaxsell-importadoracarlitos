@@ -29,36 +29,19 @@ const displayStoreBrand = (value: unknown) =>
 const DEFAULT_WHATSAPP_CONTACTS = [
   {
     id: 0,
-    name: 'Lissy',
-    number: '56936302521',
-    img: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/08/1785997439696-pegada-1785997429956.png',
-    border: 'border-red-400',
-    hover: 'hover:border-red-500',
-    text: 'text-red-500',
-    sub: 'Personalizado',
+    name: 'Importadora Carlitos',
+    number: '56954592656',
+    sub: 'Atención por WhatsApp',
     active: true,
-    floatingEmojis: ['❤️', '💖', '💕'],
-  },
-  {
-    id: 1,
-    name: 'Fernanda',
-    number: '56945892576',
-    img: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/08/1785998075009-pegada-1785998072451.png',
-    border: 'border-gray-500',
-    hover: 'hover:border-gray-600',
-    text: 'text-gray-600',
-    sub: 'Personalizado',
-    active: true,
-    floatingEmojis: ['🖤', '🖤', '🖤'],
   },
 ];
 
 const DEFAULT_BALATIN_CONTACT = {
   name: 'Importadora Carlitos',
-  number: '56936599658',
+  number: '56954592656',
   img: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/09/1789051062597-pegada-1789051061671.png',
   active: true,
-  sub: 'Dueño Importadora Carlitos'
+  sub: 'Bot de atención Importadora Carlitos'
 };
 
 const DEFAULT_HOME_MARKETING = {
@@ -160,12 +143,9 @@ const getCachedStoreSettings = unstable_cache(
         bankAccountNumber: doc.bankAccountNumber || '',
         bankEmail: doc.bankEmail || '',
         bankInstructions: doc.bankInstructions || '',
-        whatsappContacts: Array.isArray(doc.whatsappContacts) && doc.whatsappContacts.length > 0 ? doc.whatsappContacts : DEFAULT_WHATSAPP_CONTACTS,
-        balatinContact: doc.balatinContact ? {
-          ...doc.balatinContact,
-          name: displayStoreBrand(doc.balatinContact.name),
-          sub: displayStoreBrand(doc.balatinContact.sub),
-        } : DEFAULT_BALATIN_CONTACT,
+        // No reutilizar teléfonos ni asistentes de la configuración heredada.
+        whatsappContacts: DEFAULT_WHATSAPP_CONTACTS,
+        balatinContact: DEFAULT_BALATIN_CONTACT,
         attendantMode: doc.attendantMode || 'choice',
         allowWhatsappOrders: doc.allowWhatsappOrders !== false,
         allowWebOrders: doc.allowWebOrders !== false,

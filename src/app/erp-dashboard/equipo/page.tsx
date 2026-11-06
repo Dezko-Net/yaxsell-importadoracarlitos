@@ -2713,7 +2713,7 @@ INSTRUCCIONES:
                     {renderCargoEditor(trabajador)}
                     <div>
                       <label className="text-[9px] font-bold text-slate-500 uppercase">Teléfono</label>
-                      <input type="tel" value={trabajador.telefono || ''} onChange={(e) => handleSave(trabajador.id, 'telefono', e.target.value)} onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} placeholder="+56912345678" className="w-full mt-1 px-2 py-1.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white" />
+                      <input type="tel" value={trabajador.telefono || ''} onChange={(e) => handleSave(trabajador.id, 'telefono', e.target.value)} onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} placeholder="+56954592656" className="w-full mt-1 px-2 py-1.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white" />
                     </div>
                     <div className="col-span-2">
                       <label className="text-[9px] font-bold text-slate-500 uppercase">Sueldo</label>

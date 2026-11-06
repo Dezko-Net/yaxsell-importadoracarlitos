@@ -439,7 +439,7 @@ export default function PedidoPage() {
           await fetch('/api/admin/whatsapp-send', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone: '56962293893', message: adminMsg })
+            body: JSON.stringify({ phone: '56985520703', message: adminMsg })
           });
         }
       } catch (errNotify) {
@@ -1589,7 +1589,7 @@ export default function PedidoPage() {
             Conecta tu pedido a nuestro WhatsApp para recibir actualizaciones automáticas. Si escribiste mal tu número en el carrito, haz click aquí para corregirlo.
           </p>
           <a
-            href={`https://wa.me/56962293893?text=vincular_pedido%20${order.$id}`}
+            href={`https://wa.me/56954592656?text=vincular_pedido%20${order.$id}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-2xl font-bold text-sm transition shadow-sm"

@@ -1,23 +1,17 @@
 'use server';
 
 import { sendWhatsAppMessage, sendWhatsAppTemplate, formatWhatsAppPhone, addToHistory } from '@/lib/whatsapp';
-import { getKeniaRuntimeSnapshot } from '@/lib/kenia-runtime';
 import { serverGetDocument, serverUploadFile, STORE_SETTINGS_COLLECTION } from '@/lib/db-server';
 import { ORDERS_COLLECTION_ID, VENDOR_ORDERS_COLLECTION_ID, VENDORS_COLLECTION_ID } from '@/lib/db';
 import { parsePaymentProofs } from '@/lib/payment-proofs';
 import { createPaymentReviewPdf } from '@/lib/payment-review-pdf';
 import type { VendorBranding } from '@/lib/generateOrderPdf';
+import { OWNER_WHATSAPP_PHONE } from '@/lib/store-contact';
 
-const ADMIN_FALLBACK_PHONE = '56992139185';
+const ADMIN_FALLBACK_PHONE = OWNER_WHATSAPP_PHONE;
 
 export async function getAdminAlertPhone(): Promise<string> {
-  try {
-    const runtime = await getKeniaRuntimeSnapshot();
-    if (runtime.config?.adminAlertPhone) {
-      return runtime.config.adminAlertPhone;
-    }
-  } catch {}
-  return process.env.ADMIN_WHATSAPP_NUMBER || ADMIN_FALLBACK_PHONE;
+  return ADMIN_FALLBACK_PHONE;
 }
 
 export async function notifyAdmin(message: string): Promise<void> {

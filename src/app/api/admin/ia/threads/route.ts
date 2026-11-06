@@ -3,6 +3,7 @@ import { AI_ENABLED, WHATSAPP_BOT_ENABLED } from '@/lib/feature-flags';
 import { ADMIN_CHAT_COLLECTION_ID, ORDERS_COLLECTION_ID } from '@/lib/db';
 import { serverListDocuments } from '@/lib/db-server';
 import { getKeniaRuntimeSnapshot, normalizePhone } from '@/lib/kenia-runtime';
+import { OWNER_WHATSAPP_PHONE } from '@/lib/store-contact';
 
 type ChatDoc = {
   $id: string;
@@ -25,7 +26,7 @@ export async function GET(req: NextRequest) {
     const res = await serverListDocuments(ADMIN_CHAT_COLLECTION_ID, [qLimit]);
     const runtime = await getKeniaRuntimeSnapshot();
     const adminPhones = new Set(
-      String(process.env.ADMIN_WHATSAPP_NUMBER || '')
+      OWNER_WHATSAPP_PHONE
         .split(',')
         .map((value) => normalizePhone(value))
         .filter(Boolean)

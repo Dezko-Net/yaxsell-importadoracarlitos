@@ -1633,7 +1633,7 @@ export default function AdminIAWhatsAppPage() {
             </div>
             <div style={{ marginBottom:14 }}>
               <label style={{ display:'block', color:'#374151', fontSize:12.5, fontWeight:700, marginBottom:7 }}>Número de teléfono</label>
-              <input type="text" inputMode="numeric" value={newChatPhone} onChange={e => setNewChatPhone(e.target.value)} placeholder="56912345678" className="wa-input" />
+              <input type="text" inputMode="numeric" value={newChatPhone} onChange={e => setNewChatPhone(e.target.value)} placeholder="56954592656" className="wa-input" />
             </div>
             <div style={{ marginBottom:24 }}>
               <label style={{ display:'block', color:'#374151', fontSize:12.5, fontWeight:700, marginBottom:7 }}>Nombre <span style={{ color:'#9ca3af', fontWeight:400 }}>(opcional)</span></label>

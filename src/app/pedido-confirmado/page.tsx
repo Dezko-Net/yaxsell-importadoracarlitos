@@ -382,7 +382,7 @@ function ConfirmadoInner() {
             <button onClick={() => { setIsLoading(true); load(); }} style={{ padding: '11px 24px', background: 'linear-gradient(135deg,#2563eb,#60a5fa)', color: '#fff', border: 0, borderRadius: 12, cursor: 'pointer', fontSize: 13, fontWeight: 700, boxShadow: '0 6px 20px rgba(37,99,235,0.25)' }}>
               Reintentar
             </button>
-            <a href="https://wa.me/56962293893" style={{ display: 'inline-block', padding: '11px 24px', background: '#f3f4f6', color: '#111827', borderRadius: 12, textDecoration: 'none', fontSize: 13, fontWeight: 700 }}>
+            <a href="https://wa.me/56954592656" style={{ display: 'inline-block', padding: '11px 24px', background: '#f3f4f6', color: '#111827', borderRadius: 12, textDecoration: 'none', fontSize: 13, fontWeight: 700 }}>
               Contactar soporte
             </a>
           </div>
@@ -621,7 +621,7 @@ function ConfirmadoInner() {
 
           {/* Verify button */}
           <a
-            href={`https://wa.me/56962293893?text=Hola%20Yaxbot,%20quiero%20verificar%20mi%20número%20para%20el%20pedido%20${order?.$id}%20(${order?.ORDERCODE}).%20Mi%20número%20registrado%20es%20${order?.CUSTOMERPHONE}`}
+            href={`https://wa.me/56954592656?text=Hola%20Yaxbot,%20quiero%20verificar%20mi%20número%20para%20el%20pedido%20${order?.$id}%20(${order?.ORDERCODE}).%20Mi%20número%20registrado%20es%20${order?.CUSTOMERPHONE}`}
             target="_blank"
             rel="noopener noreferrer"
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px', background: '#25D366', color: '#fff', borderRadius: 14, textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 14px rgba(37,211,102,0.2)', transition: 'all 0.2s' }}
