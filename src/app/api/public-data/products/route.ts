@@ -112,7 +112,9 @@ export async function GET(request: NextRequest) {
 
     // Fetch cached data
     const [allProductsRaw, activeOffers, apertura] = await Promise.all([
-      getCachedAllProducts(),
+      // El catálogo web se invalida al crear o editar productos e inventario.
+      // No se refresca con polling ni lecturas periódicas de Firestore.
+      getCachedAllProducts(minimal ? { eventDriven: true } : undefined),
       minimal && !ofertasOnly ? Promise.resolve([]) : getCachedActiveOffers(),
       minimal ? Promise.resolve(null) : getCachedAperturaSettings()
     ]);
@@ -176,7 +178,9 @@ export async function GET(request: NextRequest) {
         total: modeProducts.length,
       }, {
         headers: {
-          'Cache-Control': 'public, max-age=120, s-maxage=300, stale-while-revalidate=600'
+          'Cache-Control': 'private, no-store, no-cache, max-age=0, must-revalidate',
+          'Vercel-CDN-Cache-Control': 'no-store',
+          'CDN-Cache-Control': 'no-store',
         }
       });
     }

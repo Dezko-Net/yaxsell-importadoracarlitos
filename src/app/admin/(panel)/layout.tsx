@@ -65,10 +65,10 @@ const NAV_GROUPS: NavGroup[] = [
     ...(AI_ENABLED ? [{ href: '/admin/ia', label: 'IA', icon: Ico.Sparkles, children: [
       { href: '/admin/ia',          label: 'Centro de control', icon: Ico.Sparkles },
     ]}] : []),
-    ...(WHATSAPP_BOT_ENABLED ? [{ href: MODULE_ACCESS.whatsappManagement ? '/admin/ia/whatsapp' : '/admin/ia/cotizacion', label: 'BOT', icon: Ico.Bot, children: [
+    ...(WHATSAPP_BOT_ENABLED ? [{ href: MODULE_ACCESS.whatsappInbox ? '/admin/ia/whatsapp' : '/admin/ia/cotizacion', label: 'BOT', icon: Ico.Bot, children: [
       { href: '/admin/ia/cotizacion', label: 'Cotización', icon: Ico.Plantillas },
+      ...(MODULE_ACCESS.whatsappInbox ? [{ href: '/admin/ia/whatsapp', label: 'WhatsApp', icon: Ico.WhatsApp }] : []),
     ]}] : []),
-    ...(MODULE_ACCESS.whatsappManagement && (AI_ENABLED || WHATSAPP_BOT_ENABLED) ? [{ href: '/admin/ia/whatsapp', label: 'WhatsApp', icon: Ico.WhatsApp }] : []),
   ]}] : []),
   { label: 'SERVER', defaultOpen: true, items: [
     { href: '/admin/ia/firebase', label: 'Backend', icon: Ico.Server },
@@ -80,7 +80,6 @@ const NAV_GROUPS: NavGroup[] = [
       { href: '/admin/store-catalog',              label: '1. Seleccionar de Tienda', icon: Ico.Inventario },
       { href: '/admin/store-catalog/revision-web', label: '2. Revisión Web',           icon: Ico.Categorias },
       { href: '/admin/products',                   label: '3. Productos Publicados',   icon: Ico.Productos },
-      { href: '/admin/combos',                     label: 'Packs',                     icon: Ico.Productos },
       { href: '/admin/categories',                 label: 'Categorías',                icon: Ico.Categorias },
       { href: '/admin/subcategories',              label: 'Subcategorías',             icon: Ico.Subcategorias },
     ]},
@@ -91,14 +90,11 @@ const NAV_GROUPS: NavGroup[] = [
     { href: '/admin/users',     label: 'Clientes',   icon: Ico.Usuarios },
   ]},
   { label: 'General', defaultOpen: false, items: [
-    { href: '/admin/analytics', label: 'Analytics',    icon: Ico.Analytics },
-    { href: '/admin/vendors', label: 'Tiendas Aliadas', icon: Ico.Mayoristas },
     { href: '', label: 'Marketing', icon: Ico.OfertasDia, children: [
       { href: '/admin/marketing/home', label: 'Imágenes del inicio', icon: Ico.Plantillas },
       { href: '/admin/coupons',       label: 'Cupones',        icon: Ico.Cupones },
       { href: '/admin/points-store',  label: 'Tienda de puntos', icon: Ico.Sorteos },
     ]},
-    { href: '/admin/engagement/plantillas', label: 'Plantillas',       icon: Ico.Plantillas },
     { href: '', label: 'Mi Tienda', icon: Ico.MiTienda, children: [
       { href: '/admin/settings',       label: 'Servidor',         icon: Ico.Server },
       { href: '/admin/store-settings', label: 'Información',      icon: Ico.Productos },

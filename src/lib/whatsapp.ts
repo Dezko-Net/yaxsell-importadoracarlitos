@@ -7,11 +7,13 @@ const WA_PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID || '';
 const HARDCODED_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN || '';
 const WA_API_BASE = `https://graph.facebook.com/v20.0`;
 
-import { serverListDocuments, serverCreateDocument, serverDeleteDocument } from './db-server';
+import { getAdminDb, serverListDocuments, serverCreateDocument, serverDeleteDocument, serverGetDocument, serverUpdateDocument } from './db-server';
 import { ADMIN_CHAT_COLLECTION_ID } from './db';
+import { FieldValue } from 'firebase-admin/firestore';
 import crypto from 'crypto';
 
 const MAX_HISTORY = 20; // máx turnos a mantener por usuario
+export const WHATSAPP_THREAD_SUMMARIES_COLLECTION = 'whatsapp_thread_summaries';
 
 export function getWhatsAppDocId(msgId: string, role: 'user' | 'assistant'): string {
   const hash = crypto.createHash('md5').update(msgId).digest('hex');
@@ -73,16 +75,74 @@ export async function addToHistory(
       ? getWhatsAppDocId(msgId, role)
       : `wa_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     
-    await serverCreateDocument(ADMIN_CHAT_COLLECTION_ID, docId, {
-      userId: `whatsapp:${phone}`,
+    const phoneDigits = String(phone || '').replace(/\D/g, '');
+    if (!phoneDigits) return;
+    const now = new Date().toISOString();
+    const messageData = {
+      storeId: 'main_store',
+      userId: `whatsapp:${phoneDigits}`,
       senderRole: role === 'assistant' ? 'admin' : 'user',
       message: content,
-      createdAt: new Date().toISOString(),
+      createdAt: now,
       readByUser: true,
-      readByAdmin: true,
-    });
+      readByAdmin: role === 'assistant',
+      summaryIndexed: true,
+    };
+    const db = getAdminDb();
+    const summaryRef = db.collection(WHATSAPP_THREAD_SUMMARIES_COLLECTION).doc(phoneDigits);
+
+    // Escritura atómica sin leer el resumen; webhooks repetidos no duplican sus contadores.
+    if (typeof (db as any).batch === 'function') {
+      const batch = (db as any).batch();
+      batch.create(db.collection(ADMIN_CHAT_COLLECTION_ID).doc(docId), messageData);
+      batch.set(summaryRef, {
+        phone: phoneDigits,
+        preview: String(content || '').slice(0, 500),
+        lastAt: now,
+        totalMessages: FieldValue.increment(1),
+        customerMessages: FieldValue.increment(role === 'user' ? 1 : 0),
+        adminMessages: FieldValue.increment(role === 'assistant' ? 1 : 0),
+        unreadCount: FieldValue.increment(role === 'user' ? 1 : 0),
+        updatedAt: now,
+      }, { merge: true });
+      await batch.commit();
+      return;
+    }
+
+    // Compatibilidad con el adaptador REST anterior; este camino sí necesita una lectura.
+    try {
+      await serverGetDocument(ADMIN_CHAT_COLLECTION_ID, docId);
+      return;
+    } catch {}
+    await serverCreateDocument(ADMIN_CHAT_COLLECTION_ID, docId, messageData);
+    let current: Record<string, any> = {};
+    try {
+      current = await serverGetDocument(WHATSAPP_THREAD_SUMMARIES_COLLECTION, phoneDigits);
+      await serverUpdateDocument(WHATSAPP_THREAD_SUMMARIES_COLLECTION, phoneDigits, {
+        phone: phoneDigits,
+        preview: String(content || '').slice(0, 500),
+        lastAt: now,
+        totalMessages: Number(current.totalMessages || 0) + 1,
+        customerMessages: Number(current.customerMessages || 0) + (role === 'user' ? 1 : 0),
+        adminMessages: Number(current.adminMessages || 0) + (role === 'assistant' ? 1 : 0),
+        unreadCount: Number(current.unreadCount || 0) + (role === 'user' ? 1 : 0),
+        updatedAt: now,
+      });
+    } catch {
+      await serverCreateDocument(WHATSAPP_THREAD_SUMMARIES_COLLECTION, phoneDigits, {
+        phone: phoneDigits,
+        preview: String(content || '').slice(0, 500),
+        lastAt: now,
+        totalMessages: 1,
+        customerMessages: role === 'user' ? 1 : 0,
+        adminMessages: role === 'assistant' ? 1 : 0,
+        unreadCount: role === 'user' ? 1 : 0,
+        updatedAt: now,
+      });
+    }
   } catch (err) {
-    // If it's a duplicate document error, we just ignore it
+    const detail = String((err as any)?.message || err || '').toLowerCase();
+    if (detail.includes('already exists') || detail.includes('already-exists') || detail.includes('6 already')) return;
     console.error('[WhatsApp] addToHistory error:', err);
   }
 }
@@ -90,13 +150,19 @@ export async function addToHistory(
 export async function clearHistory(phone: string): Promise<void> {
   try {
     const qUserId = JSON.stringify({ method: 'equal', attribute: 'userId', values: [`whatsapp:${phone}`] });
+    const phoneDigits = String(phone || '').replace(/\D/g, '');
     const qLimit = JSON.stringify({ method: 'limit', values: [100] });
-    
-    const res = await serverListDocuments(ADMIN_CHAT_COLLECTION_ID, [qUserId, qLimit]);
-    if (res.documents && res.documents.length > 0) {
-      await Promise.all(
-        res.documents.map((doc: any) => serverDeleteDocument(ADMIN_CHAT_COLLECTION_ID, String(doc.$id || doc.id)).catch(() => {}))
-      );
+    while (true) {
+      const res = await serverListDocuments(ADMIN_CHAT_COLLECTION_ID, [qUserId, qLimit]);
+      const docs = res.documents || [];
+      if (docs.length === 0) break;
+      await Promise.all(docs.map((doc: any) =>
+        serverDeleteDocument(ADMIN_CHAT_COLLECTION_ID, String(doc.$id || doc.id)).catch(() => {})
+      ));
+      if (docs.length < 100) break;
+    }
+    if (phoneDigits) {
+      await serverDeleteDocument(WHATSAPP_THREAD_SUMMARIES_COLLECTION, phoneDigits).catch(() => {});
     }
   } catch (err) {
     console.error('[WhatsApp] clearHistory error:', err);

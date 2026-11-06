@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { whatsappAdminFetch } from '@/lib/whatsapp-admin-client';
 import {
   AlertTriangle,
   Bot,
@@ -98,7 +99,7 @@ export default function AdminIAPage() {
   const loadConfig = useCallback(async () => {
     setLoadingConfig(true);
     try {
-      const res = await fetch('/api/admin/ia/config', { cache: 'no-store' });
+      const res = await whatsappAdminFetch('/api/admin/ia/config', { cache: 'no-store' });
       const data = await res.json();
       if (data?.success) setConfig(data.config);
     } finally { setLoadingConfig(false); }
@@ -107,7 +108,7 @@ export default function AdminIAPage() {
   const loadThreads = useCallback(async () => {
     setLoadingThreads(true);
     try {
-      const res = await fetch('/api/admin/ia/threads', { cache: 'no-store' });
+      const res = await whatsappAdminFetch('/api/admin/ia/threads', { cache: 'no-store' });
       const data = await res.json();
       if (data?.success) setStats(data.stats);
     } finally { setLoadingThreads(false); }
@@ -115,7 +116,7 @@ export default function AdminIAPage() {
 
   const loadDebugInfo = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/ia/debug', { cache: 'no-store' });
+      const res = await whatsappAdminFetch('/api/admin/ia/debug', { cache: 'no-store' });
       const data = await res.json();
       if (data?.success) {
         setDebugMode(data.debugMode || false);
@@ -132,7 +133,7 @@ export default function AdminIAPage() {
     setDebugLoading(true);
     setDebugResult(null);
     try {
-      const res = await fetch('/api/admin/ia/debug', {
+      const res = await whatsappAdminFetch('/api/admin/ia/debug', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action }),
@@ -171,7 +172,7 @@ export default function AdminIAPage() {
   async function handleSaveConfig() {
     setSavingConfig(true);
     try {
-      const res = await fetch('/api/admin/ia/config', {
+      const res = await whatsappAdminFetch('/api/admin/ia/config', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(config),
@@ -189,7 +190,7 @@ export default function AdminIAPage() {
     const next = { ...config, isEnabled: !config.isEnabled };
     setConfig(next);
     try {
-      const res = await fetch('/api/admin/ia/config', {
+      const res = await whatsappAdminFetch('/api/admin/ia/config', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(next),

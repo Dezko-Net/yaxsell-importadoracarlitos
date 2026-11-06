@@ -15,11 +15,11 @@ export async function GET(request: NextRequest) {
     if (path) {
       revalidatePath(path, 'layout');
     }
-    if (tag) {
+    if (tag && tag !== 'products') {
       revalidateTag(tag);
       // Invalidación selectiva por dominio para no purgar categorías/subcategorías/ofertas innecesariamente
       if (tag === 'products' || tag === 'catalog') {
-        clearCatalogMemoryCache(); // Soft invalidation -> activa Server-Side Delta Sync
+        clearCatalogMemoryCache(); // También invalida la caché compartida del catálogo.
         clearCatalogDataCache();
         revalidateTag('home');
         revalidateTag('catalog');

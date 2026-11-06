@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { Search, X, Link2, Check, Trash2, Plus, Loader2 } from 'lucide-react';
+import { whatsappAdminFetch } from '@/lib/whatsapp-admin-client';
 
 interface QuoteProduct {
   id: string;
@@ -114,7 +115,7 @@ export default function CotizacionPage() {
     setGeneratingForm(true);
     try {
       const allProducts = groups.flatMap(g => g.products.map(p => ({ ...p, group: g.label })));
-      const res = await fetch('/api/admin/ia/cotizacion', {
+      const res = await whatsappAdminFetch('/api/admin/ia/cotizacion', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

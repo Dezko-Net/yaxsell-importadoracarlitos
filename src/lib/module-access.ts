@@ -4,6 +4,7 @@ export const MODULE_ACCESS = {
   pos: false,
   erp: false,
   whatsappManagement: false,
+  whatsappInbox: true,
 } as const;
 
 const INTEGRATED_PRODUCT_STEPS = new Set([
@@ -49,14 +50,14 @@ const ERP_PATHS = [
   '/admin-supreme',
 ] as const;
 
-// Bandeja y acciones manuales del panel; el webhook del bot no depende de estas rutas.
-const WHATSAPP_MANAGEMENT_PATHS = [
+// Bandeja de atención del bot: se puede ofrecer aunque no se contrate la gestión
+// general de WhatsApp integrada con pedidos, configuración y herramientas del ERP.
+const WHATSAPP_INBOX_PATHS = [
   '/admin/ia/whatsapp',
-  '/api/admin/whatsapp-send',
-  '/api/admin/orders/notify-shipping-data',
   '/api/admin/ia/config',
   '/api/admin/ia/threads',
   '/api/admin/ia/thread',
+  '/api/admin/ia/threads/backfill',
   '/api/admin/ia/send',
   '/api/admin/ia/send-template',
   '/api/admin/ia/customer-lookup',
@@ -68,8 +69,15 @@ const WHATSAPP_MANAGEMENT_PATHS = [
   '/api/admin/ia/interact',
 ] as const;
 
+// Funciones generales de WhatsApp ligadas a pedidos y ajustes comerciales.
+const WHATSAPP_MANAGEMENT_PATHS = [
+  '/api/admin/whatsapp-send',
+  '/api/admin/orders/notify-shipping-data',
+] as const;
+
 export const DISABLED_MODULE_PATHS = [
   ...(!MODULE_ACCESS.pos ? POS_PATHS : []),
   ...(!MODULE_ACCESS.erp ? ERP_PATHS : []),
+  ...(!MODULE_ACCESS.whatsappInbox ? WHATSAPP_INBOX_PATHS : []),
   ...(!MODULE_ACCESS.whatsappManagement ? WHATSAPP_MANAGEMENT_PATHS : []),
 ] as const;

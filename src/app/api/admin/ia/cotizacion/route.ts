@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { serverCreateDocument, serverListDocuments, serverGetDocument } from '@/lib/db-server';
 import { COTIZACION_COLLECTION_ID } from '@/lib/db';
+import { requireWhatsAppAdmin } from '@/lib/whatsapp-admin-auth';
 
 export async function POST(req: NextRequest) {
+  const denied = await requireWhatsAppAdmin(req);
+  if (denied) return denied;
   try {
     const { products, groups, discountPct, clientName } = await req.json();
     if (!Array.isArray(products) || products.length === 0) {

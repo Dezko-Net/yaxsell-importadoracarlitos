@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { serverListDocuments, getHeaders, getServerConfig } from '@/lib/db-server';
 import { USERS_COLLECTION_ID, ORDERS_COLLECTION_ID, VENDOR_ORDERS_COLLECTION_ID } from '@/lib/db';
 import { MEDIA_BUCKET_ID, MEDIA_PREFIXES } from '@/lib/db';
+import { requireWhatsAppAdmin } from '@/lib/whatsapp-admin-auth';
 
 export interface OrderDetail {
   id: string;
@@ -69,6 +70,8 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export async function GET(req: NextRequest) {
+  const denied = await requireWhatsAppAdmin(req);
+  if (denied) return denied;
   const raw = req.nextUrl.searchParams.get('phones') || '';
   const withDetail = req.nextUrl.searchParams.get('detail') === 'true';
   if (!raw.trim()) return NextResponse.json({ customers: {} });

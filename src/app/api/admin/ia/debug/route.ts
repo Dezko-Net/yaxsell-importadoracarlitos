@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AI_ENABLED } from '@/lib/feature-flags';
+import { AI_ENABLED, WHATSAPP_BOT_ENABLED } from '@/lib/feature-flags';
 import { getKeniaConfig, saveKeniaConfig, getKeniaUsage, resetKeniaUsage } from '@/lib/kenia-runtime';
 import { clearHistory } from '@/lib/whatsapp';
+import { requireWhatsAppAdmin } from '@/lib/whatsapp-admin-auth';
 
 const DEBUG_PHONE = '56985520703';
 
-export async function GET() {
-  if (!AI_ENABLED) return NextResponse.json({ error: 'Feature no disponible' }, { status: 404 });
+export async function GET(req: NextRequest) {
+  const denied = await requireWhatsAppAdmin(req);
+  if (denied) return denied;
+  if (!AI_ENABLED && !WHATSAPP_BOT_ENABLED) return NextResponse.json({ error: 'Feature no disponible' }, { status: 404 });
   try {
     const config = await getKeniaConfig();
     const usage = await getKeniaUsage(DEBUG_PHONE);
@@ -32,7 +35,9 @@ export async function GET() {
 }
 
 export async function PUT(req: NextRequest) {
-  if (!AI_ENABLED) return NextResponse.json({ error: 'Feature no disponible' }, { status: 404 });
+  const denied = await requireWhatsAppAdmin(req);
+  if (denied) return denied;
+  if (!AI_ENABLED && !WHATSAPP_BOT_ENABLED) return NextResponse.json({ error: 'Feature no disponible' }, { status: 404 });
   try {
     const body = await req.json();
     const action = body.action as string;

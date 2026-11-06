@@ -2,7 +2,7 @@ import 'server-only';
 
 import { getAuth } from 'firebase-admin/auth';
 import { NextRequest } from 'next/server';
-import { getAdminApp } from '@/lib/db-server';
+import { getAdminApp, getAdminDb } from '@/lib/db-server';
 import { isAdminEmail } from '@/lib/admin-access';
 
 const gAdminAuth = globalThis as unknown as {
@@ -37,6 +37,25 @@ export async function isSupremeAdminRequest(req: NextRequest): Promise<boolean> 
     const tokenExpMs = decoded.exp ? decoded.exp * 1000 : now + TOKEN_CACHE_TTL_MS;
     cache.set(token, { isAdmin, exp: Math.min(now + TOKEN_CACHE_TTL_MS, tokenExpMs) });
     return isAdmin;
+  } catch {
+    return false;
+  }
+}
+
+/** Permite gestionar WhatsApp a los administradores con acceso al módulo web. */
+export async function hasWebAdminAccess(req: NextRequest): Promise<boolean> {
+  const token = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '').trim();
+  if (!token) return false;
+  try {
+    const decoded = await getAuth(getAdminApp()).verifyIdToken(token);
+    const email = String(decoded.email || '').trim().toLowerCase();
+    if (!email) return false;
+    if (isAdminEmail(email)) return true;
+
+    const userId = email.replace(/[^a-z0-9_-]/g, '_');
+    const snapshot = await getAdminDb().collection('erp_users').doc(userId).get();
+    const modules = snapshot.data()?.modules;
+    return Array.isArray(modules) && modules.includes('web');
   } catch {
     return false;
   }

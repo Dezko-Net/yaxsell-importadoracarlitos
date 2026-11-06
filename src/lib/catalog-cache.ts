@@ -1,4 +1,4 @@
-import { unstable_cache } from 'next/cache';
+import { revalidateTag, unstable_cache } from 'next/cache';
 import { PRODUCTS_COLLECTION, STORE_SETTINGS_COLLECTION } from '@/lib/collections';
 import { normalizeProductImages } from '@/lib/product-images';
 import { serverListDocuments } from '@/lib/db-server';
@@ -67,6 +67,9 @@ export function clearCatalogMemoryCache(options?: { hard?: boolean }): void {
     // Soft invalidation: mantiene rawDocsMap para hacer Delta Sync incremental (1 lectura en vez de 736)
     state.needsDeltaSync = true;
   }
+  // Invalida también la caché compartida entre instancias serverless.
+  // Vaciar globalThis solo actualiza la instancia que recibió la mutación.
+  try { revalidateTag('products'); } catch {}
   clearHomeMemoryCache();
 }
 
@@ -271,10 +274,14 @@ import { applyWebPrice } from '@/lib/apertura-promo';
 import { isProductPublishedOnWeb } from '@/lib/product-publication';
 export { applyWebPrice };
 
-async function fetchAllProductsFromDb(inventoryModeOverride?: InventoryConnectionMode): Promise<any[]> {
+async function fetchAllProductsFromDb(
+  inventoryModeOverride?: InventoryConnectionMode,
+  forceRefresh = false,
+): Promise<any[]> {
   const requestedMode = inventoryModeOverride || await getInventoryConnectionMode();
   const now = Date.now();
   if (
+    !forceRefresh &&
     state.memoryCacheAllProducts &&
     state.memoryCacheInventoryMode === requestedMode &&
     !state.needsDeltaSync &&
@@ -451,13 +458,25 @@ async function fetchAllProductsFromDb(inventoryModeOverride?: InventoryConnectio
 }
 
 const nextCachedAllProducts = unstable_cache(
-  async (inventoryMode: InventoryConnectionMode) => fetchAllProductsFromDb(inventoryMode),
+  async (inventoryMode: InventoryConnectionMode) => fetchAllProductsFromDb(inventoryMode, true),
   ['all-public-products-cache-v22'],
-  { revalidate: 3600, tags: ['products', 'store_settings', 'vendors'] }
+  { revalidate: false, tags: ['products', 'store_settings', 'vendors'] }
 );
 
-export async function getCachedAllProducts(): Promise<any[]> {
+export async function getCachedAllProducts(options?: { eventDriven?: boolean }): Promise<any[]> {
   const inventoryMode = await getInventoryConnectionMode();
+  if (options?.eventDriven) {
+    // Esta ruta permanece en caché hasta que una mutación invalida `products`.
+    // No son necesarias lecturas por intervalo ni polling del catálogo.
+    const result = await nextCachedAllProducts(inventoryMode);
+    if (Array.isArray(result)) {
+      state.memoryCacheAllProducts = result;
+      state.memoryCacheAllProductsTime = Date.now();
+      state.memoryCacheInventoryMode = inventoryMode;
+      state.needsDeltaSync = false;
+    }
+    return result;
+  }
   if (
     state.memoryCacheAllProducts &&
     state.memoryCacheInventoryMode === inventoryMode &&

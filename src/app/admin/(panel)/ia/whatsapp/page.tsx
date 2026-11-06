@@ -3,6 +3,7 @@
    100dvh, fully responsive (desktop split-view + mobile view-switch + drawer) */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { whatsappAdminFetch } from '@/lib/whatsapp-admin-client';
 import {
   AlertTriangle,
   ArrowLeft,
@@ -102,6 +103,7 @@ type KeniaConfig = {
 
 type ThreadDetail = {
   phone: string;
+  unreadCount?: number;
   messages: ThreadMessage[];
   usage: {
     phone: string;
@@ -117,6 +119,13 @@ type ThreadDetail = {
     overLimit: boolean;
     tokenLimit: number;
   };
+};
+
+type ThreadIndexMigration = {
+  required: boolean;
+  complete: boolean;
+  cursor: string | null;
+  processed: number;
 };
 
 const emptyConfig: KeniaConfig = {
@@ -189,6 +198,9 @@ export default function AdminIAWhatsAppPage() {
     overLimitThreads: 0,
     totalTokens: 0,
   });
+  const [threadIndexMigration, setThreadIndexMigration] = useState<ThreadIndexMigration | null>(null);
+  const [migratingThreadIndex, setMigratingThreadIndex] = useState(false);
+  const [threadIndexProgress, setThreadIndexProgress] = useState('');
   const [selectedPhone, setSelectedPhone] = useState('');
   const [thread, setThread] = useState<ThreadDetail | null>(null);
   const [config, setConfig] = useState<KeniaConfig>(emptyConfig);
@@ -219,6 +231,7 @@ export default function AdminIAWhatsAppPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const selectedPhoneRef = useRef('');
   const customerMapRef = useRef<Record<string, CustomerInfo>>({});
+  const threadsRef = useRef<ThreadSummary[]>([]);
   const threadRequestRef = useRef(0);
   const threadsRequestRef = useRef(0);
   const requestedPhoneHandledRef = useRef(false);
@@ -248,7 +261,7 @@ export default function AdminIAWhatsAppPage() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`/api/admin/ia/customer-lookup?phones=${encodeURIComponent(finalPhone)}&detail=true`, { cache: 'no-store' });
+        const res = await whatsappAdminFetch(`/api/admin/ia/customer-lookup?phones=${encodeURIComponent(finalPhone)}&detail=true`, { cache: 'no-store' });
         const data = await res.json();
         if (cancelled) return;
         const info = data?.customers?.[finalPhone];
@@ -279,13 +292,17 @@ export default function AdminIAWhatsAppPage() {
   }, [selectedPhone]);
 
   useEffect(() => {
+    threadsRef.current = threads;
+  }, [threads]);
+
+  useEffect(() => {
     customerMapRef.current = customerMap;
   }, [customerMap]);
 
   const loadConfig = useCallback(async () => {
     setLoadingConfig(true);
     try {
-      const res = await fetch('/api/admin/ia/config', { cache: 'no-store' });
+      const res = await whatsappAdminFetch('/api/admin/ia/config', { cache: 'no-store' });
       const data = await res.json();
       if (data?.success) setConfig(data.config);
     } finally {
@@ -297,58 +314,30 @@ export default function AdminIAWhatsAppPage() {
     if (!silent) setLoadingThreads(true);
     const requestId = ++threadsRequestRef.current;
     try {
-      const query = search ? `?q=${encodeURIComponent(search)}` : '';
-      const res = await fetch(`/api/admin/ia/threads${query}`, { cache: 'no-store' });
+      // El buscador opera con la lista ya cargada y no vuelve a leer Firestore por tecla.
+      const res = await whatsappAdminFetch('/api/admin/ia/threads', { cache: 'no-store' });
       const data = await res.json();
       if (requestId !== threadsRequestRef.current) return;
       if (data?.success) {
         const nextThreads = data.threads as ThreadSummary[];
+        threadsRef.current = nextThreads;
         setThreads(nextThreads);
         setStats(data.stats);
+        if (data.migration) setThreadIndexMigration(data.migration as ThreadIndexMigration);
         const currentSelected = selectedPhoneRef.current;
-        if ((!keepSelection || !currentSelected) && nextThreads[0]) {
-          setSelectedPhone(nextThreads[0].phone);
-        } else if (currentSelected && !nextThreads.some((item) => item.phone === currentSelected)) {
-          setSelectedPhone(nextThreads[0]?.phone || '');
+        if (currentSelected && !nextThreads.some((item) => item.phone === currentSelected)) {
+          setSelectedPhone('');
+        } else if (!keepSelection && !currentSelected) {
+          // No abrir el primer chat al entrar: ahorra la lectura de sus mensajes.
+          setSelectedPhone('');
         }
-        // Enrich every customer thread in small batches. The lookup endpoint caps each
-        // request, and Firestore `in` queries have a limited number of operands.
-        if (nextThreads.length > 0 && !silent) {
-          const phones = nextThreads
-            .filter(t => t.segment === 'customer')
-            .filter(t => !customerMapRef.current[t.phone]?.name && (!t.displayName || t.displayName === `+${t.phone}`))
-            .map(t => t.phone);
-          if (phones.length) {
-            const phoneBatches: string[][] = [];
-            for (let i = 0; i < phones.length; i += 12) phoneBatches.push(phones.slice(i, i + 12));
-            void Promise.all(phoneBatches.map(async batch => {
-              try {
-                const response = await fetch(`/api/admin/ia/customer-lookup?phones=${encodeURIComponent(batch.join(','))}`, { cache: 'no-store' });
-                const lookup = await response.json();
-                return lookup?.customers || {};
-              } catch {
-                return {};
-              }
-            })).then(results => {
-              if (requestId !== threadsRequestRef.current) return;
-              const foundCustomers = Object.assign({}, ...results);
-              setCustomerMap(prev => {
-                const merged = { ...prev, ...foundCustomers };
-                sessionStorage.setItem('admin_whatsapp_cache', JSON.stringify({ threads: nextThreads, stats: data.stats, customerMap: merged }));
-                return merged;
-              });
-            });
-          } else {
-            sessionStorage.setItem('admin_whatsapp_cache', JSON.stringify({ threads: nextThreads, stats: data.stats }));
-          }
-        } else {
-          sessionStorage.setItem('admin_whatsapp_cache', JSON.stringify({ threads: nextThreads, stats: data.stats }));
-        }
+        // El perfil y los pedidos solo se consultan cuando se abre su panel.
+        sessionStorage.setItem('admin_whatsapp_cache', JSON.stringify({ threads: nextThreads, stats: data.stats, customerMap: customerMapRef.current }));
       }
     } finally {
       if (requestId === threadsRequestRef.current && !silent) setLoadingThreads(false);
     }
-  }, [search]);
+  }, []);
 
   const loadThread = useCallback(async (phone: string) => {
     if (!phone) return;
@@ -356,11 +345,19 @@ export default function AdminIAWhatsAppPage() {
     setLoadingThread(true);
     setThread(null);
     try {
-      const res = await fetch(`/api/admin/ia/thread?phone=${encodeURIComponent(phone)}`, { cache: 'no-store' });
+      const res = await whatsappAdminFetch(`/api/admin/ia/thread?phone=${encodeURIComponent(phone)}`, { cache: 'no-store' });
       const data = await res.json();
       if (requestId !== threadRequestRef.current) return;
       if (data?.success) {
         setThread(data.thread);
+        const priorUnreadCount = threadsRef.current.find((item) => item.phone === phone)?.unreadCount || 0;
+        const nextUnreadCount = data.thread.unreadCount == null ? priorUnreadCount : Math.max(0, Number(data.thread.unreadCount || 0));
+        const nextThreads = threadsRef.current.map((item) => item.phone === phone ? { ...item, unreadCount: nextUnreadCount } : item);
+        threadsRef.current = nextThreads;
+        setThreads(nextThreads);
+        if ((priorUnreadCount > 0) !== (nextUnreadCount > 0)) {
+          setStats((current) => ({ ...current, unreadThreads: Math.max(0, current.unreadThreads + (nextUnreadCount > 0 ? 1 : -1)) }));
+        }
       }
     } finally {
       if (requestId === threadRequestRef.current) setLoadingThread(false);
@@ -384,7 +381,6 @@ export default function AdminIAWhatsAppPage() {
           setThreads(parsed.threads);
           setStats(parsed.stats);
           if (parsed.customerMap) setCustomerMap(parsed.customerMap);
-          if (parsed.threads[0]) setSelectedPhone(parsed.threads[0].phone);
           setLoadingThreads(false);
           hasCachedThreads = true;
         }
@@ -418,19 +414,106 @@ export default function AdminIAWhatsAppPage() {
     (showToast as any)._timer = window.setTimeout(() => setMessage(null), 2800);
   }
 
+  async function handleOptimizeThreadIndex() {
+    if (migratingThreadIndex) return;
+    setMigratingThreadIndex(true);
+    setThreadIndexProgress('Preparando el índice…');
+    let cursor = threadIndexMigration?.cursor || null;
+    let complete = false;
+    let processed = threadIndexMigration?.processed || 0;
+    let pages = 0;
+    let retries = 0;
+    try {
+      while (!complete && pages < 10) {
+        const res = await whatsappAdminFetch('/api/admin/ia/threads/backfill', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cursor }),
+        });
+        const data = await res.json();
+        if (res.status === 409 && data?.retry) {
+          cursor = data.migration?.cursor || null;
+          processed = Number(data.migration?.processed || processed);
+          if (++retries > 3) throw new Error('El índice avanzó desde otra sesión. Actualiza e inténtalo de nuevo.');
+          continue;
+        }
+        if (!res.ok || !data?.success) throw new Error(data?.error || 'No se pudo optimizar el historial');
+        pages += 1;
+        cursor = data.migration?.cursor || null;
+        complete = Boolean(data.migration?.complete);
+        processed = Number(data.migration?.processed || processed);
+        setThreadIndexMigration(data.migration as ThreadIndexMigration);
+        setThreadIndexProgress(`Revisados ${processed.toLocaleString('es-CL')} mensajes antiguos…`);
+      }
+      if (complete) {
+        setThreadIndexProgress('Índice listo.');
+        await loadThreads(true, true);
+        showToast('success', 'Bandeja optimizada; historial indexado.');
+      } else {
+        setThreadIndexProgress(`Pausa segura en ${processed.toLocaleString('es-CL')} mensajes. Pulsa continuar para seguir.`);
+      }
+    } catch (error: any) {
+      setThreadIndexProgress('');
+      showToast('error', error?.message || 'No se pudo optimizar el historial');
+    } finally {
+      setMigratingThreadIndex(false);
+    }
+  }
+
+  function appendAdminMessageLocally(phone: string, text: string) {
+    const createdAt = new Date().toISOString();
+    setThread((current) => current?.phone === phone ? {
+      ...current,
+      messages: [...current.messages, {
+        id: `local-${Date.now()}`,
+        role: 'assistant',
+        text,
+        createdAt,
+        readByAdmin: true,
+        readByUser: true,
+      }],
+      usage: { ...current.usage, blocked: true, adminTakeover: true },
+    } : current);
+    const wasBlocked = !!threadsRef.current.find((item) => item.phone === phone)?.blocked;
+    const nextThreads = threadsRef.current.map((item) => item.phone === phone ? {
+      ...item,
+      preview: text,
+      lastAt: createdAt,
+      totalMessages: item.totalMessages + 1,
+      adminMessages: item.adminMessages + 1,
+      blocked: true,
+      adminTakeover: true,
+    } : item);
+    threadsRef.current = nextThreads;
+    setThreads(nextThreads);
+    if (!wasBlocked) setStats((current) => ({ ...current, blockedThreads: current.blockedThreads + 1 }));
+    try { sessionStorage.setItem('admin_whatsapp_cache', JSON.stringify({ threads: nextThreads, stats, customerMap: customerMapRef.current })); } catch {}
+  }
+
   async function handleSetBlock(blocked: boolean, reason?: 'admin_takeover' | 'spam' | 'manual') {
     if (!selectedPhone) return;
     setSavingBlock(true);
     try {
-      const res = await fetch('/api/admin/ia/block', {
+      const res = await whatsappAdminFetch('/api/admin/ia/block', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: selectedPhone, blocked, reason }),
       });
       const data = await res.json();
       if (!data?.success) throw new Error(data?.error || 'No se pudo actualizar');
-      await loadThread(selectedPhone);
-      await loadThreads(true);
+      const usage = data.usage || {};
+      const priorBlocked = !!threadsRef.current.find((item) => item.phone === selectedPhone)?.blocked;
+      setThread((current) => current?.phone === selectedPhone ? { ...current, usage: { ...current.usage, ...usage } } : current);
+      const nextThreads = threadsRef.current.map((item) => item.phone === selectedPhone ? {
+        ...item,
+        blocked: !!usage.blocked,
+        adminTakeover: !!usage.adminTakeover,
+        escalated: !!usage.escalated,
+        spamBlocked: !!usage.spamBlocked,
+      } : item);
+      threadsRef.current = nextThreads;
+      setThreads(nextThreads);
+      if (priorBlocked !== !!usage.blocked) setStats((current) => ({ ...current, blockedThreads: Math.max(0, current.blockedThreads + (usage.blocked ? 1 : -1)) }));
 
       let msgText = 'Cliente reactivado para IA';
       if (blocked) {
@@ -449,7 +532,7 @@ export default function AdminIAWhatsAppPage() {
   async function handleSaveConfig() {
     setSavingConfig(true);
     try {
-      const res = await fetch('/api/admin/ia/config', {
+      const res = await whatsappAdminFetch('/api/admin/ia/config', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(config),
@@ -468,7 +551,7 @@ export default function AdminIAWhatsAppPage() {
   async function saveKeniaStatusDirectly(newValue: boolean) {
     const next = { ...config, isEnabled: newValue };
     try {
-      const res = await fetch('/api/admin/ia/config', {
+      const res = await whatsappAdminFetch('/api/admin/ia/config', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(next),
@@ -489,16 +572,16 @@ export default function AdminIAWhatsAppPage() {
     if (!selectedPhone || !draft.trim()) return;
     setSending(true);
     try {
-      const res = await fetch('/api/admin/ia/send', {
+      const messageText = draft.trim();
+      const res = await whatsappAdminFetch('/api/admin/ia/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: selectedPhone, text: draft.trim() }),
+        body: JSON.stringify({ phone: selectedPhone, text: messageText }),
       });
       const data = await res.json();
       if (!data?.success) throw new Error(data?.error || 'No se pudo enviar');
       setDraft('');
-      await loadThread(selectedPhone);
-      await loadThreads(true);
+      appendAdminMessageLocally(selectedPhone, messageText);
       showToast('success', 'Mensaje enviado por WhatsApp');
     } catch (error: any) {
       showToast('error', error?.message || 'No se pudo enviar el mensaje');
@@ -511,15 +594,14 @@ export default function AdminIAWhatsAppPage() {
     if (!phone) return;
     setSendingTemplate(true);
     try {
-      const res = await fetch('/api/admin/ia/send-template', {
+      const res = await whatsappAdminFetch('/api/admin/ia/send-template', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone }),
       });
       const data = await res.json();
       if (!data?.success) throw new Error(data?.error || 'No se pudo enviar la plantilla');
-      await loadThread(phone);
-      await loadThreads(true);
+      if (data.loggedMessage) appendAdminMessageLocally(phone, data.loggedMessage);
       showToast('success', 'Plantilla de prueba enviada');
     } catch (error: any) {
       showToast('error', error?.message || 'No se pudo enviar la plantilla');
@@ -572,7 +654,7 @@ export default function AdminIAWhatsAppPage() {
     try {
       const phone = newChatPhone.replace(/\D/g, '').trim();
       const finalPhone = phone.startsWith('56') ? phone : (phone.length === 9 && phone.startsWith('9') ? '56' + phone : phone);
-      const res = await fetch('/api/admin/ia/send-template', {
+      const res = await whatsappAdminFetch('/api/admin/ia/send-template', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: finalPhone }),
@@ -591,7 +673,7 @@ export default function AdminIAWhatsAppPage() {
   async function handleClearHistory(phone: string) {
     setConfirmAction(null);
     try {
-      const res = await fetch('/api/admin/ia/clear-history', {
+      const res = await whatsappAdminFetch('/api/admin/ia/clear-history', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone, deleteUsage: false }),
@@ -608,7 +690,7 @@ export default function AdminIAWhatsAppPage() {
   async function handleDeleteThread(phone: string) {
     setConfirmAction(null);
     try {
-      const res = await fetch('/api/admin/ia/delete-thread', {
+      const res = await whatsappAdminFetch('/api/admin/ia/delete-thread', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone }),
@@ -634,7 +716,7 @@ export default function AdminIAWhatsAppPage() {
     setLoadingOrders(true);
     setShowOrdersPanel(true);
     try {
-      const res = await fetch(`/api/admin/ia/customer-lookup?phones=${encodeURIComponent(phone)}&detail=true`, { cache: 'no-store' });
+      const res = await whatsappAdminFetch(`/api/admin/ia/customer-lookup?phones=${encodeURIComponent(phone)}&detail=true`, { cache: 'no-store' });
       const data = await res.json();
       if (data?.customers?.[phone]) {
         setCustomerMap(prev => ({ ...prev, [phone]: { ...(prev[phone] || data.customers[phone]), ...data.customers[phone] } }));
@@ -649,7 +731,7 @@ export default function AdminIAWhatsAppPage() {
     try {
       const orders = customerMap[phone]?.orders || [];
       if (orders.length === 0) { showToast('error', 'No hay pedidos para vincular'); return; }
-      const res = await fetch('/api/admin/ia/link-phone', {
+      const res = await whatsappAdminFetch('/api/admin/ia/link-phone', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone, orderIds: orders.map(o => o.id) }),
@@ -1043,6 +1125,26 @@ export default function AdminIAWhatsAppPage() {
               </div>
             ))}
           </div>
+
+          {threadIndexMigration?.required && (
+            <div style={{ margin:'0 14px 10px', padding:'11px 12px', border:'1px solid #fed7aa', borderRadius:12, background:'#fff7ed', color:'#7c2d12' }}>
+              <div style={{ display:'flex', alignItems:'flex-start', gap:9 }}>
+                <AlertTriangle size={17} style={{ flexShrink:0, marginTop:2, color:'#c2410c' }} />
+                <div style={{ minWidth:0, flex:1 }}>
+                  <p style={{ fontSize:12, fontWeight:800 }}>Optimización inicial del historial</p>
+                  <p style={{ fontSize:11, lineHeight:1.45, marginTop:3, color:'#9a3412' }}>
+                    Se recorrerán los mensajes antiguos una sola vez para indexar las conversaciones. Después la bandeja consultará resúmenes, sin escanear mensajes y pedidos cada vez.
+                  </p>
+                  {threadIndexProgress && <p style={{ fontSize:10.5, marginTop:5, color:'#7c2d12' }}>{threadIndexProgress}</p>}
+                  <button type="button" onClick={handleOptimizeThreadIndex} disabled={migratingThreadIndex}
+                    style={{ marginTop:8, display:'inline-flex', alignItems:'center', gap:6, border:0, borderRadius:8, padding:'7px 10px', background:migratingThreadIndex?'#fed7aa':'#c2410c', color:'#fff', fontSize:11, fontWeight:800, cursor:migratingThreadIndex?'wait':'pointer' }}>
+                    {migratingThreadIndex ? <Loader2 size={13} className="animate-spin" /> : <Zap size={13} />}
+                    {migratingThreadIndex ? 'Optimizando…' : threadIndexMigration.processed ? 'Continuar optimización' : 'Optimizar historial antiguo'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Search */}
           <div className="wa-search-wrap">

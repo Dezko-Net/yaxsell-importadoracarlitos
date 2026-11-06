@@ -7,6 +7,7 @@ import { ORDERS_COLLECTION_ID } from '@/lib/db';
 import { getGeminiAuthHeaders, buildGeminiUrl } from '@/lib/google-auth';
 import { GEMINI_TEXT_MODELS } from '@/lib/gemini-models';
 import { getPublicSiteUrl } from '@/lib/public-site-url';
+import { requireWhatsAppAdmin } from '@/lib/whatsapp-admin-auth';
 
 export const maxDuration = 60;
 
@@ -33,6 +34,8 @@ Ayudas a los clientes con:
 - No hagas preguntas abiertas al final, responde y cierra`;
 
 export async function POST(req: NextRequest) {
+  const denied = await requireWhatsAppAdmin(req);
+  if (denied) return denied;
   if (!WHATSAPP_CUSTOMER_AI_ENABLED) return NextResponse.json({ error: 'Respuestas de IA por WhatsApp desactivadas' }, { status: 404 });
   try {
     const body = await req.json();
