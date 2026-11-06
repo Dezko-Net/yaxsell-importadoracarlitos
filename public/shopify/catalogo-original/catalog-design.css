@@ -637,8 +637,8 @@ header.glass > div > div:first-child > div:last-child { flex:1; min-width:0; }
 .catalog-service-bar #minPurchaseDisplay { color:#fff; }
 .catalog-shipping-icon { background:#b3555d; }
 /* A light blue announcement bar complements the yellow navigation. */
-#announcementBar.carlitos-announcement { background:#eaf4ff; color:#254c72; border-bottom-color:#c6dced; box-shadow:0 2px 8px rgba(35,75,120,.07); }
+#announcementBar.carlitos-announcement { background:#fff0a8; color:#254c72; border-top-color:#fad502; border-bottom-color:#e3c54b; box-shadow:0 2px 8px rgba(117,89,16,.09); }
 .carlitos-announcement-copy { color:#254c72; }
-.carlitos-announcement-copy i { color:#c28729; }
-.carlitos-announcement-location { background:#fff; border-color:#c6dced; color:#355c7e; }
-.carlitos-announcement-location svg { color:#b3555d; }
+.carlitos-announcement-copy i { color:#a91e2b; }
+.carlitos-announcement-location { background:#fffdf4; border-color:#e6cf70; color:#355c7e; }
+.carlitos-announcement-location svg { color:#a9444d; }

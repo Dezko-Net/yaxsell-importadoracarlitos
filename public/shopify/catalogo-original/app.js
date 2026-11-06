@@ -7,7 +7,7 @@ let WHATSAPP_CONTACTS = [
   { name: 'Cajera 1', number: '56962293893' },
   { name: 'Cajera 2', number: '56967294975' }
 ];
-let BALATIN_CONTACT = { name: 'Importadora Carlitos', number: '56936599658' };
+let BALATIN_CONTACT = { name: 'Importadora Carlitos', number: '56954592656' };
 let _homeMarketing = null;
 try { _homeMarketing = JSON.parse(localStorage.getItem('home_marketing') || 'null'); } catch (e) {}
 let MAIN_STORE_NAME = ((typeof localStorage !== 'undefined' && localStorage.getItem('store_name')) || 'Importadora Carlitos')
@@ -1731,11 +1731,11 @@ function choosePurchaseMethod(method) {
   var step2 = document.getElementById('modalStep2');
   if (step0) step0.classList.add('hidden');
   
-  var preferred = getPreferredAttendant();
-  var hasPreferred = preferred !== null && preferred >= 0 && preferred < WHATSAPP_CONTACTS.length;
-  if (step1) step1.classList.toggle('hidden', hasPreferred);
-  if (step2) step2.classList.toggle('hidden', !hasPreferred);
-  if (hasPreferred) selectAttendant(preferred);
+  selectedAttendant = 'bot';
+  if (step1) step1.classList.add('hidden');
+  if (step2) step2.classList.remove('hidden');
+  fillCustomerFormFromCache();
+  setTimeout(function() { var input = document.getElementById('custName'); if (input) input.focus(); }, 100);
 }
 window.choosePurchaseMethod = choosePurchaseMethod;
 
@@ -1945,7 +1945,7 @@ async function submitCustomerOrder() {
   if (!normalizedPhone) { showToast('Numero de telefono invalido. Ej: 9 1234 5678 o 56912345678'); return; }
 
   setSubmittingCustomerOrder(true);
-  var attendant = WHATSAPP_CONTACTS[selectedAttendant] || WHATSAPP_CONTACTS[0];
+  var attendant = { name: (BALATIN_CONTACT && BALATIN_CONTACT.name) || 'Importadora Carlitos', number: (BALATIN_CONTACT && BALATIN_CONTACT.number) || '56954592656' };
 
   var apiBase = window.location.origin;
 

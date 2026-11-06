@@ -43,3 +43,8 @@ Esto solo cambia la navegación visible. No elimina sus rutas ni sus datos.
 - `git diff --check` sin errores de formato.
 - No se ejecutaron pruebas ni compilación en este push.
 - No se ejecutó ninguna migración de datos ni se desplegó Firebase desde este cambio.
+
+### Compra directa con el bot (6-11-2026)
+
+- Al elegir WhatsApp se abre el formulario de nombre y teléfono y se usa el número configurado del bot; se elimina la selección de asesor en los dos flujos del carrito.
+- Se conserva la barra de anuncios amarilla y se actualiza la versión de los archivos del catálogo. Los cambios necesitan publicarse para aparecer en producción.

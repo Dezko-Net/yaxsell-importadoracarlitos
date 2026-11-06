@@ -240,74 +240,8 @@ export default function CartDrawer({ open, onClose }: Props) {
       return;
     }
 
-    if (currentVendor) {
-      // Para pedidos de tiendas aliadas (vendors), la atención va directamente al chatbot del número central de admin orders
-      setSelectedAttendant('balatin');
-      setModalStep(2);
-      return;
-    }
-
-    const isYexiActive = balatinConfig?.active !== false;
-
-    // Si la modalidad es Yexi IA directa, o si Yexi está activa y no hay asesoras humanas activas:
-    if (isYexiActive && (attendantMode === 'yexi' || contactsList.length === 0)) {
-      setSelectedAttendant('balatin');
-      setModalStep(2);
-      return;
-    }
-
-    if (attendantMode === 'direct') {
-      if (contactsList.length > 0) {
-        setSelectedAttendant(0);
-        setModalStep(2);
-        return;
-      } else if (isYexiActive) {
-        setSelectedAttendant('balatin');
-        setModalStep(2);
-        return;
-      }
-    }
-
-    if (attendantMode === 'rotation') {
-      if (contactsList.length > 0) {
-        const randomIdx = Math.floor(Math.random() * contactsList.length);
-        setSelectedAttendant(randomIdx);
-        setModalStep(2);
-        return;
-      } else if (isYexiActive) {
-        setSelectedAttendant('balatin');
-        setModalStep(2);
-        return;
-      }
-    }
-
-    try {
-      const pref = localStorage.getItem('preferredAttendant');
-      if (pref === 'balatin' || pref === 'yexi') {
-        if (isYexiActive) {
-          setSelectedAttendant('balatin');
-          setModalStep(2);
-          return;
-        }
-      } else if (pref !== null && !isNaN(Number(pref))) {
-        const numPref = Number(pref);
-        if (numPref >= 0 && numPref < contactsList.length && contactsList[numPref]?.active !== false) {
-          setSelectedAttendant(numPref);
-          setModalStep(2);
-          return;
-        } else {
-          localStorage.removeItem('preferredAttendant');
-        }
-      }
-    } catch {}
-
-    if (isYexiActive && contactsList.length === 0) {
-      setSelectedAttendant('balatin');
-      setModalStep(2);
-      return;
-    }
-
-    setModalStep(1);
+    setSelectedAttendant('balatin');
+    setModalStep(2);
   };
 
   const handleSelectAttendant = (idx: number) => {
