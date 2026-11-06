@@ -867,7 +867,10 @@ function getCartProduct(skuOrId) {
   if (!raw) return null;
   const overrides = getOverrides();
   const key = raw.sku || target;
-  return overrides[key] ? { ...raw, ...overrides[key] } : raw;
+  const result = overrides[key] ? { ...raw, ...overrides[key] } : { ...raw };
+  const live = allProducts.find(function(p) { return p && (p.sku === raw.sku || (p.id && p.id === raw.id)); });
+  if (live) { result.stock = live.stock; result.STOCK = live.stock; }
+  return result;
 }
 
 function getProducts() {
@@ -895,6 +898,8 @@ function getProducts() {
         return live && (live.sku === p.sku || live.id === p.id || live.name === p.name);
       });
       const merged = overrides[p.sku] ? { ...p, ...overrides[p.sku] } : { ...p };
+      // El inventario vivo no puede ser reemplazado por un ajuste local antiguo.
+      if (liveProduct) { merged.stock = liveProduct.stock; merged.STOCK = liveProduct.stock; }
       if (!merged.VENDOR_ID && liveProduct && liveProduct.VENDOR_ID) merged.VENDOR_ID = liveProduct.VENDOR_ID;
       if (!merged.VENDOR_NAME && liveProduct && liveProduct.VENDOR_NAME) merged.VENDOR_NAME = liveProduct.VENDOR_NAME;
       if (!merged.image) {
@@ -5706,8 +5711,9 @@ function resolveAppwriteImage(url, apiBase) {
 // consultando el catálogo para no prolongar la vigencia del stock mostrado.
 var _catalogFetchInFlight = null;
 var _lastCatalogSyncTs = 0;
-var IFRAME_CATALOG_CACHE_KEY = 'yaxsel_iframe_catalog_v3';
-var IFRAME_CATALOG_FRESH_MS = 10 * 60 * 1000; // 10 min
+var IFRAME_CATALOG_CACHE_KEY = 'yaxsel_iframe_catalog_v4';
+var IFRAME_CATALOG_FRESH_MS = 30 * 1000;
+var _catalogReadFromSession = false;
 function fetchAppwriteProducts(forceRefresh) {
   if (!forceRefresh && Array.isArray(allProducts) && allProducts.length > 0 && (Date.now() - _lastCatalogSyncTs < 2 * 60 * 1000)) {
     return Promise.resolve(allProducts);
@@ -5723,6 +5729,7 @@ function fetchAppwriteProducts(forceRefresh) {
           if (Array.isArray(parsed.vendors)) _vendors = parsed.vendors;
           if (parsed.mainStoreName) MAIN_STORE_NAME = parsed.mainStoreName;
           _lastCatalogSyncTs = Number(parsed.ts || Date.now());
+          _catalogReadFromSession = true;
           return Promise.resolve(parsed.products);
         }
       }
@@ -5746,7 +5753,7 @@ async function loadAppwriteProducts() {
     .then(function(res) { return res.ok ? res.json() : null; }).catch(function() { return null; });
   var vendorsPromise = fetch(apiBase + '/api/public-data/vendors')
     .then(function(res) { return res.ok ? res.json() : null; }).catch(function() { return null; });
-  var prodRes = await fetch(apiBase + '/api/public-data/products?limit=1000&includeVendorProducts=true&minimal=true');
+  var prodRes = await fetch(apiBase + '/api/public-data/products?limit=1000&includeVendorProducts=true&minimal=true&stockv=2');
   if (!prodRes.ok) throw new Error('No se pudieron cargar los productos (HTTP ' + prodRes.status + ').');
   var prodData = await prodRes.json();
   if (!Array.isArray(prodData) && !Array.isArray(prodData.products)) throw new Error('Respuesta de productos inválida.');
@@ -5962,6 +5969,11 @@ async function init() {
 
   updateHeaderWhatsAppUrl();
   render();
+  // Muestra la copia rápida e inmediatamente comprueba el stock de nuevo.
+  if (_catalogReadFromSession) {
+    _catalogReadFromSession = false;
+    refreshData().catch(function() {});
+  }
   loadCatalogPack().then(function() {
     const activeRoute = parseHash()[0] || '';
     if (!activeRoute || activeRoute === 'packs') render();

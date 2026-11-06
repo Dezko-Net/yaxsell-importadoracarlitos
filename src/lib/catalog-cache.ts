@@ -28,6 +28,7 @@ interface CatalogGlobalState {
   memoryCacheAllProductsTime: number;
   memoryCacheInventoryMode: InventoryConnectionMode | null;
   inflightCatalogFetch: Promise<any[]> | null;
+  inflightCatalogMode: InventoryConnectionMode | null;
   memoryCacheVendors: { data: { activeVendorIds: Set<string>; profiles: Record<string, any> }; time: number } | null;
   memoryCacheStoreName: { name: string; time: number } | null;
 }
@@ -42,6 +43,7 @@ if (!g.__yaxsellCatalogState) {
     memoryCacheAllProductsTime: 0,
     memoryCacheInventoryMode: null,
     inflightCatalogFetch: null,
+    inflightCatalogMode: null,
     memoryCacheVendors: null,
     memoryCacheStoreName: null,
   };
@@ -55,6 +57,7 @@ export function clearCatalogMemoryCache(options?: { hard?: boolean }): void {
   state.memoryCacheAllProductsTime = 0;
   state.memoryCacheInventoryMode = null;
   state.inflightCatalogFetch = null;
+  state.inflightCatalogMode = null;
   if (options?.hard) {
     state.rawDocsMap.clear();
     state.lastSyncTs = 0;
@@ -269,9 +272,11 @@ import { isProductPublishedOnWeb } from '@/lib/product-publication';
 export { applyWebPrice };
 
 async function fetchAllProductsFromDb(inventoryModeOverride?: InventoryConnectionMode): Promise<any[]> {
+  const requestedMode = inventoryModeOverride || await getInventoryConnectionMode();
   const now = Date.now();
   if (
     state.memoryCacheAllProducts &&
+    state.memoryCacheInventoryMode === requestedMode &&
     !state.needsDeltaSync &&
     now - state.memoryCacheAllProductsTime < MEMORY_CACHE_TTL
   ) {
@@ -279,9 +284,12 @@ async function fetchAllProductsFromDb(inventoryModeOverride?: InventoryConnectio
   }
 
   if (state.inflightCatalogFetch) {
-    return state.inflightCatalogFetch;
+    if (state.inflightCatalogMode === requestedMode) return state.inflightCatalogFetch;
+    await state.inflightCatalogFetch;
+    return fetchAllProductsFromDb(requestedMode);
   }
 
+  state.inflightCatalogMode = requestedMode;
   state.inflightCatalogFetch = (async () => {
     try {
       let usedDelta = false;
@@ -333,7 +341,7 @@ async function fetchAllProductsFromDb(inventoryModeOverride?: InventoryConnectio
 
       // El catálogo común contiene productos web activos de Importadora Carlitos y de
       // tiendas aliadas. Las rutas deciden después qué tienda mostrar.
-      const inventoryMode = inventoryModeOverride || await getInventoryConnectionMode();
+      const inventoryMode = requestedMode;
       const allProducts = Array.from(state.rawDocsMap.values()).filter((p: any) => {
         const stock = isMainStoreProduct(p)
           ? getInventoryStock(p, inventoryMode, true)
@@ -435,6 +443,7 @@ async function fetchAllProductsFromDb(inventoryModeOverride?: InventoryConnectio
       return state.memoryCacheAllProducts;
     } finally {
       state.inflightCatalogFetch = null;
+      state.inflightCatalogMode = null;
     }
   })();
 
@@ -443,7 +452,7 @@ async function fetchAllProductsFromDb(inventoryModeOverride?: InventoryConnectio
 
 const nextCachedAllProducts = unstable_cache(
   async (inventoryMode: InventoryConnectionMode) => fetchAllProductsFromDb(inventoryMode),
-  ['all-public-products-cache-v21'],
+  ['all-public-products-cache-v22'],
   { revalidate: 3600, tags: ['products', 'store_settings', 'vendors'] }
 );
 

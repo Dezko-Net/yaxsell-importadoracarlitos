@@ -22,7 +22,7 @@ interface CatalogoClientProps {
 }
 
 export default function CatalogoClient({ defaultHash = '' }: CatalogoClientProps = {}) {
-    const iframeSrc = `/shopify/catalogo-original/index.html?v=20261106_catalog_speed${defaultHash}`;
+    const iframeSrc = `/shopify/catalogo-original/index.html?v=20261106_stock_web${defaultHash}`;
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const { favorites, toggleFavorite } = useFavorites();
   const { addBundleItem } = useCart();
