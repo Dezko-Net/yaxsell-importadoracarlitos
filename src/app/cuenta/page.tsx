@@ -111,7 +111,7 @@ function CuentaWrapper() {
   const isEmbed = searchParams.get("embed") === "1";
 
   if (!isEmbed) {
-    return <CatalogoClient defaultHash="#/account" />;
+    return <CatalogoClient defaultHash={searchParams.get("pedidos") === "1" ? "#/account/orders" : "#/account"} />;
   }
 
   return <ActualCuentaPage />;
@@ -119,6 +119,7 @@ function CuentaWrapper() {
 
 function ActualCuentaPage() {
   const { user, isLoggedIn, isLoading, logout, loginWithGoogle } = useAuth();
+  const searchParams = useSearchParams();
   const reduced = useReducedMotion();
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleError, setGoogleError] = useState("");
@@ -129,6 +130,14 @@ function ActualCuentaPage() {
   const rootRef = useRef<HTMLElement>(null);
   const mascotRef = useRef<HTMLDivElement>(null);
   const slotRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isLoading || searchParams.get("pedidos") !== "1") return;
+    const frame = requestAnimationFrame(() => {
+      document.getElementById("historial-pedidos")?.scrollIntoView({ block: "start" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [isLoading, searchParams]);
 
   useEffect(() => {
     try {

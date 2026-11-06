@@ -288,10 +288,10 @@ function ConfirmarPedidoContent() {
           </p>
           <div className="mt-6 flex flex-col gap-3 justify-center">
             <Link
-              href="/productos"
+              href="/cuenta?pedidos=1"
               className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-indigo-600 text-white font-bold text-sm shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition active:scale-95"
             >
-              <span>📦 Ver mis pedidos en el catálogo</span>
+              <span>📦 Ver mis pedidos en mi cuenta</span>
             </Link>
             <Link
               href={`/pedido/${order?.$id || code}`}

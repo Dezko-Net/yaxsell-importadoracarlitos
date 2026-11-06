@@ -53,3 +53,7 @@ Esto solo cambia la navegación visible. No elimina sus rutas ni sus datos.
 
 - Los enlaces públicos generados por el bot apuntan a `https://www.importadoracarlitos.cl`.
 - Los datos bancarios antiguos se retiraron del texto del bot; para la tienda principal, el bot informa que el equipo entregará datos confirmados hasta que Carlitos los proporcione. Revisar la configuración de pago y otras pantallas al recibirlos.
+
+### Acceso directo al historial de pedidos
+
+- La confirmación de despacho y el enlace del bot abren `/cuenta?pedidos=1`, que muestra Mi cuenta y desplaza al historial dentro del catálogo incrustado. El acceso normal a Mi cuenta conserva su vista inicial.

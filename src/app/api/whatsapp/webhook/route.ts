@@ -373,7 +373,7 @@ function isOrderStatusRequest(text: string): boolean {
 
 function customerOrderStatusReply(): string {
   const contactNumber = CUSTOMER_SUPPORT_PHONE ? `+${CUSTOMER_SUPPORT_PHONE}` : "este mismo WhatsApp";
-  return `Puedes revisar tus pedidos aquí:\n${CUSTOMER_SITE_URL}/cuenta\n\nSi compraste por la web, inicia sesión con tu cuenta. Si hiciste el pedido por WhatsApp, sincroniza tu número de teléfono en Mi cuenta. Cuando despachemos tu pedido, podrás ver el estado en tu historial. Cuando salga de la tienda, ${contactNumber} te enviará el comprobante de envío.`;
+  return `Puedes revisar tus pedidos aquí:\n${CUSTOMER_SITE_URL}/cuenta?pedidos=1\n\nSi compraste por la web, inicia sesión con tu cuenta. Si hiciste el pedido por WhatsApp, sincroniza tu número de teléfono en Mi cuenta. Cuando despachemos tu pedido, podrás ver el estado en tu historial. Cuando salga de la tienda, ${contactNumber} te enviará el comprobante de envío.`;
 }
 
 function customerSupportReply(): string {

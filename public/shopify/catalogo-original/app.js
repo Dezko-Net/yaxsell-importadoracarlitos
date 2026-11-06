@@ -2443,6 +2443,7 @@ window.addEventListener('hashchange', render);
 
 // === Account Embed View ===
 function renderAccount() {
+  const accountUrl = location.hash.startsWith('#/account/orders') ? '/cuenta?embed=1&pedidos=1' : '/cuenta?embed=1';
   const announcementBar = document.getElementById('announcementBar');
   if (announcementBar) announcementBar.style.display = 'none';
 
@@ -2457,9 +2458,11 @@ function renderAccount() {
     container = document.createElement('div');
     container.id = 'accountEmbedContainer';
     container.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:40;background:#121216;-webkit-overflow-scrolling:touch;overflow:hidden;border:none;margin:0;padding:0;';
-    container.innerHTML = '<iframe id="accountFrame" src="/cuenta?embed=1" style="width:100%;height:100%;border:none;margin:0;padding:0;display:block;outline:none;" title="Mi cuenta"></iframe>';
+    container.innerHTML = '<iframe id="accountFrame" src="' + accountUrl + '" style="width:100%;height:100%;border:none;margin:0;padding:0;display:block;outline:none;" title="Mi cuenta"></iframe>';
     document.body.appendChild(container);
   }
+  const accountFrame = document.getElementById('accountFrame');
+  if (accountFrame && accountFrame.getAttribute('src') !== accountUrl) accountFrame.setAttribute('src', accountUrl);
   container.style.display = 'block';
   container.style.visibility = 'visible';
 
