@@ -70,7 +70,7 @@ const WHATSAPP_CONTACTS: Attendant[] = [
 
 const BALATIN_CONTACT = {
   name: 'Importadora Carlitos',
-  number: '56936599658',
+  number: '56936715405',
   img: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/09/1789051062597-pegada-1789051061671.png',
 };
 
@@ -328,7 +328,7 @@ export default function CartDrawer({ open, onClose }: Props) {
     waMsg += `*Total: ${formatPrice(subtotal)}*\n`;
     waMsg += `*Codigo: ${orderCode}*`;
 
-    const cleanNumber = normalizeChileanPhone(balatinConfig.number || '56936599658') || '56936599658';
+    const cleanNumber = normalizeChileanPhone(balatinConfig.number || '56936715405') || '56936715405';
     const waUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(waMsg)}`;
 
     try {
@@ -388,10 +388,10 @@ export default function CartDrawer({ open, onClose }: Props) {
     const attendant = directWebBot
       ? { name: webConfig.storeName || currentStoreName, number: webConfig.botPhone }
       : isVendorOrder || selectedAttendant === 'balatin' || selectedAttendant === 'yexi'
-      ? { name: balatinConfig.name || 'Importadora Carlitos', number: balatinConfig.number || '56936599658' }
+      ? { name: balatinConfig.name || 'Importadora Carlitos', number: balatinConfig.number || '56936715405' }
       : typeof selectedAttendant === 'number' && contactsList[selectedAttendant]
         ? contactsList[selectedAttendant]
-        : { name: balatinConfig.name || 'Importadora Carlitos', number: balatinConfig.number || '56936599658' };
+        : { name: balatinConfig.name || 'Importadora Carlitos', number: balatinConfig.number || '56936715405' };
 
     const apiBase = typeof window !== 'undefined' ? window.location.origin : '';
     const orderItems = items.map(i => ({
@@ -486,7 +486,7 @@ export default function CartDrawer({ open, onClose }: Props) {
     waMsg += `*Total: ${formatPrice(subtotal)}*\n`;
     waMsg += `*Codigo: ${orderCode}*`;
 
-    const targetNumber = normalizeChileanPhone(attendant.number || balatinConfig.number || '56936599658') || '56936599658';
+    const targetNumber = normalizeChileanPhone(attendant.number || balatinConfig.number || '56936715405') || '56936715405';
     const waUrl = `https://wa.me/${targetNumber}?text=${encodeURIComponent(waMsg)}`;
 
     try {

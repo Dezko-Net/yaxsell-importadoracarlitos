@@ -721,7 +721,7 @@ export default function CatalogoMayoristaAdminPage() {
                   value={balatin.number}
                   onChange={(e) => setBalatin({ ...balatin, number: e.target.value })}
                   className="w-full px-4 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                  placeholder="Ej: 56936599658"
+                  placeholder="Ej: 56936715405"
                 />
               </div>
             </div>

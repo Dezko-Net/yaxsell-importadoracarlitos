@@ -88,7 +88,7 @@ export default function StoreSettingsPage() {
   ]);
   const [balatin, setBalatin] = useState<BalatinContact>({
     name: 'Importadora Carlitos',
-    number: '56936599658',
+    number: '56936715405',
     img: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/09/1789051062597-pegada-1789051061671.png',
     active: true,
     sub: 'Dueño Importadora Carlitos',
@@ -150,7 +150,7 @@ export default function StoreSettingsPage() {
         if (doc.balatinContact && typeof doc.balatinContact === 'object') {
           setBalatin({
             name: doc.balatinContact.name || 'Importadora Carlitos',
-            number: doc.balatinContact.number || '56936599658',
+            number: doc.balatinContact.number || '56936715405',
             img: doc.balatinContact.img || 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/09/1789051062597-pegada-1789051061671.png',
             sub: doc.balatinContact.sub || 'Dueño Importadora Carlitos',
             active: doc.balatinContact.active !== false,
@@ -882,7 +882,7 @@ export default function StoreSettingsPage() {
               </div>
               <div>
                 <label style={{ fontSize: 10, fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: 4 }}>Número de WhatsApp de Importadora Carlitos</label>
-                <input value={balatin.number} onChange={e => setBalatin({ ...balatin, number: e.target.value })} placeholder="Ej: 56936599658" style={{
+                <input value={balatin.number} onChange={e => setBalatin({ ...balatin, number: e.target.value })} placeholder="Ej: 56936715405" style={{
                   width: '100%', padding: '8px 12px', border: '1px solid #c7d2fe', borderRadius: 8, fontSize: 13, outline: 'none', boxSizing: 'border-box',
                 }} />
               </div>

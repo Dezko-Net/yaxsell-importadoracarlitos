@@ -1223,7 +1223,7 @@ export const SECTION_DEFAULTS: SectionConfig[] = [
         { title: 'Métodos de pago', url: '/pagos' },
       ],
       footerCol3Links: [
-        { title: 'WhatsApp', url: 'https://wa.me/56962293893' },
+        { title: 'WhatsApp', url: 'https://wa.me/56936715405' },
         { title: 'Instagram', url: 'https://instagram.com/yaxsell' },
         { title: 'Facebook', url: 'https://facebook.com/yaxsell' },
         { title: 'Email', url: 'mailto:contacto@yaxsell.cl' },

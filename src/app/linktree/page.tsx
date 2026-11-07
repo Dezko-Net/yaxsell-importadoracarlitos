@@ -33,7 +33,7 @@ const LINKS = [
 ];
 
 const SOCIAL = [
-  { href: 'https://wa.me/56962293893',            icon: MessageCircle, label: 'WhatsApp',  color: '#25D366' },
+  { href: 'https://wa.me/56936715405',            icon: MessageCircle, label: 'WhatsApp',  color: '#25D366' },
   { href: 'https://instagram.com/yaxsell',  icon: Instagram,     label: 'Instagram', color: '#E1306C' },
 ];
 import LinktreeClientContent from './LinktreeClientContent';
