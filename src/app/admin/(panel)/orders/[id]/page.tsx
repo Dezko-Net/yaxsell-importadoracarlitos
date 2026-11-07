@@ -8,6 +8,7 @@ import { MODULE_ACCESS } from '@/lib/module-access';
 import { MEDIA_BUCKET_ID, MEDIA_PREFIXES, ORDER_BOX_PHOTOS_BUCKET_ID, ID, Query } from '@/lib/db';
 import { Order, OrderStatus } from '@/types/admin';
 import { generateOrderPdf } from '@/lib/generateOrderPdf';
+import { orderQrSvg } from '@/lib/order-qr';
 import {
   ArrowLeft, Package, User, MapPin, CreditCard, Truck, Clock, FileText,
   Phone, Mail, Hash, ChevronDown, Save, CheckCircle, Copy, Check,
@@ -1324,7 +1325,7 @@ export default function OrderDetailPage() {
         setSelectedPaymentProofIsPdf(true);
       } else {
         // Usar el proxy para evitar bloqueo CORS de Firebase Storage
-        const proxyUrl = `/api/media-proxy?url=${encodeURIComponent(selectedPaymentProof)}`;
+        const proxyUrl = selectedPaymentProof.startsWith('/api/media-proxy?') ? selectedPaymentProof : `/api/media-proxy?url=${encodeURIComponent(selectedPaymentProof)}`;
         fetch(proxyUrl, { method: 'HEAD' })
           .then(res => {
             const contentType = res.headers.get('content-type');
@@ -1560,17 +1561,19 @@ export default function OrderDetailPage() {
     );
   }
 
-  let items: { name: string; qty: number; price: number; total: number; img?: string; id?: string; originalPrice?: number | null }[] = [];
+  let items: { name: string; qty: number; price: number; total: number; img?: string; id?: string; sku?: string; originalPrice?: number | null }[] = [];
   try { items = JSON.parse(order.ITEMS || '[]'); } catch {}
   const date = order.CREATEDAT ? new Date(order.CREATEDAT) : new Date(order.$createdAt);
   const ageMs = Date.now() - date.getTime();
-  const isOverdue = order.STATUS === 'payment_expired';
+  const independentWeb = inventoryMode === 'web_independent';
+  const isUnpaidStatus = ['pending', 'pending_stock', 'processing', 'paid', 'payment_expired', 'payment_review'].includes(order.STATUS);
+  const isOverdue = !independentWeb && order.STATUS === 'payment_expired';
   const scRaw = STATUS_CONFIG[order.STATUS] || STATUS_CONFIG.pending;
   const isRetiro = order.SHIPPINGAGENCY?.toUpperCase() === 'RETIRO EN TIENDA';
   const isReadyRetiro = order.STATUS === 'shipped' && isRetiro;
   const sc = {
     ...scRaw,
-    label: isReadyRetiro ? 'Listo para retirar' : displayStatusLabel(order.STATUS, order.SHIPPINGAGENCY),
+    label: isReadyRetiro ? 'Listo para retirar' : independentWeb && isUnpaidStatus ? (parsePaymentProofs(order.PAYMENTPROOFURL).length ? 'Revisando pago' : 'No pagado') : displayStatusLabel(order.STATUS, order.SHIPPINGAGENCY),
     bg: isReadyRetiro ? 'bg-fuchsia-50' : scRaw.bg,
     text: isReadyRetiro ? 'text-fuchsia-700' : scRaw.text,
     border: isReadyRetiro ? 'border-fuchsia-200' : scRaw.border,
@@ -1581,8 +1584,9 @@ export default function OrderDetailPage() {
   const isGift = (order as any).ISGIFT;
   const isLive = (order as any).PURCHASEDFROMLIVE;
 
-  const effectiveStatus = (['pending', 'pending_stock', 'processing'].includes(order.STATUS)) ? 'paid' : order.STATUS;
-  const currentStepIdx = STATUS_FLOW.indexOf(effectiveStatus);
+  const statusFlow = independentWeb ? ['paid', 'payment_review', 'payment_confirmed', 'shipped', 'delivered'] : STATUS_FLOW;
+  const effectiveStatus = independentWeb && isUnpaidStatus ? (parsePaymentProofs(order.PAYMENTPROOFURL).length ? 'payment_review' : 'paid') : (['pending', 'pending_stock', 'processing'].includes(order.STATUS)) ? 'paid' : order.STATUS;
+  const currentStepIdx = statusFlow.indexOf(effectiveStatus);
   const isCancelled = order.STATUS === 'cancelled';
 
   const rawAdditionalInfo = order.ADDITIONALINFO || '';
@@ -1667,11 +1671,13 @@ export default function OrderDetailPage() {
     setUploadingProof(true);
     try {
       const { storage, databases } = getServices();
-      const { databaseId, endpoint, projectId } = getFirebaseConfig();
+      const { databaseId } = getFirebaseConfig();
       const fileId = ID.unique();
-      await storage.createFile(MEDIA_BUCKET_ID, fileId, file);
+      const uploaded = await storage.createFile(MEDIA_BUCKET_ID, fileId, file);
       const ext = file.name.split('.').pop()?.toLowerCase() || '';
-      const url = `${endpoint}/storage/buckets/${MEDIA_BUCKET_ID}/files/${fileId}/view?project=${projectId}&ext=${ext}`;
+      const fileUrl = new URL(uploaded.url);
+      if (/^[a-z0-9]{1,8}$/.test(ext)) fileUrl.searchParams.set('ext', ext);
+      const url = fileUrl.toString();
       const allProofs = serializePaymentProofs([...current, url]);
       await databases.updateDocument(databaseId, ORDERS_COLLECTION_ID, orderId, {
         PAYMENTPROOFURL: allProofs,
@@ -1890,7 +1896,7 @@ export default function OrderDetailPage() {
                   </a>
                 </div>
               ) : (
-                <img src={`/api/media-proxy?url=${encodeURIComponent(selectedPaymentProof)}`} alt="Comprobante de pago" className="w-full h-auto max-h-[75vh] object-contain rounded-2xl" />
+                <img src={selectedPaymentProof.startsWith('/api/media-proxy?') ? selectedPaymentProof : `/api/media-proxy?url=${encodeURIComponent(selectedPaymentProof)}`} alt="Comprobante de pago" className="w-full h-auto max-h-[75vh] object-contain rounded-2xl" />
               )}
             </div>
           </div>
@@ -2293,6 +2299,11 @@ export default function OrderDetailPage() {
         </div>
       </div>
 
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 20, marginBottom: 8 }}>
+        <div style={{ textAlign: 'center', color: '#1e40af', fontWeight: 700 }}><div style={{ width: 160, height: 160, background: '#fff' }} dangerouslySetInnerHTML={{ __html: orderQrSvg(order.$id) }} />Embalado</div>
+        <div style={{ textAlign: 'center', color: '#b91c1c', fontWeight: 700 }}><div style={{ width: 160, height: 160, background: '#fff' }} dangerouslySetInnerHTML={{ __html: orderQrSvg(order.$id, 'shortage') }} />Faltantes / devoluciones</div>
+      </div>
+
       {/* Cliente / Envío */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
         <div style={{ flex: 1, border: '1px solid #bae6fd', borderRadius: 10, overflow: 'hidden' }}>
@@ -2407,6 +2418,16 @@ export default function OrderDetailPage() {
     </div>
 
     <div className="print-area print:hidden max-w-6xl mx-auto space-y-4 sm:space-y-5 px-1 sm:px-0">
+      {(order as any).WAREHOUSE_SHORTAGE_PENDING && (order as any).WAREHOUSE_SHORTAGE && (() => {
+        const report = (order as any).WAREHOUSE_SHORTAGE;
+        const amount = (value: number) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(value);
+        return <section className="rounded-2xl border border-red-200 bg-red-50 p-4 sm:p-5" aria-label="Faltantes reportados por bodega">
+          <h2 className="font-bold text-red-900">Faltantes reportados por bodega</h2>
+          <p className="mt-1 text-sm text-red-800">Revisa estos productos y contacta al cliente. El total estimado no modifica el pedido ni el stock.</p>
+          <ul className="mt-3 space-y-1 text-sm text-red-900">{(Array.isArray(report.items) ? report.items : []).map((item: any, index: number) => <li key={index}>• {item.name}: faltan <strong>{item.missing}</strong> de {item.qty}</li>)}</ul>
+          <div className="mt-4 flex flex-wrap gap-x-8 gap-y-2 text-sm"><span>Total original: <strong>{amount(report.originalTotal)}</strong></span><span>Total estimado: <strong className="text-red-800">{amount(report.estimatedTotal)}</strong></span></div>
+        </section>;
+      })()}
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2 sm:gap-3">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -2529,7 +2550,7 @@ export default function OrderDetailPage() {
           {/* Progress rail */}
           <div className="relative overflow-x-auto pb-2 pt-3">
             <div className="flex items-start gap-0 min-w-max">
-              {STATUS_FLOW.map((step, i) => {
+              {statusFlow.map((step, i) => {
                 const STEP_ICON_PATHS: Record<string, string> = {
                   pending:          'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm.5 5H11v6l5.25 3.15.75-1.23-4.5-2.67V7z',
                   pending_stock:    'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm.5 5H11v6l5.25 3.15.75-1.23-4.5-2.67V7z',
@@ -2548,13 +2569,13 @@ export default function OrderDetailPage() {
                 };
                 const isReadyRetiroStep = step === 'shipped' && isRetiro;
                 const hex = isReadyRetiroStep ? '#c026d3' : (STATUS_HEX[step] || '#6b7280');
-                const label = displayStatusLabel(step, order.SHIPPINGAGENCY);
+                const label = independentWeb && step === 'paid' ? 'No pagado' : displayStatusLabel(step, order.SHIPPINGAGENCY);
                 const isCompleted = step !== 'payment_expired' && i < currentStepIdx;
                 const isCurrent = i === currentStepIdx;
                 const isFuture = step === 'payment_expired'
                   ? effectiveStatus !== 'payment_expired'
                   : i > currentStepIdx;
-                const nextHex = STATUS_HEX[STATUS_FLOW[i + 1]] || hex;
+                const nextHex = STATUS_HEX[statusFlow[i + 1]] || hex;
                 const iconPath = STEP_ICON_PATHS[step];
                 return (
                   <React.Fragment key={step}>
@@ -2583,7 +2604,7 @@ export default function OrderDetailPage() {
                       </div>
                       <span className="text-[8px] sm:text-[9px] font-bold text-center leading-tight transition-colors group-hover:enabled:text-gray-900" style={{ color: isCurrent ? hex : isFuture ? '#c2cbd6' : '#475569' }}>{label}</span>
                     </button>
-                    {i < STATUS_FLOW.length - 1 && (
+                    {i < statusFlow.length - 1 && (
                       <div className="relative self-start mt-[17px] flex-shrink-0 -mx-1 rounded-full overflow-hidden" style={{ height: 4, width: 24, background: isCompleted ? `linear-gradient(90deg, ${hex}, ${nextHex})` : '#e5e7eb' }}>
                         {isCompleted && <span className="absolute inset-0" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.85), transparent)', animation: `kcdShimmer 2.4s linear ${i * 0.18}s infinite` }} />}
                       </div>
@@ -2596,7 +2617,7 @@ export default function OrderDetailPage() {
 
           {/* Cronómetro / Estado del plazo de pago */}
           {(() => {
-            if ((order.STATUS === 'paid' || order.STATUS === 'payment_expired') && !order.PAYMENTPROOFURL) {
+            if (!independentWeb && (order.STATUS === 'paid' || order.STATUS === 'payment_expired') && !order.PAYMENTPROOFURL) {
               const isPaymentExpired = order.STATUS === 'payment_expired';
               const deadline = Number(isPaymentExpired ? getOrderAutoCancelDeadline(order) : (order.EXPIRESAT || 0));
               if (!deadline) return null;
@@ -3092,7 +3113,7 @@ export default function OrderDetailPage() {
                   <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">RUT</label>
                   <input className="cust-input px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" value={customerForm.rut} onChange={e => setCustomerForm(f => ({ ...f, rut: e.target.value }))} placeholder="Ej: 13.266.051-4" />
                   <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Teléfono</label>
-                  <input className="cust-input px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" value={customerForm.phone} onChange={e => setCustomerForm(f => ({ ...f, phone: e.target.value }))} placeholder="Ej: +56954592656" />
+                  <input className="cust-input px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" value={customerForm.phone} onChange={e => setCustomerForm(f => ({ ...f, phone: e.target.value }))} placeholder="Ej: +56912345678" />
                   <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Email</label>
                   <input className="cust-input px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" value={customerForm.email} onChange={e => setCustomerForm(f => ({ ...f, email: e.target.value }))} placeholder="Ej: marcela@gmail.com" />
                   <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Dirección</label>

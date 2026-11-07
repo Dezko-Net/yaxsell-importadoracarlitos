@@ -55,9 +55,7 @@ export default function StoreShell({ children }: { children: React.ReactNode }) 
     pathname.startsWith('/datos-envio');
   // Link in bio: página autónoma a pantalla completa, sin navbar ni footer.
   const isLinktree     = pathname.startsWith('/linktree');
-  // La política debe responder públicamente incluso si la tienda está en mantenimiento.
-  const isPrivacyPage = pathname === '/privacidad';
-  if (isAdmin || isAuth || isPrivacyPage) {
+  if (isAdmin || isAuth) {
     return <>{children}</>;
   }
 

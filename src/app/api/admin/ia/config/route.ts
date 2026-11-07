@@ -3,11 +3,8 @@ import { AI_ENABLED } from '@/lib/feature-flags';
 import { NextRequest, NextResponse } from 'next/server';
 import { getKeniaConfig, saveKeniaConfig } from '@/lib/kenia-runtime';
 import { revalidateTag } from 'next/cache';
-import { requireWhatsAppAdmin } from '@/lib/whatsapp-admin-auth';
 
-export async function GET(req: NextRequest) {
-  const denied = await requireWhatsAppAdmin(req);
-  if (denied) return denied;
+export async function GET() {
   try {
     const config = await getKeniaConfig();
     return NextResponse.json({ success: true, config });
@@ -17,8 +14,6 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
-  const denied = await requireWhatsAppAdmin(req);
-  if (denied) return denied;
   try {
     const body = await req.json();
     const config = await saveKeniaConfig({

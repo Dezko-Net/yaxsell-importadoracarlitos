@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AI_ENABLED, WHATSAPP_BOT_ENABLED } from '@/lib/feature-flags';
+import { AI_ENABLED } from '@/lib/feature-flags';
 import { addToHistory, sendWhatsAppMessage } from '@/lib/whatsapp';
 import { normalizePhone, setKeniaBlocked } from '@/lib/kenia-runtime';
-import { requireWhatsAppAdmin } from '@/lib/whatsapp-admin-auth';
 
 export async function POST(req: NextRequest) {
-  const denied = await requireWhatsAppAdmin(req);
-  if (denied) return denied;
-  if (!AI_ENABLED && !WHATSAPP_BOT_ENABLED) return NextResponse.json({ error: 'Feature no disponible' }, { status: 404 });
+  if (!AI_ENABLED) return NextResponse.json({ error: 'Feature no disponible' }, { status: 404 });
   try {
     const body = await req.json();
     const phone = normalizePhone(body.phone || '');
@@ -23,9 +20,8 @@ export async function POST(req: NextRequest) {
 
     await sendWhatsAppMessage(phone, text, token);
     await addToHistory(phone, 'assistant', text);
-    // Al responder manualmente, toma el control el administrador y Yaxbot se pausa.
-    await setKeniaBlocked(phone, true, 'admin_takeover');
-    return NextResponse.json({ success: true, adminTakeover: true });
+    await setKeniaBlocked(phone, false);
+    return NextResponse.json({ success: true, reactivated: true });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error?.message || 'No se pudo enviar el mensaje de Yaxbot' }, { status: 500 });
   }

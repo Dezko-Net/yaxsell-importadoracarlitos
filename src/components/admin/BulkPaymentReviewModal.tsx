@@ -52,7 +52,7 @@ const dateLabel = (value: number) => value
 
 function OrderProof({ url, index }: { url: string; index: number }) {
   const [failed, setFailed] = useState(false);
-  const isPdf = /\.pdf(?:\?|$)/i.test(url);
+  const isPdf = /(?:\.pdf(?:\?|$)|[?&]ext=pdf(?:&|$))/i.test(url);
   if (failed) return <div className="flex h-full min-h-0 items-center justify-center bg-slate-100 text-sm text-slate-500">No se pudo cargar este comprobante.</div>;
   if (isPdf) {
     return <iframe title={`Comprobante ${index + 1}`} src={url} className="h-full min-h-0 w-full bg-white" onError={() => setFailed(true)} />;

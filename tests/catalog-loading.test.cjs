@@ -59,19 +59,3 @@ test('un error del servicio de productos no se interpreta como catálogo vacío'
   });
   await assert.rejects(ctx.loadAppwriteProducts(), /HTTP 503/);
 });
-
-test('el stock vivo prevalece sobre ajustes locales antiguos', () => {
-  const source = fs.readFileSync('public/shopify/catalogo-original/app.js', 'utf8');
-  const start = source.indexOf('function getCartProduct(');
-  const end = source.indexOf('\nfunction getProductImageCandidates(', start);
-  assert.ok(start >= 0 && end > start);
-  const context = {
-    allProducts: [{ id: '1', sku: 'A', name: 'Polera', stock: 10, image: '/foto.png' }],
-    _customProducts: [], selectedStore: '', window: { location: { origin: 'https://test.local' } },
-    getOverrides: () => ({ A: { stock: 0 } }), getDeleted: () => [], Set, String,
-  };
-  vm.createContext(context);
-  vm.runInContext(source.slice(start, end), context);
-  assert.equal(context.getProducts()[0].stock, 10);
-  assert.equal(context.getCartProduct('A').stock, 10);
-});

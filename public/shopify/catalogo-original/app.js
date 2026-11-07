@@ -1,29 +1,19 @@
 // === CATÁLOGO EMPRENDEDOR - BASE TEMPLATE ===
 // ============================================
 // CONFIGURACIÓN DEL CLIENTE (SaaS dinámico por URL)
-let CLIENT_ID = 'carlitos';
+if (!window.__CATALOG_CONFIG__ || !window.__CATALOG_CONFIG__.firebase || !window.__CATALOG_CONFIG__.clientId) throw new Error('Falta la configuración Firebase del catálogo.');
+let CLIENT_ID = window.__CATALOG_CONFIG__.clientId;
 
-let WHATSAPP_CONTACTS = [
-  { name: 'Cajera 1', number: '56962293893' },
-  { name: 'Cajera 2', number: '56967294975' }
-];
-let BALATIN_CONTACT = { name: 'Importadora Carlitos', number: '56954592656' };
+let WHATSAPP_CONTACTS = [];
+let BALATIN_CONTACT = { name: '', number: '', active: false };
 let _homeMarketing = null;
 try { _homeMarketing = JSON.parse(localStorage.getItem('home_marketing') || 'null'); } catch (e) {}
-let MAIN_STORE_NAME = ((typeof localStorage !== 'undefined' && localStorage.getItem('store_name')) || 'Importadora Carlitos')
-  .replace(/(?:Importadora\s*3B|(?:Importadora\s+)?Don\s*Balato(?:\s+[AB])?)/gi, 'Importadora Carlitos');
+let MAIN_STORE_NAME = CLIENT_ID === 'carlitos' ? 'Importadora Carlitos' : 'Mi tienda';
 const PASSWORDS = { admin: 'Flavia273@' }; // TODO: Move to firebase
 const STORAGE_KEYS = { cart: `db_cart_${CLIENT_ID}`, adminAuth: `db_admin_auth_${CLIENT_ID}` };
 
 // === Firebase Firestore ===
-const firebaseConfig = {
-  apiKey: "AIzaSyClqpsQ5eHECOQAXz3ls6-RUgoH8nthdkE",
-  authDomain: "importadora-carlitos.firebaseapp.com",
-  projectId: "importadora-carlitos",
-  storageBucket: "importadora-carlitos.firebasestorage.app",
-  messagingSenderId: "289604179340",
-  appId: "1:289604179340:web:9d3f876c8aafeceedef2a9"
-};
+const firebaseConfig = window.__CATALOG_CONFIG__.firebase;
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
@@ -1105,6 +1095,7 @@ function syncFromParentCart(parentItems) {
 }
 
 window.addEventListener('message', (e) => {
+  if (e.origin !== window.location.origin || e.source !== window.parent) return;
   if (e.data && e.data.type === 'YAXSEL_FAVORITES_SYNC' && Array.isArray(e.data.favorites)) {
     syncCatalogFavorites(e.data.favorites);
   }
@@ -1154,6 +1145,24 @@ window.addEventListener('message', (e) => {
         shouldReRender = true;
       }
     }
+    if (e.data.webConfig && typeof e.data.webConfig === 'object') {
+      const next = e.data.webConfig;
+      const previous = JSON.stringify(_settings.webConfig || null);
+      _settings.webConfig = next;
+      _settings.logoUrl = String(next.logoUrl || '');
+      _settings.heroImageUrl = String(next.heroImageUrl || '');
+      _settings.supportPhone = String(next.supportPhone || '').replace(/\D/g, '');
+      _settings.botPhone = String(next.botPhone || '').replace(/\D/g, '');
+      _settings.address = String(next.address || '');
+      _settings.announcementText = String(next.announcementText || '');
+      _settings.shippingText = String(next.shippingText || '');
+      _settings.heroKicker = String(next.heroKicker || '');
+      _settings.heroTitle = String(next.heroTitle || '');
+      _settings.heroDescription = String(next.heroDescription || '');
+      BALATIN_CONTACT = { ...BALATIN_CONTACT, name: MAIN_STORE_NAME, number: _settings.botPhone, active: Boolean(_settings.botPhone) };
+      WHATSAPP_CONTACTS = _settings.supportPhone ? [{ name: 'Atención', number: _settings.supportPhone, active: true }] : [];
+      if (previous !== JSON.stringify(next)) shouldReRender = true;
+    }
     updateCatalogBranding();
     if (shouldReRender) {
       try { render(); } catch (err) {}
@@ -1164,10 +1173,10 @@ window.addEventListener('message', (e) => {
 function updateHeaderWhatsAppUrl() {
   const btn = document.getElementById('headerWhatsAppBtn');
   if (!btn) return;
-  const phone = (BALATIN_CONTACT && BALATIN_CONTACT.number) ||
-                (WHATSAPP_CONTACTS && WHATSAPP_CONTACTS[0] && WHATSAPP_CONTACTS[0].number) ||
-                '56962293893';
+  const phone = _settings.supportPhone || _settings.botPhone || '';
   const cleanPhone = String(phone).replace(/[^0-9]/g, '');
+  btn.style.display = cleanPhone ? '' : 'none';
+  if (!cleanPhone) { btn.removeAttribute('href'); return; }
   btn.href = 'https://wa.me/' + cleanPhone + '?text=' + encodeURIComponent('Hola, tengo una consulta sobre la tienda 🛒');
 }
 
@@ -1179,8 +1188,26 @@ function updateCatalogBranding() {
   }
   if (MAIN_STORE_NAME) {
     document.title = MAIN_STORE_NAME + ' · Catálogo Mayorista';
-  updateHeaderWhatsAppUrl();
+    updateHeaderWhatsAppUrl();
   }
+  const location = document.querySelector('.carlitos-announcement-location');
+  if (location) {
+    location.style.display = _settings.address ? '' : 'none';
+    location.querySelectorAll('.carlitos-location-full, .carlitos-location-short').forEach(el => { el.textContent = _settings.address || ''; });
+  }
+  const icon = document.querySelector('link[rel="icon"]');
+  if (icon && _settings.logoUrl) icon.setAttribute('href', _settings.logoUrl);
+  const announcement = document.querySelector('.carlitos-announcement-copy');
+  if (announcement) {
+    announcement.replaceChildren();
+    String(_settings.announcementText || '').split('·').forEach((part, index) => {
+      if (index) { const dot = document.createElement('i'); dot.textContent = '·'; announcement.appendChild(dot); }
+      announcement.appendChild(document.createTextNode(part.trim()));
+    });
+  }
+  const shipping = document.querySelector('.catalog-shipping');
+  const shippingText = shipping && shipping.querySelector('strong');
+  if (shipping && shippingText) { shipping.style.display = _settings.shippingText ? '' : 'none'; shippingText.textContent = _settings.shippingText || ''; }
 }
 window.addEventListener('yaxsel:cart-updated', () => {
   try {
@@ -1470,9 +1497,9 @@ function vendorBadge(product) {
     ? rawName
     : (isMain ? MAIN_STORE_NAME : 'Tienda asociada');
   if (isMain) {
-    var brandLogo = '/images/importadora-carlitos-logo-nuevo.png';
+    var brandLogo = _settings.logoUrl || '';
     return '<div class="mt-1 mb-0.5"><span class="db-store-badge" title="' + escapeHtml(vName) + '">' +
-      '<img src="' + brandLogo + '" alt="" aria-hidden="true">' +
+      (brandLogo ? '<img src="' + escapeHtml(brandLogo) + '" alt="" aria-hidden="true">' : '') +
       '<span>' + escapeHtml(vName) + '</span>' +
     '</span></div>';
   }
@@ -1846,6 +1873,7 @@ function normalizeChileanPhone(raw) {
 // Balatin: sin formulario, sin pedido pre-creado. El cliente le escribe directo con su lista
 // y Balatin arma el pedido conversando (nombre, stock, direccion y comprobante por chat).
 function sendToBalatin() {
+  if (!BALATIN_CONTACT.number) { showToast('El WhatsApp de pedidos aún no está configurado.'); return; }
   var balatinGroup = selectedCartGroupId ? getCartGroups().find(function(g) { return g.id === selectedCartGroupId; }) : null;
   var balatinCart = balatinGroup ? balatinGroup.items.map(function(row) { return row.item; }) : cart.slice();
   var balatinTotal = balatinCart.reduce(function(sum, i) { return sum + i.qty * i.price; }, 0);
@@ -1936,6 +1964,7 @@ function sendToBalatin() {
 async function submitCustomerOrder() {
   if (submittingCustomerOrder) return;
   if (selectedAttendant === null) { showToast('Selecciona quien te atiende'); return; }
+  if (!(WHATSAPP_CONTACTS[selectedAttendant] || WHATSAPP_CONTACTS[0])?.number) { showToast('El WhatsApp de atención aún no está configurado.'); return; }
   var targetCart = cart.slice();
   var rawName = (document.getElementById('custName') || {}).value || '';
   var customerName = rawName.trim();
@@ -2009,7 +2038,7 @@ async function submitCustomerOrder() {
 
   // Construir mensaje de WhatsApp para Importadora Carlitos con link de verificar stock
   var siteUrl = window.location.origin;
-  var waMsg = '*Hola Ivan!* Soy *' + customerName + '*\r\n\r\n';
+  var waMsg = '*Hola!* Soy *' + customerName + '*\r\n\r\n';
   waMsg += 'Tengo un pedido del catalogo:\r\n\r\n';
   waMsg += '----------------------------------------\r\n';
   waMsg += '*Tienda:* ' + MAIN_STORE_NAME + '\r\n';
@@ -2443,7 +2472,6 @@ window.addEventListener('hashchange', render);
 
 // === Account Embed View ===
 function renderAccount() {
-  const accountUrl = location.hash.startsWith('#/account/orders') ? '/cuenta?embed=1&pedidos=1' : '/cuenta?embed=1';
   const announcementBar = document.getElementById('announcementBar');
   if (announcementBar) announcementBar.style.display = 'none';
 
@@ -2458,11 +2486,9 @@ function renderAccount() {
     container = document.createElement('div');
     container.id = 'accountEmbedContainer';
     container.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:40;background:#121216;-webkit-overflow-scrolling:touch;overflow:hidden;border:none;margin:0;padding:0;';
-    container.innerHTML = '<iframe id="accountFrame" src="' + accountUrl + '" style="width:100%;height:100%;border:none;margin:0;padding:0;display:block;outline:none;" title="Mi cuenta"></iframe>';
+    container.innerHTML = '<iframe id="accountFrame" src="/cuenta?embed=1" style="width:100%;height:100%;border:none;margin:0;padding:0;display:block;outline:none;" title="Mi cuenta"></iframe>';
     document.body.appendChild(container);
   }
-  const accountFrame = document.getElementById('accountFrame');
-  if (accountFrame && accountFrame.getAttribute('src') !== accountUrl) accountFrame.setAttribute('src', accountUrl);
   container.style.display = 'block';
   container.style.visibility = 'visible';
 
@@ -3465,20 +3491,35 @@ function categoryUrl(prefix) {
 // === Store (tienda) filter band — logo + nombre ===
 function renderNewsBanner() {
   try {
-    if (!_homeMarketing || !_homeMarketing.newsBanner || !_homeMarketing.newsBanner.enabled) return '';
-    var nb = _homeMarketing.newsBanner;
-    var isMobile = window.innerWidth < 640;
-    var img = isMobile ? (nb.mobileUrl || nb.desktopUrl) : (nb.desktopUrl || nb.mobileUrl);
-    if (!img) return '';
-    return '<div class="news-banner-wrap" style="margin-top:16px;border-radius:20px;overflow:hidden;box-shadow:0 10px 30px rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.15)">'
-      + '<img src="' + escapeHtml(img) + '" alt="Últimas novedades" style="display:block;width:100%;height:auto;object-fit:cover" />'
-      + '</div>';
+    if (!_homeMarketing) return '';
+    var banners = Array.isArray(_homeMarketing.newsBanners)
+      ? _homeMarketing.newsBanners.slice(0, 3)
+      : (_homeMarketing.newsBanner ? [_homeMarketing.newsBanner] : []);
+    return banners.map(function(nb, index) {
+      if (!nb || !nb.enabled) return '';
+      var desktop = String(nb.desktopUrl || nb.mobileUrl || '').trim();
+      var mobile = String(nb.mobileUrl || nb.desktopUrl || '').trim();
+      if (!desktop || !mobile) return '';
+      var image = '<picture><source media="(max-width: 639px)" srcset="' + escapeHtml(mobile) + '">'
+        + '<img src="' + escapeHtml(desktop) + '" alt="Novedad ' + (index + 1) + '" loading="lazy" style="display:block;width:100%;height:auto" /></picture>';
+      var href = '', external = false;
+      if (nb.linkType === 'category' && typeof nb.category === 'string' && nb.category.trim()) {
+        href = categoryUrl([nb.category.trim()]);
+      } else if (nb.linkType === 'url' && typeof nb.linkUrl === 'string') {
+        try {
+          var parsed = new URL(nb.linkUrl);
+          if ((parsed.protocol === 'http:' || parsed.protocol === 'https:') && !parsed.username && !parsed.password) { href = parsed.href; external = true; }
+        } catch (_) {}
+      }
+      if (href) image = '<a href="' + escapeHtml(href) + '"' + (external ? ' target="_blank" rel="noopener noreferrer"' : '') + ' aria-label="' + escapeHtml(nb.linkType === 'category' ? 'Ver categoría ' + nb.category : 'Abrir enlace del banner') + '">' + image + '</a>';
+      return '<div class="news-banner-wrap" style="margin-top:16px;border-radius:20px;overflow:hidden;box-shadow:0 10px 30px rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.15)">' + image + '</div>';
+    }).join('');
   } catch (e) { return ''; }
 }
 
 function renderStoreBand() {
   if (_vendors.length === 0) return '';
-  var mainLogo = '/images/importadora-carlitos-logo-nuevo.png';
+  var mainLogo = _settings.logoUrl || '';
   var stores = [{ id: '', name: 'Todas', color: '#121216', logoUrl: '' },
                 { id: '__main__', name: MAIN_STORE_NAME, color: '#c81e1e', logoUrl: mainLogo }]
     .concat(_vendors.map(function(v){ return { id: v.id, name: v.name, color: v.color || '#f97316', logoUrl: v.logoUrl || '', phone: v.phone || '' }; }));
@@ -3598,7 +3639,8 @@ function renderHome() {
     .filter(p => getPrice(p) > 0)
     .sort((a,b) => getPrice(a) - getPrice(b))
     .slice(0, 8);
-  const heroLogoUrl = '/images/importadora-carlitos-logo-nuevo.png';
+  const heroLogoUrl = _settings.logoUrl || '';
+  const heroBackground = 'linear-gradient(90deg,rgba(8,18,17,.46),rgba(12,23,21,.16))' + (_settings.heroImageUrl ? ',url(' + JSON.stringify(_settings.heroImageUrl) + ')' : '');
   const categoryBrowseSection = topCatsWithStock.length > 0 ? `
     <section id="categoriesSection" class="category-browse-section scroll-mt-24" aria-labelledby="categoryBrowseTitle">
       <div class="catalog-section-heading category-section-heading">
@@ -3631,7 +3673,7 @@ function renderHome() {
   const html = `
     <div class="fade-in space-y-6 catalog-home">
       <!-- Hero sky tomado de Definitive; se conservan datos y acciones del catálogo actual. -->
-      <section class="hero-banner hero-sky-surface relative overflow-hidden rounded-[28px] p-5 sm:p-8 card-shadow">
+      <section class="hero-banner hero-sky-surface relative overflow-hidden rounded-[28px] p-5 sm:p-8 card-shadow" style="background-image:${escapeHtml(heroBackground)}">
         <canvas class="hero-sky-canvas" aria-hidden="true"></canvas>
         <div class="hero-sky-shade" aria-hidden="true"></div>
         <svg class="hero-motion-scene" viewBox="0 0 340 220" aria-hidden="true" focusable="false">
@@ -3642,23 +3684,21 @@ function renderHome() {
           <g class="hero-motion-item hero-motion-shirt" transform="translate(268 133)"><image href="/images/hero-decor/ropa.png" width="68" height="68" preserveAspectRatio="xMidYMid meet"/></g>
           <g class="hero-motion-sparkles" fill="#ffe8a1"><circle cx="54" cy="53" r="1.8"/><circle cx="282" cy="104" r="1.6"/><path d="M58 171v8m-4-4h8M272 64v6m-3-3h6" stroke="#ffe8a1" stroke-width="1.3" stroke-linecap="round"/></g>
         </svg>
-        <div class="hero-mobile-kicker"><span aria-hidden="true"></span>Proveedor directo · Chile</div>
+        ${_settings.heroKicker ? `<div class="hero-mobile-kicker"><span aria-hidden="true"></span>${escapeHtml(_settings.heroKicker)}</div>` : ''}
         <div class="absolute z-10 top-4 right-3 sm:top-1/2 sm:right-6 -translate-y-0 sm:-translate-y-1/2">
           <div class="hero-logo-frame w-[58px] h-[58px] sm:w-32 sm:h-32${heroLogoUrl ? '' : ' logo-error'}" aria-label="Logo de ${escapeHtml(MAIN_STORE_NAME)}">
             <div class="hero-logo-skeleton" aria-hidden="true"></div>
             ${heroLogoUrl ? `<img id="heroLogoImage" src="${escapeHtml(heroLogoUrl)}" alt="Logo de ${escapeHtml(MAIN_STORE_NAME)}" class="hero-logo-image" onload="this.parentElement.classList.add('logo-loaded')" onerror="this.parentElement.classList.add('logo-error')">` : ''}
-            <div class="hero-logo-fallback absolute inset-0 items-center justify-center text-center font-display font-extrabold text-sm text-white/80">IC</div>
+            <div class="hero-logo-fallback absolute inset-0 items-center justify-center text-center font-display font-extrabold text-sm text-white/80">${escapeHtml((MAIN_STORE_NAME || 'T').slice(0, 2).toUpperCase())}</div>
           </div>
         </div>
         <div class="relative z-10 max-w-[74%] sm:max-w-[72%]">
-          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/25 backdrop-blur text-[9px] sm:text-[10px] font-bold tracking-[0.1em] sm:tracking-[0.14em] uppercase text-white shadow-sm border border-white/40">
-            <span class="w-1.5 h-1.5 rounded-full bg-yellow-300"></span>Proveedor directo · Chile
-          </div>
+          ${_settings.heroKicker ? `<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/25 backdrop-blur text-[9px] sm:text-[10px] font-bold tracking-[0.1em] sm:tracking-[0.14em] uppercase text-white shadow-sm border border-white/40"><span class="w-1.5 h-1.5 rounded-full bg-yellow-300"></span>${escapeHtml(_settings.heroKicker)}</div>` : '<div class="hidden"></div>'}
           <h1 class="font-display font-extrabold text-[25px] sm:text-4xl leading-[1.1] mt-3 sm:mt-4 text-white max-w-[16ch]" style="text-shadow:0 2px 8px rgba(42,93,158,.25)">
-            Ropa que va contigo. Perfumes para cada momento<span class="text-yellow-300">.</span>
+            ${escapeHtml(_settings.heroTitle || 'Descubre nuestros productos')}
           </h1>
           <p class="text-white/90 text-xs sm:text-sm mt-2.5 max-w-xl font-medium leading-relaxed">
-            Descubre ropa, perfumes y más. Te atendemos por WhatsApp y enviamos a todo Chile.
+            ${escapeHtml(_settings.heroDescription || 'Explora nuestro catálogo y encuentra tus favoritos.')}
           </p>
           <div class="flex flex-col sm:flex-row sm:items-center gap-2.5 mt-4 sm:mt-5">
             <a href="#/all" class="hero-catalog-link inline-flex items-center justify-center gap-1.5 px-3 sm:px-5 py-2.5 rounded-2xl font-semibold text-xs sm:text-sm active:scale-95 w-full sm:w-auto">
@@ -3843,7 +3883,7 @@ function renderCategory(prefixEncoded) {
         </div>
         <div>
           <h1>${escapeHtml(displayCatTitle)}</h1>
-          <p>Importadora Carlitos · Stock disponible en línea</p>
+          <p>${escapeHtml(MAIN_STORE_NAME)} · Stock disponible en línea</p>
         </div>
       </div>
       <span class="catalog-heading-count">${products.length} ${products.length === 1 ? 'producto' : 'productos'}</span>
@@ -5714,7 +5754,7 @@ function resolveAppwriteImage(url, apiBase) {
 // consultando el catálogo para no prolongar la vigencia del stock mostrado.
 var _catalogFetchInFlight = null;
 var _lastCatalogSyncTs = 0;
-var IFRAME_CATALOG_CACHE_KEY = 'yaxsel_iframe_catalog_v4';
+var IFRAME_CATALOG_CACHE_KEY = 'yaxsel_iframe_catalog_v4_' + firebaseConfig.projectId;
 var IFRAME_CATALOG_FRESH_MS = 30 * 1000;
 var _catalogReadFromSession = false;
 function fetchAppwriteProducts(forceRefresh) {
@@ -5730,7 +5770,7 @@ function fetchAppwriteProducts(forceRefresh) {
           if (Array.isArray(parsed.categories)) _appwriteCategories = parsed.categories;
           if (Array.isArray(parsed.subcategories)) _appwriteSubcategories = parsed.subcategories;
           if (Array.isArray(parsed.vendors)) _vendors = parsed.vendors;
-          if (parsed.mainStoreName) MAIN_STORE_NAME = parsed.mainStoreName;
+          if (!_settings.webConfig && parsed.mainStoreName) MAIN_STORE_NAME = parsed.mainStoreName;
           _lastCatalogSyncTs = Number(parsed.ts || Date.now());
           _catalogReadFromSession = true;
           return Promise.resolve(parsed.products);

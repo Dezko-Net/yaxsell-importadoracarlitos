@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import { serverCreateDocument } from '@/lib/db-server';
 import { PRODUCTS_COLLECTION_ID } from '@/lib/db';
 import { getInventoryConnectionMode } from '@/lib/inventory-mode';
@@ -74,6 +75,7 @@ export async function POST(req: NextRequest) {
       /* notificación opcional */
     }
 
+    try { revalidateTag('products'); } catch {}
     clearCatalogMemoryCache();
 
     return NextResponse.json({

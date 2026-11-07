@@ -4,6 +4,7 @@ import { normalizeProductImages } from '@/lib/product-images';
 import { serverListDocuments } from '@/lib/db-server';
 import { getPublicVendors } from '@/lib/public-vendor-cache';
 import { getInventoryConnectionMode, getInventoryStock, type InventoryConnectionMode } from '@/lib/inventory-mode';
+import { getWebClientConfig } from '@/lib/web-client-config-server';
 
 // Módulo compartido del catálogo completo cacheado.
 // Usa server SDK (firebase-admin) para evitar problemas de permisos del cliente.
@@ -56,6 +57,7 @@ export function clearCatalogMemoryCache(options?: { hard?: boolean }): void {
   state.memoryCacheAllProducts = null;
   state.memoryCacheAllProductsTime = 0;
   state.memoryCacheInventoryMode = null;
+  state.memoryCacheStoreName = null;
   state.inflightCatalogFetch = null;
   state.inflightCatalogMode = null;
   if (options?.hard) {
@@ -67,9 +69,9 @@ export function clearCatalogMemoryCache(options?: { hard?: boolean }): void {
     // Soft invalidation: mantiene rawDocsMap para hacer Delta Sync incremental (1 lectura en vez de 736)
     state.needsDeltaSync = true;
   }
-  // Invalida también la caché compartida entre instancias serverless.
-  // Vaciar globalThis solo actualiza la instancia que recibió la mutación.
-  try { revalidateTag('products'); } catch {}
+  // Invalida la caché compartida de Next en todas las instancias de producción;
+  // limpiar globalThis por sí solo solo afecta a esta instancia serverless.
+  revalidateTag('products');
   clearHomeMemoryCache();
 }
 
@@ -389,24 +391,13 @@ async function fetchAllProductsFromDb(
       }
 
       // Obtener nombre de la tienda principal con caché en memoria (60 min)
-      let mainStoreName = 'Importadora Carlitos';
+      let mainStoreName = 'Mi tienda';
       const sNow = Date.now();
       if (state.memoryCacheStoreName && (sNow - state.memoryCacheStoreName.time < STORE_NAME_CACHE_TTL)) {
         mainStoreName = state.memoryCacheStoreName.name;
       } else {
         try {
-          const sSnap = await serverListDocuments(STORE_SETTINGS_COLLECTION, [
-            JSON.stringify({ method: 'limit', values: [1] }),
-          ]);
-          if (sSnap && sSnap.documents && sSnap.documents.length > 0) {
-            const sDoc = sSnap.documents[0] as any;
-            if (sDoc?.STORENAME || sDoc?.storeName) {
-              const configuredStoreName = String(sDoc.STORENAME || sDoc.storeName).trim();
-              mainStoreName = /(?:importadora\s*3b|don\s*balato)/i.test(configuredStoreName)
-                ? 'Importadora Carlitos'
-                : configuredStoreName;
-            }
-          }
+          mainStoreName = (await getWebClientConfig()).storeName;
         } catch (e) {
           console.warn('Error obteniendo nombre de la tienda principal en catalog-cache:', e);
         }
@@ -466,8 +457,8 @@ const nextCachedAllProducts = unstable_cache(
 export async function getCachedAllProducts(options?: { eventDriven?: boolean }): Promise<any[]> {
   const inventoryMode = await getInventoryConnectionMode();
   if (options?.eventDriven) {
-    // Esta ruta permanece en caché hasta que una mutación invalida `products`.
-    // No son necesarias lecturas por intervalo ni polling del catálogo.
+    // La caché compartida vive hasta que una mutación invalida el tag `products`.
+    // No se consulta Firestore por intervalo ni se usa memoria local posiblemente vieja.
     const result = await nextCachedAllProducts(inventoryMode);
     if (Array.isArray(result)) {
       state.memoryCacheAllProducts = result;

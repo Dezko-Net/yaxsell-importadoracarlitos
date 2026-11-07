@@ -1,4 +1,6 @@
 'use client';
+import { parsePaymentProofs } from '@/lib/payment-proofs';
+import { useStoreSettings } from '@/hooks/useStoreSettings';
 
 import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
@@ -14,12 +16,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { getOrderAutoCancelDeadline } from '@/lib/order-expiration';
 
 const BANK_DEFAULTS = {
-  bankAccountHolder: 'Importadora Carlitos',
-  bankRut: '78267426-9',
-  bankName: 'Banco de Chile',
-  bankAccountType: 'Cuenta Corriente',
-  bankAccountNumber: '4081220201',
-  bankEmail: 'contacto@yaxsell.cl',
+  bankAccountHolder: '',
+  bankRut: '',
+  bankName: '',
+  bankAccountType: '',
+  bankAccountNumber: '',
+  bankEmail: '',
 };
 
 function getBankDetails(): Record<string, string> {
@@ -30,7 +32,7 @@ function getBankDetails(): Record<string, string> {
       'Titular': p.bankAccountHolder || 'No configurado',
       'RUT': p.bankRut || 'No configurado',
       'Banco': p.bankName || 'No configurado',
-      'Tipo de cuenta': p.bankAccountType || 'Cuenta Vista',
+      'Tipo de cuenta': p.bankAccountType || 'No configurado',
       'N° de cuenta': p.bankAccountNumber || 'No configurado',
       'Email': p.bankEmail || 'No configurado',
     };
@@ -177,6 +179,7 @@ async function resolveOrderInventoryMode(order?: Order | null): Promise<'erp_int
 export default function PedidoPage() {
   const { id } = useParams<{ id: string }>();
   const { user, isLoggedIn, isLoading: authLoading } = useAuth();
+  const { inventoryMode } = useStoreSettings();
   const [order, setOrder] = useState<Order | null>(null);
   const [orderLookupError, setOrderLookupError] = useState('');
   const [isWholesale, setIsWholesale] = useState(false);
@@ -193,7 +196,7 @@ export default function PedidoPage() {
             'Titular': d.bankAccountHolder || 'No configurado',
             'RUT': d.bankRut || 'No configurado',
             'Banco': d.bankName || 'No configurado',
-            'Tipo de cuenta': d.bankAccountType || 'Cuenta Vista',
+            'Tipo de cuenta': d.bankAccountType || 'No configurado',
             'N° de cuenta': d.bankAccountNumber || 'No configurado',
             'Email': d.bankEmail || d.email || 'No configurado',
           });
@@ -433,14 +436,6 @@ export default function PedidoPage() {
           await notifyNegotiationComplete(orderCode, customerName, replacedCount);
         } else if (missingCount > 0 && replacedCount > 0) {
           await notifyNegotiationPartial(orderCode, customerName, replacedCount, missingCount);
-        } else {
-          // Fallback: use the old message format for edge cases
-          const adminMsg = `✅ El cliente del pedido *#${orderCode}* ha completado un reemplazo en la web.\n• Producto original: ${oldItem.name}\n• Nuevo producto: ${newProd.NAME}`;
-          await fetch('/api/admin/whatsapp-send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone: '56985520703', message: adminMsg })
-          });
         }
       } catch (errNotify) {
         console.warn('Error notificando al admin:', errNotify);
@@ -601,10 +596,11 @@ export default function PedidoPage() {
 
   useEffect(() => {
     if (order?.PAYMENTPROOFURL) {
-      if (isPdfUrl(order.PAYMENTPROOFURL)) {
+      const proofUrl = parsePaymentProofs(order.PAYMENTPROOFURL)[0] || order.PAYMENTPROOFURL;
+      if (isPdfUrl(proofUrl)) {
         setPaymentProofIsPdf(true);
       } else {
-        fetch(order.PAYMENTPROOFURL, { method: 'HEAD' })
+        fetch(proofUrl, { method: 'HEAD' })
           .then(res => {
             const contentType = res.headers.get('content-type');
             if (contentType?.includes('application/pdf')) {
@@ -1186,6 +1182,7 @@ export default function PedidoPage() {
     }
   }
 
+  const independentWeb = !isVendorOrder && !isWholesale && inventoryMode === 'web_independent';
   const canEditBeforePayment = ['pending', 'pending_stock', 'processing', 'paid', 'payment_expired'].includes(order.STATUS);
   const isStockConfirmed = ['pending', 'pending_stock', 'processing', 'paid', 'payment_expired'].includes(order.STATUS);
   const BANK = isVendorOrder && vendorBranding
@@ -1193,17 +1190,19 @@ export default function PedidoPage() {
         'Titular': vendorBranding.bankAccountHolder || 'No configurado',
         'RUT': vendorBranding.bankRut || 'No configurado',
         'Banco': vendorBranding.bankName || 'No configurado',
-        'Tipo de cuenta': vendorBranding.bankAccountType || 'Cuenta Vista',
+        'Tipo de cuenta': vendorBranding.bankAccountType || 'No configurado',
         'N° de cuenta': vendorBranding.bankAccountNumber || 'No configurado',
         'Email': vendorBranding.bankEmail || 'No configurado',
       }
     : (serverBank || getBankDetails());
   const isRetiro = order.SHIPPINGAGENCY?.toUpperCase() === 'RETIRO EN TIENDA';
   const isReadyRetiro = order.STATUS === 'shipped' && isRetiro;
-  const status = isReadyRetiro
+  const status = independentWeb && ['pending', 'pending_stock', 'processing', 'paid', 'payment_expired', 'payment_review'].includes(order.STATUS)
+    ? { label: parsePaymentProofs(order.PAYMENTPROOFURL).length ? 'Revisando pago' : 'No pagado', color: '#1d4ed8', bg: '#eff6ff' }
+    : isReadyRetiro
     ? { label: 'Listo para retirar', color: '#a21caf', bg: '#fae8ff' }
     : (STATUS_MAP[order.STATUS] || { label: order.STATUS, color: '#333', bg: '#f5f5f5' });
-  const showTimer = isStockConfirmed && (order.STATUS === 'payment_expired' ? getOrderAutoCancelDeadline(order) : order.EXPIRESAT) && !uploaded;
+  const showTimer = !independentWeb && isStockConfirmed && (order.STATUS === 'payment_expired' ? getOrderAutoCancelDeadline(order) : order.EXPIRESAT) && !uploaded;
   const isSuccess = uploaded || ['paid', 'payment_confirmed', 'shipped', 'delivered'].includes(order.STATUS);
   const customerEditCount = getCustomerEditCount(order);
   const canCustomerModify = !['payment_review', 'payment_confirmed', 'negotiation', 'shipped', 'delivered', 'cancelled'].includes(order.STATUS);
@@ -1317,7 +1316,13 @@ export default function PedidoPage() {
         {(() => {
           const isRetiro = order.SHIPPINGAGENCY?.toUpperCase() === 'RETIRO EN TIENDA';
           const useWholesaleTimeline = isWholesale;
-          const steps = useWholesaleTimeline
+          const steps = independentWeb ? [
+            { key: 'paid', label: 'No pagado', icon: <Clock size={15} /> },
+            { key: 'payment_review', label: 'Revisando pago', icon: <Upload size={15} /> },
+            { key: 'payment_confirmed', label: 'Pago confirmado', icon: <CheckCircle size={15} /> },
+            { key: 'shipped', label: 'Embalado', icon: <Package size={15} /> },
+            { key: 'delivered', label: 'Entregado', icon: <Truck size={15} /> },
+          ] : useWholesaleTimeline
             ? [
                 { key: 'paid',               label: 'Stock Confirmado',  icon: <CheckCircle size={15} /> },
                 { key: 'payment_expired',    label: 'Pago vencido',      icon: <Clock size={15} /> },
@@ -1334,8 +1339,8 @@ export default function PedidoPage() {
                 { key: 'shipped',            label: 'Embalado',            icon: <Package size={15} /> },
                 { key: 'delivered',          label: 'Entregado',           icon: <Truck size={15} /> },
               ];
-          const statusOrder = ['paid', 'payment_expired', 'payment_review', 'payment_confirmed', 'shipped', 'delivered'];
-          const effStatus = ['pending', 'pending_stock', 'processing'].includes(order.STATUS) ? 'paid' : order.STATUS;
+          const statusOrder = independentWeb ? ['paid', 'payment_review', 'payment_confirmed', 'shipped', 'delivered'] : ['paid', 'payment_expired', 'payment_review', 'payment_confirmed', 'shipped', 'delivered'];
+          const effStatus = independentWeb && ['pending', 'pending_stock', 'processing', 'paid', 'payment_expired', 'payment_review'].includes(order.STATUS) ? (parsePaymentProofs(order.PAYMENTPROOFURL).length ? 'payment_review' : 'paid') : ['pending', 'pending_stock', 'processing'].includes(order.STATUS) ? 'paid' : order.STATUS;
           const currentIdx = statusOrder.indexOf(effStatus);
           if (order.STATUS === 'cancelled') return null;
           return (
@@ -1536,7 +1541,7 @@ export default function PedidoPage() {
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button 
                     onClick={() => {
-                      const url = order.PAYMENTPROOFURL!;
+                      const url = parsePaymentProofs(order.PAYMENTPROOFURL)[0] || order.PAYMENTPROOFURL!;
                       if (isPdfUrl(url) || paymentProofIsPdf) {
                         window.open(url, '_blank');
                       } else {
@@ -1589,7 +1594,7 @@ export default function PedidoPage() {
             Conecta tu pedido a nuestro WhatsApp para recibir actualizaciones automáticas. Si escribiste mal tu número en el carrito, haz click aquí para corregirlo.
           </p>
           <a
-            href={`https://wa.me/56954592656?text=vincular_pedido%20${order.$id}`}
+            href="#"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-2xl font-bold text-sm transition shadow-sm"

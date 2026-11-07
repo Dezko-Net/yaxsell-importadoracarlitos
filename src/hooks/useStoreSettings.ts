@@ -23,27 +23,13 @@ export interface BalatinContact {
   sub?: string;
 }
 
-export const DEFAULT_WHATSAPP_CONTACTS: Attendant[] = [
-  {
-    id: 0,
-    name: 'Importadora Carlitos',
-    number: '56954592656',
-    sub: 'Atención por WhatsApp',
-    active: true,
-  },
-];
-
-export const DEFAULT_BALATIN_CONTACT: BalatinContact = {
-  name: 'Importadora Carlitos',
-  number: '56954592656',
-  img: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/09/1789051062597-pegada-1789051061671.png',
-  active: true,
-  sub: 'Bot de atención Importadora Carlitos',
-};
+export const DEFAULT_WHATSAPP_CONTACTS: Attendant[] = [];
+export const DEFAULT_BALATIN_CONTACT: BalatinContact = { name: '', number: '', active: false };
 
 export interface HomeMarketing {
   heroSlides: { enabled: boolean; desktopUrl: string; mobileUrl: string }[];
   newsBanner: { enabled: boolean; desktopUrl: string; mobileUrl: string };
+  newsBanners?: { enabled: boolean; desktopUrl: string; mobileUrl: string; linkType?: 'none' | 'url' | 'category'; linkUrl?: string; category?: string }[];
 }
 
 export interface StoreSettings {
@@ -233,10 +219,24 @@ export function useStoreSettings() {
     return 50000;
   })() : 50000);
 
-  // Esta copia de Carlitos utiliza un solo canal público: el número del bot.
-  // No recuperar contactos antiguos de localStorage ni de configuraciones heredadas.
-  const effectiveWhatsappContacts = DEFAULT_WHATSAPP_CONTACTS;
-  const effectiveBalatinContact = DEFAULT_BALATIN_CONTACT;
+  const effectiveWhatsappContacts = settings?.whatsappContacts || (typeof window !== 'undefined' ? (() => {
+    try {
+      const stored = localStorage.getItem('store_whatsapp_contacts');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return null;
+  })() : null) || DEFAULT_WHATSAPP_CONTACTS;
+
+  const effectiveBalatinContact = settings?.balatinContact || (typeof window !== 'undefined' ? (() => {
+    try {
+      const stored = localStorage.getItem('store_balatin_contact');
+      if (stored) return JSON.parse(stored);
+    } catch {}
+    return null;
+  })() : null) || DEFAULT_BALATIN_CONTACT;
 
   return {
     settings,

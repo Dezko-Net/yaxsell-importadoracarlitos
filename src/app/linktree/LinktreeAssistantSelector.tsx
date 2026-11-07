@@ -63,13 +63,13 @@ export default function LinktreeAssistantSelector({ onClose }: LinktreeAssistant
 
   const handleSelectFernanda = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const url = `https://wa.me/56954592656?text=${encodeURIComponent('Hola Importadora Carlitos, quiero consultar por una compra.')}`;
+    const url = `https://wa.me/56967294975?text=${encodeURIComponent('Hola Fernanda! 🌸 Te escribo desde la tienda, quiero hacer una consulta ✨')}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const handleSelectTora = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const url = `https://wa.me/56954592656?text=${encodeURIComponent('Hola Importadora Carlitos, quiero ayuda con el catálogo.')}`;
+    const url = `https://wa.me/56962293893?text=${encodeURIComponent('Hola Lissy! ⚡ Te escribo desde la tienda, quiero hacer una consulta 🚀')}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 

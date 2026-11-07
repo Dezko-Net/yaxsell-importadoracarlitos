@@ -8,6 +8,7 @@ import { useCart } from '@/context/CartContext';
 import { formatPrice } from '@/lib/db';
 import { useCartItemPrice } from '@/hooks/useCartItemPrice';
 import { useStoreSettings } from '@/hooks/useStoreSettings';
+import { useWebClientConfig } from '@/hooks/useWebClientConfig';
 import type { CartItem } from '@/types';
 import { getProductRisk } from '@/lib/stock-risk';
 import StockVerificationModal from '@/components/StockVerificationModal';
@@ -45,15 +46,31 @@ interface Attendant {
 const WHATSAPP_CONTACTS: Attendant[] = [
   {
     id: 0,
-    name: 'Importadora Carlitos',
-    number: '56954592656',
-    sub: 'Atención por WhatsApp',
+    name: 'Lissy',
+    number: '56936302521',
+    img: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/08/1785997439696-pegada-1785997429956.png',
+    border: 'border-red-400',
+    hover: 'hover:border-red-500',
+    text: 'text-red-500',
+    sub: 'Personalizado',
+    floatingEmojis: ['❤️', '💖', '💕'],
+  },
+  {
+    id: 1,
+    name: 'Fernanda',
+    number: '56945892576',
+    img: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/08/1785998075009-pegada-1785998072451.png',
+    border: 'border-gray-500',
+    hover: 'hover:border-gray-600',
+    text: 'text-gray-600',
+    sub: 'Personalizado',
+    floatingEmojis: ['🖤', '🖤', '🖤'],
   },
 ];
 
 const BALATIN_CONTACT = {
   name: 'Importadora Carlitos',
-  number: '56954592656',
+  number: '56936599658',
   img: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/09/1789051062597-pegada-1789051061671.png',
 };
 
@@ -75,6 +92,7 @@ export default function CartDrawer({ open, onClose }: Props) {
   const router = useRouter();
   const { 
     storeName,
+    inventoryMode,
     minimumPurchase: serverMinPurchase,
     whatsappContacts,
     balatinContact,
@@ -82,6 +100,7 @@ export default function CartDrawer({ open, onClose }: Props) {
     allowWhatsappOrders,
     allowWebOrders,
   } = useStoreSettings();
+  const { config: webConfig } = useWebClientConfig();
   const currentStoreName = storeName || 'Importadora Carlitos';
   const [vendors, setVendors] = useState<any[]>([]);
   const [vendorsLoaded, setVendorsLoaded] = useState(false);
@@ -309,7 +328,7 @@ export default function CartDrawer({ open, onClose }: Props) {
     waMsg += `*Total: ${formatPrice(subtotal)}*\n`;
     waMsg += `*Codigo: ${orderCode}*`;
 
-    const cleanNumber = normalizeChileanPhone(balatinConfig.number || '56954592656') || '56954592656';
+    const cleanNumber = normalizeChileanPhone(balatinConfig.number || '56936599658') || '56936599658';
     const waUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(waMsg)}`;
 
     try {
@@ -360,11 +379,19 @@ export default function CartDrawer({ open, onClose }: Props) {
     setOrderError(null);
 
     const isVendorOrder = Boolean(currentVendor && commonVendorId);
-    const attendant = isVendorOrder || selectedAttendant === 'balatin' || selectedAttendant === 'yexi'
-      ? { name: balatinConfig.name || 'Importadora Carlitos', number: balatinConfig.number || '56954592656' }
+    const directWebBot = inventoryMode === 'web_independent' && !isVendorOrder;
+    if (directWebBot && !normalizeChileanPhone(webConfig.botPhone)) {
+      setOrderError('El número del bot aún no está configurado para esta tienda.');
+      setSubmittingOrder(false);
+      return;
+    }
+    const attendant = directWebBot
+      ? { name: webConfig.storeName || currentStoreName, number: webConfig.botPhone }
+      : isVendorOrder || selectedAttendant === 'balatin' || selectedAttendant === 'yexi'
+      ? { name: balatinConfig.name || 'Importadora Carlitos', number: balatinConfig.number || '56936599658' }
       : typeof selectedAttendant === 'number' && contactsList[selectedAttendant]
         ? contactsList[selectedAttendant]
-        : { name: balatinConfig.name || 'Importadora Carlitos', number: balatinConfig.number || '56954592656' };
+        : { name: balatinConfig.name || 'Importadora Carlitos', number: balatinConfig.number || '56936599658' };
 
     const apiBase = typeof window !== 'undefined' ? window.location.origin : '';
     const orderItems = items.map(i => ({
@@ -459,7 +486,7 @@ export default function CartDrawer({ open, onClose }: Props) {
     waMsg += `*Total: ${formatPrice(subtotal)}*\n`;
     waMsg += `*Codigo: ${orderCode}*`;
 
-    const targetNumber = normalizeChileanPhone(attendant.number || balatinConfig.number || '56954592656') || '56954592656';
+    const targetNumber = normalizeChileanPhone(attendant.number || balatinConfig.number || '56936599658') || '56936599658';
     const waUrl = `https://wa.me/${targetNumber}?text=${encodeURIComponent(waMsg)}`;
 
     try {
@@ -730,7 +757,7 @@ export default function CartDrawer({ open, onClose }: Props) {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-bold text-sm sm:text-base text-slate-900 leading-tight">Pedir por WhatsApp</h4>
-                        <p className="mt-1 text-xs sm:text-[13px] text-slate-600 leading-snug">Confirma productos y stock directamente con una cajera</p>
+                        <p className="mt-1 text-xs sm:text-[13px] text-slate-600 leading-snug">Confirma tu pedido directamente por WhatsApp</p>
                       </div>
                       <ArrowRight size={18} className="text-emerald-700 group-hover:translate-x-0.5 transition-transform shrink-0" />
                     </div>

@@ -1,3 +1,4 @@
+import { getInventoryConnectionMode } from '@/lib/inventory-mode';
 import { getAuth } from 'firebase-admin/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminApp } from '@/lib/db-server';
@@ -78,15 +79,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'El rango de fechas no es válido' }, { status: 400 });
     }
 
-    let query: FirebaseFirestore.Query = getAdminDb()
-      .collection(ORDERS_COLLECTION_ID)
-      .where('STATUS', '==', 'payment_review');
-    if (start !== null) query = query.where('CREATEDAT', '>=', start);
-    if (end !== null) query = query.where('CREATEDAT', '<', end);
-
-    const snapshot = await query.orderBy('CREATEDAT', 'desc').limit(MAX_REVIEW_ORDERS + 1).get();
-    const truncated = snapshot.docs.length > MAX_REVIEW_ORDERS;
-    const orders = snapshot.docs.slice(0, MAX_REVIEW_ORDERS).map(document => {
+    const independentWeb = await getInventoryConnectionMode() === 'web_independent';
+    const makeQuery = (legacy: boolean) => {
+      let query: FirebaseFirestore.Query = getAdminDb().collection(ORDERS_COLLECTION_ID)
+        .where('STATUS', legacy ? 'in' : '==', legacy ? ['paid', 'pending', 'pending_stock', 'processing', 'payment_expired'] : 'payment_review');
+      if (start !== null) query = query.where('CREATEDAT', '>=', start);
+      if (end !== null) query = query.where('CREATEDAT', '<', end);
+      return query.orderBy('CREATEDAT', 'desc').limit(MAX_REVIEW_ORDERS + 1).get();
+    };
+    const [snapshot, legacy] = await Promise.all([makeQuery(false), independentWeb ? makeQuery(true) : Promise.resolve(null)]);
+    const documents = [...snapshot.docs, ...(legacy?.docs || [])]
+      .filter(document => !independentWeb || parsePaymentProofs(document.data().PAYMENTPROOFURL).length > 0)
+      .sort((a, b) => normalizeTimestamp(b.data().CREATEDAT) - normalizeTimestamp(a.data().CREATEDAT));
+    const truncated = documents.length > MAX_REVIEW_ORDERS || Boolean(legacy && legacy.docs.length > MAX_REVIEW_ORDERS);
+    const orders = documents.slice(0, MAX_REVIEW_ORDERS).map(document => {
       const order = document.data();
       return {
         $id: document.id,
@@ -128,8 +134,8 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const ids = Array.isArray(body?.orderIds)
-      ? [...new Set(body.orderIds.map((id: unknown) => String(id || '').trim()).filter(Boolean))]
+    const ids: string[] = Array.isArray(body?.orderIds)
+      ? [...new Set<string>(body.orderIds.map((id: unknown) => String(id || '').trim()).filter(Boolean))]
       : [];
     if (ids.length === 0 || ids.length > MAX_CONFIRM_IDS) {
       return NextResponse.json({ error: `Selecciona entre 1 y ${MAX_CONFIRM_IDS} pedidos` }, { status: 400 });
@@ -139,6 +145,8 @@ export async function POST(request: NextRequest) {
     }
 
     const db = getAdminDb();
+    const independentWeb = await getInventoryConnectionMode() === 'web_independent';
+    const eligibleStatuses = independentWeb ? ['paid', 'pending', 'pending_stock', 'processing', 'payment_expired', 'payment_review', 'payment_confirmed'] : ['payment_review', 'payment_confirmed'];
     const refs = ids.map(id => db.collection(ORDERS_COLLECTION_ID).doc(id));
     // Validate the entire batch before changing any status.
     const initialSnapshots = await Promise.all(refs.map(ref => ref.get()));
@@ -148,7 +156,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: `El pedido ${ids[index]} ya no existe. No se cambió ningún estado.` }, { status: 409 });
       }
       const order = snapshot.data() || {};
-      if (!['payment_review', 'payment_confirmed'].includes(String(order.STATUS || ''))) {
+      if (!eligibleStatuses.includes(String(order.STATUS || ''))) {
         return NextResponse.json({ error: `El pedido ${order.ORDERCODE || ids[index]} ya no está en revisión de pago. Actualiza la lista; no se cambió ningún estado.` }, { status: 409 });
       }
       if (parsePaymentProofs(order.PAYMENTPROOFURL).length === 0) {
@@ -170,7 +178,7 @@ export async function POST(request: NextRequest) {
           if (String(order.STATUS) === 'payment_confirmed') {
             return { changed: false, order };
           }
-          if (String(order.STATUS) !== 'payment_review' || parsePaymentProofs(order.PAYMENTPROOFURL).length === 0) {
+          if (!eligibleStatuses.includes(String(order.STATUS)) || parsePaymentProofs(order.PAYMENTPROOFURL).length === 0) {
             throw new Error('El pedido cambió de estado o perdió su comprobante.');
           }
 

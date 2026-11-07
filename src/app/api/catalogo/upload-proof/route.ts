@@ -1,3 +1,4 @@
+import { getOrderInventoryConnectionMode } from '@/lib/inventory-mode';
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
 import { getAdminDb, serverGetDocument, serverUploadFile } from '@/lib/db-server';
@@ -42,14 +43,15 @@ export async function POST(request: NextRequest) {
     let { order } = lookup.match as any;
     const collectionId = lookup.match.collectionId;
     const vendorOrder = collectionId === VENDOR_ORDERS_COLLECTION_ID || isVendorOrder(order);
+    const independentWeb = !vendorOrder && await getOrderInventoryConnectionMode(order) === 'web_independent';
     if (vendorOrder) {
       const autoCancelAt = getOrderAutoCancelAt(order);
       if ((PAYMENT_PENDING_STATUSES.includes(order.STATUS) || order.STATUS === 'payment_expired') && !order.PAYMENTPROOFURL && autoCancelAt > 0 && autoCancelAt <= Date.now()) {
         await expireUnpaidOrder(order.$id);
         return NextResponse.json({ error: 'Vencieron las 24 horas desde la creación del pedido y fue cancelado' }, { status: 410 });
       }
-    } else {
-      // La tienda principal conserva su temporizador de pago y el flujo PWA.
+    } else if (!independentWeb) {
+      // La tienda principal integrada conserva el temporizador de pago.
       if (PAYMENT_PENDING_STATUSES.includes(order.STATUS) && !order.PAYMENTPROOFURL && isOrderPaymentWindowExpired(order)) {
         await markOrderPaymentExpired(order.$id);
         order = await serverGetDocument(collectionId, order.$id) as any;
@@ -104,7 +106,7 @@ export async function POST(request: NextRequest) {
           if (autoCancelAt > 0 && autoCancelAt <= Date.now()) {
             throw Object.assign(new Error('Vencieron las 24 horas desde la creación del pedido.'), { statusCode: 410 });
           }
-        } else if (fresh.STATUS === 'payment_expired' && getOrderAutoCancelAt(fresh) <= Date.now()) {
+        } else if (!independentWeb && fresh.STATUS === 'payment_expired' && getOrderAutoCancelAt(fresh) <= Date.now()) {
           throw Object.assign(new Error('Vencieron las 24 horas desde la creación del pedido.'), { statusCode: 410 });
         }
 

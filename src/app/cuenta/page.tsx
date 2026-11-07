@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { getServices, getFirebaseConfig, MEDIA_BUCKET_ID } from "@/lib/db";
 import { useAuth } from "@/hooks/useAuth";
+import { useWebClientConfig } from "@/hooks/useWebClientConfig";
 import { LoyaltyService } from "@/services/loyaltyService";
 import PedidosMultiChannelSection from "@/components/cuenta/PedidosMultiChannelSection";
 import OrdersCloudMascot from "@/components/admin/OrdersCloudMascot";
@@ -111,7 +112,7 @@ function CuentaWrapper() {
   const isEmbed = searchParams.get("embed") === "1";
 
   if (!isEmbed) {
-    return <CatalogoClient defaultHash={searchParams.get("pedidos") === "1" ? "#/account/orders" : "#/account"} />;
+    return <CatalogoClient defaultHash="#/account" />;
   }
 
   return <ActualCuentaPage />;
@@ -119,7 +120,7 @@ function CuentaWrapper() {
 
 function ActualCuentaPage() {
   const { user, isLoggedIn, isLoading, logout, loginWithGoogle } = useAuth();
-  const searchParams = useSearchParams();
+  const { config: webConfig } = useWebClientConfig();
   const reduced = useReducedMotion();
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleError, setGoogleError] = useState("");
@@ -130,14 +131,6 @@ function ActualCuentaPage() {
   const rootRef = useRef<HTMLElement>(null);
   const mascotRef = useRef<HTMLDivElement>(null);
   const slotRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (isLoading || searchParams.get("pedidos") !== "1") return;
-    const frame = requestAnimationFrame(() => {
-      document.getElementById("historial-pedidos")?.scrollIntoView({ block: "start" });
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [isLoading, searchParams]);
 
   useEffect(() => {
     try {
@@ -311,7 +304,7 @@ function ActualCuentaPage() {
         <Link
           href="/"
           className={styles.brand}
-          aria-label="Importadora Carlitos, inicio"
+          aria-label={`${webConfig.storeName}, inicio`}
           onClick={(e) => {
             if (typeof window !== "undefined" && window.parent && window.parent !== window) {
               e.preventDefault();
@@ -319,7 +312,7 @@ function ActualCuentaPage() {
             }
           }}
         >
-          <img src="/images/optimized/logo-carlitos.svg" alt="Importadora Carlitos" />
+          {webConfig.logoUrl ? <img src={webConfig.logoUrl} alt={`Logo de ${webConfig.storeName}`} width={96} height={96} /> : <span className="text-sm font-bold text-slate-900">{webConfig.storeName.slice(0, 2).toUpperCase()}</span>}
         </Link>
         <button
           type="button"
@@ -332,10 +325,6 @@ function ActualCuentaPage() {
       </header>
       <div className={styles.sky} aria-hidden="true">
         <CoverArtwork />
-        <div className={styles.skyWords}>
-          <span>Un espacio para ti.</span>
-          <p>Y para todo lo que viene.</p>
-        </div>
       </div>
       <div className={styles.skySpacer} aria-hidden="true" />
       <div className={styles.curtain}>
@@ -348,7 +337,7 @@ function ActualCuentaPage() {
           >
             <span className={styles.welcome}>
               <span />
-              Tu espacio Importadora Carlitos
+              Tu espacio {webConfig.storeName}
             </span>
             <h1>
               {firstName ? (
@@ -539,15 +528,15 @@ function ActualCuentaPage() {
         </section>
         <footer className={styles.footer}>
           <span>
-            Importadora Carlitos <span>·</span> Cerca de ti, en cada compra.
+            {webConfig.storeName} <span>·</span> Cerca de ti, en cada compra.
           </span>
-          <a
-            href="https://wa.me/56954592656"
+          {(webConfig.supportPhone || webConfig.botPhone) && <a
+            href={`https://wa.me/${webConfig.supportPhone || webConfig.botPhone}`}
             target="_blank"
             rel="noopener noreferrer"
           >
             <MessageCircle size={14} /> Conversemos
-          </a>
+          </a>}
         </footer>
       </div>
       <div className={styles.mascot} ref={mascotRef} aria-hidden="true">

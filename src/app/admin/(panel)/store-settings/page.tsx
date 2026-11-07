@@ -71,18 +71,27 @@ export default function StoreSettingsPage() {
   const [waContacts, setWaContacts] = useState<WhatsAppContact[]>([
     {
       id: 0,
-      name: 'Importadora Carlitos',
-      number: '56954592656',
-      sub: 'Atención por WhatsApp',
+      name: 'Lissy',
+      number: '56936302521',
+      img: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/08/1785997439696-pegada-1785997429956.png',
+      sub: 'Personalizado',
+      active: true,
+    },
+    {
+      id: 1,
+      name: 'Fernanda',
+      number: '56945892576',
+      img: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/08/1785998075009-pegada-1785998072451.png',
+      sub: 'Personalizado',
       active: true,
     },
   ]);
   const [balatin, setBalatin] = useState<BalatinContact>({
     name: 'Importadora Carlitos',
-    number: '56954592656',
+    number: '56936599658',
     img: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/09/1789051062597-pegada-1789051061671.png',
     active: true,
-    sub: 'Bot de atención Importadora Carlitos',
+    sub: 'Dueño Importadora Carlitos',
   });
   const [attendantMode, setAttendantMode] = useState<'choice' | 'direct' | 'rotation' | 'yexi'>('choice');
   const [allowWhatsappOrders, setAllowWhatsappOrders] = useState(true);
@@ -141,9 +150,9 @@ export default function StoreSettingsPage() {
         if (doc.balatinContact && typeof doc.balatinContact === 'object') {
           setBalatin({
             name: doc.balatinContact.name || 'Importadora Carlitos',
-            number: doc.balatinContact.number || '56954592656',
+            number: doc.balatinContact.number || '56936599658',
             img: doc.balatinContact.img || 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/09/1789051062597-pegada-1789051061671.png',
-            sub: doc.balatinContact.sub || 'Bot de atención Importadora Carlitos',
+            sub: doc.balatinContact.sub || 'Dueño Importadora Carlitos',
             active: doc.balatinContact.active !== false,
           });
         }
@@ -179,7 +188,6 @@ export default function StoreSettingsPage() {
         showInAnnouncementBar: settings.showInAnnouncementBar,
         UNLIMITEDSTOCK: settings.unlimitedStock,
         unlimitedStock: settings.unlimitedStock,
-        inventoryMode: settings.inventoryMode,
         ...(MODULE_ACCESS.whatsappManagement ? {
           whatsappContacts: waContacts,
           balatinContact: balatin,
@@ -532,42 +540,7 @@ export default function StoreSettingsPage() {
             <div style={{ fontSize: 12, color: '#6b7280', lineHeight: 1.5, background: '#f8fafc', padding: 12, borderRadius: 10, border: '1px solid #e2e8f0' }}>
               ℹ️ <strong>Al activar Sin Stock:</strong> Se ocultarán todas las pantallas de inventario y stock del panel. Las secciones "Catálogo" y "Solicitudes" serán ocultadas en el storefront y se permitirá la compra ilimitada.
             </div>
-            <div style={{ padding: 14, border: '1px solid #dbeafe', borderRadius: 12, background: '#f8fbff' }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#1f2937', marginBottom: 4 }}>Conexión del inventario</div>
-              <div style={{ fontSize: 11, color: '#6b7280', lineHeight: 1.5, marginBottom: 10 }}>
-                Elige si las ventas web comparten existencias con el ERP o mantienen su propio stock.
-              </div>
-              <div role="radiogroup" aria-label="Modo de inventario" style={{ display: 'grid', gap: 8 }}>
-                {([
-                  ['web_independent', 'Web independiente', 'La web usa WEB_STOCK. Los pedidos web no descuentan el stock del ERP.'],
-                  ['erp_integrated', 'Conjunto con ERP', 'La web y el ERP comparten STOCK, como funciona actualmente.'],
-                ] as const).map(([value, label, description]) => {
-                  const selected = settings.inventoryMode === value;
-                  return (
-                    <button
-                      key={value}
-                      type="button"
-                      role="radio"
-                      aria-checked={selected}
-                      onClick={() => setSettings({ ...settings, inventoryMode: value })}
-                      style={{
-                        textAlign: 'left', padding: '10px 12px', borderRadius: 10, cursor: 'pointer',
-                        border: `1.5px solid ${selected ? '#5850ec' : '#e5e7eb'}`,
-                        background: selected ? '#f3f2ff' : '#fff',
-                      }}
-                    >
-                      <div style={{ fontSize: 12, fontWeight: 700, color: '#1f2937' }}>{label}</div>
-                      <div style={{ fontSize: 11, color: '#6b7280', marginTop: 3, lineHeight: 1.45 }}>{description}</div>
-                    </button>
-                  );
-                })}
-              </div>
-              {settings.inventoryMode === 'web_independent' && (
-                <div style={{ fontSize: 11, color: '#92400e', lineHeight: 1.5, background: '#fffbeb', padding: 9, borderRadius: 8, marginTop: 9 }}>
-                  Mientras un producto no tenga WEB_STOCK, la web usa STOCK como valor inicial. Guarda el stock web de cada producto para separarlo de futuras entradas o ventas del ERP.
-                </div>
-              )}
-            </div>
+
           </div>
         </div>
 
@@ -845,7 +818,7 @@ export default function StoreSettingsPage() {
                   {/* Teléfono */}
                   <div>
                     <label style={{ fontSize: 10, fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: 4 }}>Número de WhatsApp</label>
-                    <input value={c.number} onChange={e => setWaContacts(waContacts.map((x, i) => i === idx ? { ...x, number: e.target.value } : x))} placeholder="Ej: 56954592656" style={{
+                    <input value={c.number} onChange={e => setWaContacts(waContacts.map((x, i) => i === idx ? { ...x, number: e.target.value } : x))} placeholder="Ej: 56936302521" style={{
                       width: '100%', padding: '8px 12px', border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 13, outline: 'none', boxSizing: 'border-box',
                     }} />
                   </div>
@@ -909,7 +882,7 @@ export default function StoreSettingsPage() {
               </div>
               <div>
                 <label style={{ fontSize: 10, fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: 4 }}>Número de WhatsApp de Importadora Carlitos</label>
-                <input value={balatin.number} onChange={e => setBalatin({ ...balatin, number: e.target.value })} placeholder="Ej: 56954592656" style={{
+                <input value={balatin.number} onChange={e => setBalatin({ ...balatin, number: e.target.value })} placeholder="Ej: 56936599658" style={{
                   width: '100%', padding: '8px 12px', border: '1px solid #c7d2fe', borderRadius: 8, fontSize: 13, outline: 'none', boxSizing: 'border-box',
                 }} />
               </div>

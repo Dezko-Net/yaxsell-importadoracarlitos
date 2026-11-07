@@ -3,10 +3,10 @@ import { revalidateTag, unstable_cache } from 'next/cache';
 import { STORE_SETTINGS_COLLECTION, getAdminApp, getAdminDb } from '@/lib/db-server';
 import { ORDERS_COLLECTION_ID } from '@/lib/db';
 import { getAuth } from 'firebase-admin/auth';
-import { isAdminEmail } from '@/lib/admin-access';
 import { clearCatalogMemoryCache } from '@/lib/catalog-cache';
 import { clearPublicProductDetailCache } from '@/lib/public-product-detail-cache';
 import { MODULE_ACCESS } from '@/lib/module-access';
+import { isSupremeOwner } from '@/lib/supreme-owner';
 import {
   DEFAULT_INVENTORY_CONNECTION_MODE,
   getInventoryConnectionMode,
@@ -26,23 +26,8 @@ const displayStoreBrand = (value: unknown) =>
     ? value.replace(/(?:importadora\s*3b|(?:importadora\s+)?don\s*balato(?:\s+[ab])?)/gi, 'Importadora Carlitos')
     : '';
 
-const DEFAULT_WHATSAPP_CONTACTS = [
-  {
-    id: 0,
-    name: 'Importadora Carlitos',
-    number: '56954592656',
-    sub: 'Atención por WhatsApp',
-    active: true,
-  },
-];
-
-const DEFAULT_BALATIN_CONTACT = {
-  name: 'Importadora Carlitos',
-  number: '56954592656',
-  img: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/09/1789051062597-pegada-1789051061671.png',
-  active: true,
-  sub: 'Bot de atención Importadora Carlitos'
-};
+const DEFAULT_WHATSAPP_CONTACTS: any[] = [];
+const DEFAULT_BALATIN_CONTACT = { name: '', number: '', img: '', active: false, sub: '' };
 
 const DEFAULT_HOME_MARKETING = {
   heroSlides: [
@@ -68,6 +53,12 @@ const DEFAULT_HOME_MARKETING = {
     mobileUrl: 'https://storage.googleapis.com/asistoraerp.firebasestorage.app/IADESIGN/2026/07/1785356616648-pegada-1785356614330.png',
   },
 };
+
+// Una instalación nueva no debe mostrar imágenes de otra tienda por defecto.
+if ((process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'importadora-carlitos') !== 'importadora-carlitos') {
+  DEFAULT_HOME_MARKETING.heroSlides = DEFAULT_HOME_MARKETING.heroSlides.map(() => ({ enabled: false, desktopUrl: '', mobileUrl: '' }));
+  DEFAULT_HOME_MARKETING.newsBanner = { enabled: false, desktopUrl: '', mobileUrl: '' };
+}
 
 // Serve the optimized copy even when the old URL is saved in store settings.
 const OPTIMIZED_MARKETING_IMAGES: Record<string, string> = {
@@ -143,9 +134,12 @@ const getCachedStoreSettings = unstable_cache(
         bankAccountNumber: doc.bankAccountNumber || '',
         bankEmail: doc.bankEmail || '',
         bankInstructions: doc.bankInstructions || '',
-        // No reutilizar teléfonos ni asistentes de la configuración heredada.
-        whatsappContacts: DEFAULT_WHATSAPP_CONTACTS,
-        balatinContact: DEFAULT_BALATIN_CONTACT,
+        whatsappContacts: Array.isArray(doc.whatsappContacts) && doc.whatsappContacts.length > 0 ? doc.whatsappContacts : DEFAULT_WHATSAPP_CONTACTS,
+        balatinContact: doc.balatinContact ? {
+          ...doc.balatinContact,
+          name: displayStoreBrand(doc.balatinContact.name),
+          sub: displayStoreBrand(doc.balatinContact.sub),
+        } : DEFAULT_BALATIN_CONTACT,
         attendantMode: doc.attendantMode || 'choice',
         allowWhatsappOrders: doc.allowWhatsappOrders !== false,
         allowWebOrders: doc.allowWebOrders !== false,
@@ -156,6 +150,7 @@ const getCachedStoreSettings = unstable_cache(
             ...(Array.isArray(doc.homeMarketing?.heroSlides) ? doc.homeMarketing.heroSlides[index] : {}),
           })),
           newsBanner: { ...DEFAULT_HOME_MARKETING.newsBanner, ...(doc.homeMarketing?.newsBanner || {}) },
+          ...(Array.isArray(doc.homeMarketing?.newsBanners) ? { newsBanners: doc.homeMarketing.newsBanners.slice(0, 3) } : {}),
         },
       };
     }
@@ -171,10 +166,17 @@ const getCachedStoreSettings = unstable_cache(
         desktopUrl: optimizeMarketingUrl(result.homeMarketing.newsBanner.desktopUrl),
         mobileUrl: optimizeMarketingUrl(result.homeMarketing.newsBanner.mobileUrl),
       },
+      ...(Array.isArray(result.homeMarketing.newsBanners) ? {
+        newsBanners: result.homeMarketing.newsBanners.map((banner: any) => ({
+          ...banner,
+          desktopUrl: optimizeMarketingUrl(banner?.desktopUrl || ''),
+          mobileUrl: optimizeMarketingUrl(banner?.mobileUrl || ''),
+        })),
+      } : {}),
     };
     return result;
   },
-  ['store-settings-cache-v7'],
+  ['store-settings-cache-v8'],
   { revalidate: 86400, tags: ['store-settings', 'settings'] }
 );
 
@@ -219,7 +221,7 @@ export async function POST(req: Request) {
         try {
           if (!token) throw new Error('missing token');
           const decoded = await getAuth(getAdminApp()).verifyIdToken(token);
-          if (!isAdminEmail(decoded.email)) throw new Error('not admin');
+          if (!isSupremeOwner(decoded.uid, decoded.email)) throw new Error('not supreme admin');
         } catch {
           return NextResponse.json({ ok: false, error: 'Solo un administrador autenticado puede cambiar el modo de inventario.' }, { status: 401 });
         }

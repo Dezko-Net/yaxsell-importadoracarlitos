@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import { ChevronDown, ChevronUp, Upload, Loader2 } from 'lucide-react'
 import { SECTION_STYLES, type SectionTone } from './helpers'
 
@@ -25,18 +25,19 @@ export function Section({ icon, title, subtitle, children, defaultOpen = true, t
   icon: React.ReactNode; title: string; subtitle: string; children: React.ReactNode; defaultOpen?: boolean; tone: SectionTone
 }) {
   const [open, setOpen] = useState(defaultOpen)
+  const contentId = useId()
   const style = SECTION_STYLES[tone]
   return (
-    <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
-      <button type="button" onClick={() => setOpen(!open)} className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-slate-50 border-b border-slate-100">
-        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${style.icon} shadow-xs`}>{icon}</div>
+    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls={contentId} className="flex w-full items-center gap-3 border-b border-slate-100 px-5 py-4 text-left transition hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-600 sm:px-6">
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${style.icon}`}>{icon}</div>
         <div className="min-w-0 flex-1">
-          <h2 className="text-[14px] font-bold text-slate-900">{title}</h2>
-          <p className="text-[12px] text-slate-500">{subtitle}</p>
+          <h2 className="text-base font-bold text-slate-900">{title}</h2>
+          <p className="mt-0.5 text-sm leading-5 text-slate-500">{subtitle}</p>
         </div>
         {open ? <ChevronUp size={18} className="text-slate-400" /> : <ChevronDown size={18} className="text-slate-400" />}
       </button>
-      {open && <div className="px-4 pb-4 pt-3">{children}</div>}
+      <div id={contentId} hidden={!open} className="px-5 pb-6 pt-5 sm:px-6">{children}</div>
     </section>
   )
 }

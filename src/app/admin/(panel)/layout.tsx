@@ -6,7 +6,9 @@ import Link from 'next/link';
 import Image from '@/components/StoreImage';
 import { useAuth } from '@/hooks/useAuth';
 import { useStoreSettings } from '@/hooks/useStoreSettings';
+import { useServiceModules } from '@/hooks/useServiceModules';
 import { isAdminEmail } from '@/lib/admin-access';
+import { isSupremeOwner } from '@/lib/supreme-owner';
 import { getErpUserByEmail, getRedirectForModules } from '@/lib/erpUserService';
 import { AI_ENABLED, AI_SIDEKICK_ENABLED, WHATSAPP_BOT_ENABLED } from '@/lib/feature-flags';
 import { MODULE_ACCESS, isProductNavigationVisible } from '@/lib/module-access';
@@ -85,6 +87,7 @@ const NAV_GROUPS: NavGroup[] = [
     ]},
     { href: '', label: 'Pedidos', icon: Ico.Pedidos, badge: 'orders', children: [
       { href: '/admin/orders',            label: 'Todos los Pedidos', icon: Ico.Pedidos, badge: 'orders' },
+      { href: '/admin/orders/comprobacion', label: 'Comprobación de pedidos', icon: Ico.Pedidos },
       ...(AI_ENABLED ? [{ href: '/admin/orders/negotiation', label: 'Negociación', icon: Ico.Pedidos }] : []),
     ]},
     { href: '/admin/users',     label: 'Clientes',   icon: Ico.Usuarios },
@@ -96,8 +99,8 @@ const NAV_GROUPS: NavGroup[] = [
       { href: '/admin/points-store',  label: 'Tienda de puntos', icon: Ico.Sorteos },
     ]},
     { href: '', label: 'Mi Tienda', icon: Ico.MiTienda, children: [
-      { href: '/admin/settings',       label: 'Servidor',         icon: Ico.Server },
       { href: '/admin/store-settings', label: 'Información',      icon: Ico.Productos },
+      { href: '/admin/supreme-web',    label: 'Admin Supreme Web', icon: Ico.Config },
       { href: '/admin/pagos',          label: 'Pagos',            icon: Ico.Pagos },
       { href: '/admin/agencias',       label: 'Agencias de envío', icon: Ico.Agencias },
       { href: '/admin/support',        label: 'Soporte',          icon: Ico.Soporte },
@@ -196,6 +199,7 @@ function IATopBarButton({ isOpen, onClick }: { isOpen: boolean; onClick: () => v
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoggedIn, isLoading, logout } = useAuth();
   const { unlimitedStock, settings: storeSettings } = useStoreSettings();
+  const { modules: services, ready: servicesReady } = useServiceModules();
   const router   = useRouter();
   const pathname = usePathname();
   const isFullScreenIAWhatsApp = pathname === '/admin/ia/whatsapp';
@@ -211,6 +215,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
     if (group.label === 'General') {
       const items = group.items.map(item => {
+        if (item.label === 'Mi Tienda' && item.children) {
+          return { ...item, children: item.children.filter(child => child.href !== '/admin/supreme-web' || isSupremeOwner(user?.id, user?.email)) };
+        }
         if (item.label === 'Productos' && item.children) {
           const children = item.children.map(subGroup => {
             if (subGroup.label === 'TIENDA') {
@@ -342,7 +349,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (isLoading) return;
     if (!isLoggedIn) {
       console.log('[admin-panel] not logged in, redirecting to login')
-      router.replace('/login?redirect=%2Fadmin');
+      router.replace(`/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`);
       return;
     }
     // Admin supremo siempre tiene acceso
@@ -606,7 +613,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       `}</style>
 
       {/* Botón ERP Dashboard - arriba de Ver mi página */}
-      {MODULE_ACCESS.erp && (userModules.includes('erp') || userModules.includes('erp_admin') || userModules.includes('admin_supreme')) && (
+      {servicesReady && services.erp && (userModules.includes('erp') || userModules.includes('erp_admin') || userModules.includes('admin_supreme')) && (
       <div style={{ padding: '12px 8px 0' }}>
         <a
           href="/erp-dashboard"
@@ -644,10 +651,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
       )}
 
-      {MODULE_ACCESS.pos && (userModules.includes('pos') || userModules.includes('pos_admin') || userModules.includes('admin_supreme')) && (
+      {servicesReady && services.pos && (userModules.includes('pos') || userModules.includes('pos_admin') || userModules.includes('admin_supreme')) && (
       <div style={{ padding: '12px 8px 0' }}>
         <a
-          href="/pos/donbalato-central"
+          href="/pos-acceso"
           target="_blank"
           rel="noopener noreferrer"
           style={{
@@ -1069,7 +1076,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 {/* Options */}
                 {[
                   { label: 'Ir al Dashboard', icon: '🏠', href: '/admin/dashboard' },
-                  { label: 'Configuración', icon: '⚙️', href: '/admin/settings' },
                   { label: 'Ver Tiendas', icon: '🛍️', href: '/admin/vendors' },
                 ].map(item => (
                   <Link key={item.href} href={item.href} onClick={() => closeUserMenu()} className="um-item" style={{

@@ -9,12 +9,12 @@ import { AgencyLogo } from '@/components/catalogo/AgencyLogos';
 import { getOrderAutoCancelDeadline } from '@/lib/order-expiration';
 
 const BANK_DETAILS = {
-  holder: 'Importadora Carlitos',
-  rut: '78267426-9',
-  bank: 'Banco de Chile',
-  type: 'Cuenta Corriente',
-  number: '4081220201',
-  email: 'contacto@yaxsell.cl',
+  holder: '',
+  rut: '',
+  bank: '',
+  type: '',
+  number: '',
+  email: '',
 };
 
 interface OrderItem {
@@ -144,7 +144,7 @@ function ConfirmarPedidoContent() {
         const orderQuery = orderId
           ? `id=${encodeURIComponent(orderId)}`
           : `code=${encodeURIComponent(code || '')}`;
-        const res = await fetch(`/api/catalogo/order?${orderQuery}`, { cache: 'no-store' });
+        let res = await fetch(`/api/catalogo/order?${orderQuery}`, { cache: 'no-store' });
         let data = await res.json();
         if ((!res.ok || data.error) && res.status === 404 && !orderId && code) {
           const vendorRes = await fetch(`/api/vendor/public-order?code=${encodeURIComponent(code)}`, { cache: 'no-store' });
@@ -288,10 +288,10 @@ function ConfirmarPedidoContent() {
           </p>
           <div className="mt-6 flex flex-col gap-3 justify-center">
             <Link
-              href="/cuenta?pedidos=1"
+              href="/productos"
               className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-indigo-600 text-white font-bold text-sm shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition active:scale-95"
             >
-              <span>📦 Ver mis pedidos en mi cuenta</span>
+              <span>📦 Ver mis pedidos en el catálogo</span>
             </Link>
             <Link
               href={`/pedido/${order?.$id || code}`}

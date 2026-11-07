@@ -1,4 +1,5 @@
 import { Order, OrderItem } from '@/types';
+import { orderQrSvg } from '@/lib/order-qr';
 import type { ProductWarehouseLocation } from '@/lib/product-features';
 
 function formatPrice(price: number): string {
@@ -167,6 +168,8 @@ export function buildOrderPdfHtml(
   </div>
 
   <div style="padding:28px 40px 36px;">
+
+  <div style="display:flex;justify-content:flex-end;gap:20px;margin-bottom:8px;">${order.$id ? `<div style="text-align:center;font-size:12px;font-weight:bold;color:#1e40af;"><div style="width:160px;height:160px;background:white;">${orderQrSvg(order.$id)}</div>Embalado</div><div style="text-align:center;font-size:12px;font-weight:bold;color:#b91c1c;"><div style="width:160px;height:160px;background:white;">${orderQrSvg(order.$id, 'shortage')}</div>Faltantes / devoluciones</div>` : ''}</div>
 
   <!-- Customer info -->
   <div style="display:flex;gap:16px;margin-bottom:${customerNote ? '16px' : '28px'};">

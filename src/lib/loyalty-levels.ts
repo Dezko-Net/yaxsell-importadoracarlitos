@@ -72,15 +72,15 @@ export function getAvatarRingStyle(levelId: string): Record<string, string> {
 export type BenefitLink = { href: string; label: string };
 
 /** Enlaces por beneficio (texto exacto o parcial). */
-export function getBenefitLink(benefit: string): BenefitLink | null {
+export function getBenefitLink(benefit: string, phone?: string): BenefitLink | null {
   const exact: Record<string, BenefitLink> = {
     'Acceso a catálogo completo': { href: '/productos', label: 'Ver catálogo' },
     'Seguimiento de pedidos': { href: '/cuenta/pedidos', label: 'Mis pedidos' },
-    'Atención al cliente': { href: getWhatsAppUrl('Hola, necesito ayuda con mi cuenta VIP'), label: 'WhatsApp' },
+    'Atención al cliente': { href: getWhatsAppUrl('Hola, necesito ayuda con mi cuenta VIP', phone), label: 'WhatsApp' },
     '1 punto por cada $1000 gastado': { href: '/cuenta/puntos', label: 'Canjear puntos' },
     'Sorteo mensual para nuevos usuarios': { href: '/cuenta/regalos', label: 'Ver regalos' },
   };
-  if (exact[benefit]) return exact[benefit];
+  if (exact[benefit]) return exact[benefit].href ? exact[benefit] : null;
 
   const lower = benefit.toLowerCase();
   if (lower.includes('punto')) return { href: '/cuenta/puntos', label: 'Tienda de puntos' };
@@ -90,7 +90,8 @@ export function getBenefitLink(benefit: string): BenefitLink | null {
   if (lower.includes('envío') || lower.includes('envio')) return { href: '/cuenta/direcciones', label: 'Direcciones' };
   if (lower.includes('oferta') || lower.includes('preventa')) return { href: '/ofertas', label: 'Ver ofertas' };
   if (lower.includes('whatsapp') || lower.includes('soporte') || lower.includes('atención') || lower.includes('atencion') || lower.includes('cliente')) {
-    return { href: getWhatsAppUrl('Hola, necesito ayuda con mi cuenta'), label: 'WhatsApp' };
+    const href = getWhatsAppUrl('Hola, necesito ayuda con mi cuenta', phone);
+    return href ? { href, label: 'WhatsApp' } : null;
   }
   if (lower.includes('cumpleaños') || lower.includes('cumpleanos') || lower.includes('regalo')) return { href: '/cuenta/regalos', label: 'Regalos' };
   return null;

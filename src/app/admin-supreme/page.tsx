@@ -4,30 +4,35 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeft, BarChart2, Bell, CheckCircle2, ClipboardList, ChevronDown, Crown, Database,
-  MapPin, Menu, Palette, RefreshCw, Save, Server, ShoppingCart, Store, Trash2,
-  TrendingUp, UserPlus, Users, Wallet, Waypoints, Loader2,
+  MapPin, Menu, Palette, Save, Store, Trash2,
+  TrendingUp, UserPlus, Users, Wallet, Loader2,
   Check, Shield, ShieldCheck, Briefcase, Mail, User, Lock, Layers,
 } from 'lucide-react'
 import {
-  ADMIN_SUPREME_ALLOWED_EMAIL, APP_ROLES, APP_MODULES, MODULE_LABELS, MODULE_TREE, ROLE_COLORS, ROLE_LABELS, SECTION_STYLES,
-  type AppRole, type AppModule, type AppUserRecord, type BranchConfig, type RuntimeAppConfig, type SectionTone,
+  ADMIN_SUPREME_ALLOWED_EMAIL, APP_ROLES, APP_MODULES, MODULE_LABELS, MODULE_TREE, ROLE_COLORS, ROLE_LABELS,
+  type AppModule, type AppUserRecord, type BranchConfig, type RuntimeAppConfig, type SectionTone,
   createEmptyBranch, getDefaultRuntimeConfig, loadConfig, loadUsers, mergeRuntimeConfig,
   saveConfig, saveUserToAppwrite, deleteUserFromAppwrite, deleteConfig, sanitize,
 } from './helpers'
 import { fetchTrabajadoresERP } from '@/lib/trabajadoresErpService'
 import { getAuth } from 'firebase/auth'
-import { ImageUploader, Img, Section, Stat } from './ui'
+import { ImageUploader, Img, Section } from './ui'
 import { AdminOnboarding } from './onboarding'
+import ServiceModuleSettings from '@/components/admin/ServiceModuleSettings'
+import { useAuth } from '@/hooks/useAuth'
+import { isSupremeOwner } from '@/lib/supreme-owner'
 
-const inputCls = 'mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-[13px] text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-sky-400 focus:ring-1 focus:ring-sky-100'
+const inputCls = 'mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-violet-500 focus:ring-2 focus:ring-violet-100'
 const btnPrimary = 'inline-flex items-center gap-2 rounded-lg bg-slate-800 px-3.5 py-2 text-[12px] font-semibold text-white shadow-xs transition hover:bg-slate-900 active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none'
 const btnSecondary = 'inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-[12px] font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none'
-const labelCls = 'block text-[11px] font-semibold text-slate-500 uppercase tracking-wider'
+const labelCls = 'block text-sm font-semibold text-slate-700'
 const pill = (active: boolean) => active
   ? 'border-slate-300 bg-slate-100 text-slate-700 shadow-xs'
   : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
 
 export default function AdminSupremePage() {
+  const { user: authenticatedUser } = useAuth()
+  const canManageServices = isSupremeOwner(authenticatedUser?.id, authenticatedUser?.email)
   const init = useMemo(() => getDefaultRuntimeConfig(), [])
   const baseConfig = useMemo(() => mergeRuntimeConfig(getDefaultRuntimeConfig(), init), [init])
   const [form, setForm] = useState<RuntimeAppConfig>(init)
@@ -61,7 +66,6 @@ export default function AdminSupremePage() {
   const supremeEmail = (form.supremeAdminEmail || '').trim().toLowerCase()
   const savedSupremeEmail = (init.supremeAdminEmail || '').trim().toLowerCase()
   const myEmail = ADMIN_SUPREME_ALLOWED_EMAIL
-  const myRole: AppRole = 'admin_supremo'
   const canEdit = true
 
 
@@ -116,10 +120,12 @@ export default function AdminSupremePage() {
   const activeCount = useMemo(() => form.branches.filter((b) => b.active).length, [form.branches])
   const [activeSection, setActiveSection] = useState<SectionTone>('brand')
   const sectionItems = [
-    { key: 'brand' as SectionTone, label: 'Mi Empresa', detail: 'Logo, nombre y color', icon: <Palette size={17} />, badge: `${form.branding.companyLogoUrl ? '1' : '0'} logo` },
-    { key: 'owner' as SectionTone, label: 'Operador', detail: 'Dueño y correo supremo', icon: <Crown size={17} />, badge: form.ownerProfile.displayName || 'Sin nombre' },
-    { key: 'branches' as SectionTone, label: 'Sucursales', detail: 'Sedes y managers', icon: <Store size={17} />, badge: `${activeCount}/${form.branches.length} activas` },
-    { key: 'users' as SectionTone, label: 'Usuarios', detail: 'Roles y accesos', icon: <Users size={17} />, badge: `${users.length} usuarios` },
+    ...(canManageServices ? [{ key: 'firebase' as SectionTone, label: 'Servicios', detail: 'Web, ERP y POS', icon: <Layers size={19} />, badge: 'Módulos' }] : []),
+    { key: 'brand' as SectionTone, label: 'Empresa', detail: 'Nombre, logo e identidad', icon: <Palette size={19} />, badge: form.companyName || 'Sin nombre' },
+    { key: 'owner' as SectionTone, label: 'Operador principal', detail: 'Datos del administrador', icon: <Crown size={19} />, badge: form.ownerProfile.displayName || 'Sin nombre' },
+    { key: 'branches' as SectionTone, label: 'Sucursales', detail: 'Sedes y responsables', icon: <Store size={19} />, badge: `${activeCount}/${form.branches.length} activas` },
+    { key: 'users' as SectionTone, label: 'Usuarios y accesos', detail: 'Cuentas, roles y permisos', icon: <Users size={19} />, badge: `${users.length} usuarios` },
+    { key: 'checklist' as SectionTone, label: 'Opciones avanzadas', detail: 'Restaurar configuración', icon: <Shield size={19} />, badge: 'Administración' },
   ]
   const activeSectionMeta = sectionItems.find((item) => item.key === activeSection) || sectionItems[0]
 
@@ -136,7 +142,7 @@ export default function AdminSupremePage() {
     if (!slug || !name) { setStatus('La nueva sucursal necesita nombre y slug válidos.'); return }
     if (form.branches.some((b) => b.slug === slug)) { setStatus(`Ya existe una sucursal con el slug ${slug}.`); return }
     setForm((p) => ({ ...p, branches: [...p.branches, { ...newBranch, slug, name, region: newBranch.region.trim(), icon: newBranch.icon.trim() || '🏬', color: newBranch.color.trim() || 'slate', imageUrl: newBranch.imageUrl.trim(), managerEmail: newBranch.managerEmail.trim().toLowerCase() }] }))
-    setStatus(`Sucursal ${name} creada.`)
+    setStatus(`Sucursal ${name} agregada. Guarda los cambios para aplicarla.`)
     setShowNewBranch(false)
     setNewBranch(createEmptyBranch())
   }
@@ -148,7 +154,7 @@ export default function AdminSupremePage() {
     if (!confirm(`¿Eliminar la sucursal ${branch.name}?`)) return
     setForm((p) => ({ ...p, branches: p.branches.filter((b) => b.slug !== slug) }))
     setUsers((p) => p.map((u) => ({ ...u, branchSlugs: (u.branchSlugs || []).filter((s) => s !== slug) })))
-    setStatus(`Sucursal ${branch.name} eliminada.`)
+    setStatus(`Sucursal ${branch.name} eliminada de la lista. Guarda los cambios para aplicarla.`)
   }
 
   /* load remote config */
@@ -276,20 +282,13 @@ export default function AdminSupremePage() {
           email: form.supremeAdminEmail,
         },
       }
-      await saveConfig(syncedForm)
+      if (!await saveConfig(syncedForm)) throw new Error('No se pudo guardar la configuración')
       setStatus('Guardado en Firestore. Recargando...')
       setTimeout(() => window.location.reload(), 2000)
     } catch (e) {
       const detail = e instanceof Error ? e.message : 'Error desconocido'
       setStatus(`Error al guardar: ${detail}`)
     }
-  }
-
-  const handleReset = async () => {
-    if (!canEdit) return
-    await deleteConfig()
-    setStatus('Restaurado. Recargando...')
-    setTimeout(() => window.location.reload(), 400)
   }
 
   if (loadingConfig) {
@@ -304,6 +303,33 @@ export default function AdminSupremePage() {
 
   const activeSectionContent = (() => {
     switch (activeSection) {
+      case 'firebase':
+        return canManageServices ? <ServiceModuleSettings source="erp" /> : null
+      case 'checklist':
+        return (
+          <Section icon={<Shield size={18} />} title="Opciones avanzadas" subtitle="Acciones para administrar la configuración del panel." tone="checklist">
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 sm:p-5">
+              <div className="flex items-start gap-3">
+                <Trash2 size={18} className="mt-0.5 shrink-0 text-red-700" />
+                <div>
+                  <h3 className="text-sm font-bold text-red-900">Restaurar configuración</h3>
+                  <p className="mt-1 text-sm leading-6 text-red-800">Elimina la configuración de marca, operador y sucursales de Admin Supreme. Esta acción no se puede deshacer.</p>
+                  <button type="button" disabled={!canEdit} onClick={async () => {
+                    if (!canEdit) return
+                    const confirmation = prompt('Escribe "BORRAR TODO" para confirmar que deseas restaurar la configuración:')
+                    if (confirmation !== 'BORRAR TODO') { setStatus('Restauración cancelada.'); return }
+                    setStatus('Restaurando configuración...')
+                    try {
+                      if (!await deleteConfig()) throw new Error('No se pudo eliminar la configuración')
+                      setStatus('Configuración restaurada. Recargando...')
+                      setTimeout(() => window.location.reload(), 1500)
+                    } catch (error) { setStatus(error instanceof Error ? error.message : 'No se pudo restaurar la configuración.') }
+                  }} className="mt-4 inline-flex items-center gap-2 rounded-lg border border-red-300 bg-white px-4 py-2.5 text-sm font-semibold text-red-800 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"><Trash2 size={15} /> Restaurar configuración</button>
+                </div>
+              </div>
+            </div>
+          </Section>
+        )
       case 'brand':
         return (
           <Section icon={<Palette size={18} />} title="Marca e identidad" subtitle="Cómo se presenta tu empresa." tone="brand">
@@ -1166,147 +1192,90 @@ export default function AdminSupremePage() {
                 )
               })}
             </div>
-            {/* Factory Reset */}
-            <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4">
-              <div className="flex items-center gap-2 mb-2"><Trash2 size={16} className="text-red-600" /><div className="text-[13px] font-bold text-red-800">Factory Reset — Borrar configuración</div></div>
-              <div className="text-[11px] text-red-700/80 mb-3">Elimina la configuración de Admin Supreme (marca, operador, sucursales). <b>No se puede deshacer.</b></div>
-              <button type="button" disabled={!canEdit} onClick={async () => {
-                if (!canEdit) return
-                const pass = prompt('⚠️ FACTORY RESET — Escribe "BORRAR TODO" para confirmar:')
-                if (pass !== 'BORRAR TODO') { setStatus('Factory Reset cancelado.'); return }
-                setStatus('🔄 Borrando datos...')
-                try { await deleteConfig(); setStatus('✅ Factory Reset completo. Recargando...'); setTimeout(() => window.location.reload(), 1500) }
-                catch (e: any) { setStatus(`❌ Error en Factory Reset: ${e?.message || e}`) }
-              }} className={`w-full py-2.5 rounded-lg border border-red-300 bg-red-100 text-red-800 text-[12px] font-bold transition ${!canEdit ? 'opacity-40 cursor-not-allowed' : 'hover:bg-red-200 hover:border-red-400 cursor-pointer'}`}>🗑️ Factory Reset</button>
-            </div>
           </Section>
         )
     }
   })()
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header sticky tipo ERP */}
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-200 shadow-sm">
-        <div className="px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <Link href="/erp-dashboard" className="flex items-center gap-2 rounded-lg p-1.5 hover:bg-slate-100 transition">
-              <ArrowLeft size={18} className="text-slate-600" />
+    <div className="min-h-screen bg-[#f5f6fa] text-slate-900">
+      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+          <div className="flex min-w-0 items-center gap-3">
+            <Link href="/erp-dashboard" aria-label="Volver al ERP" className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-600">
+              <ArrowLeft size={18} />
             </Link>
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800 text-white shadow-xs">
-                <Waypoints size={16} />
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-[15px] font-bold text-slate-900 truncate">Admin Supreme</h1>
-                <p className="text-[10px] text-slate-500 truncate">Panel de control multiempresa</p>
-              </div>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white"><Shield size={19} /></div>
+            <div className="min-w-0">
+              <div className="truncate text-sm font-bold text-slate-900">Admin Supreme</div>
+              <div className="hidden truncate text-xs text-slate-500 sm:block">Configuración de la empresa</div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200/60 text-emerald-700">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              <span className="text-[10px] font-bold uppercase tracking-wider">En línea</span>
-            </div>
-            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-600">
-              <span className={`h-1.5 w-1.5 rounded-full ${canEdit ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-              <span className="text-[10px] font-bold uppercase tracking-wider">{canEdit ? 'Edición' : 'Lectura'}</span>
-            </div>
-            {status && (
-              <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-[11px] font-semibold text-emerald-700">
-                <CheckCircle2 size={12} /> {status}
-              </span>
-            )}
-            {/* Atajos rápidos */}
-            <Link href="/cuadres" className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold transition hover:bg-rose-100" title="Cuadres">
-              <ClipboardList size={14} />
-              <span>Cuadres</span>
-            </Link>
-            <Link href="/pos-admin" className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold transition hover:bg-blue-100" title="POS">
-              <ShoppingCart size={14} />
-              <span>POS</span>
-            </Link>
-            <Link href="/erp-dashboard/base-datos" className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-cyan-50 border border-cyan-200 text-cyan-700 text-xs font-semibold transition hover:bg-cyan-100" title="Base de Datos">
-              <Database size={14} />
-              <span>BD</span>
-            </Link>
-            <button onClick={handleSave} disabled={!canEdit} className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 px-3 py-1.5 text-[12px] font-bold text-white shadow-xs transition hover:bg-slate-900 active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none">
-              <Save size={13} /> Guardar
+          {['brand', 'owner', 'branches'].includes(activeSection) && (
+            <button type="button" onClick={handleSave} disabled={!canEdit} title="Guardar ajustes de empresa, operador y sucursales" className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-violet-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:cursor-not-allowed disabled:opacity-40">
+              <Save size={16} /><span>Guardar cambios</span>
             </button>
-            <button onClick={handleReset} disabled={!canEdit} title="Restaurar" className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-slate-600 transition hover:bg-slate-50 active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none">
-              <RefreshCw size={13} />
-            </button>
-          </div>
+          )}
         </div>
       </header>
 
-      <div className="px-4 sm:px-6 py-4">
-        {/* Stats row */}
-        <div className="grid gap-2 grid-cols-2 lg:grid-cols-4 mb-4">
-          <Stat label="Mi Tienda" value={form.companyName || 'Sin nombre'} icon={<Store size={14} />} gradient="from-blue-500 to-indigo-600" />
-          <Stat label="Sedes activas" value={`${activeCount}/${form.branches.length}`} icon={<Store size={14} />} gradient="from-emerald-500 to-teal-600" />
-          <Stat label="Usuarios" value={`${users.length}`} icon={<Users size={14} />} gradient="from-fuchsia-500 to-violet-600" />
-          <Stat label="Tu rol" value={ROLE_LABELS[myRole]} icon={<Crown size={14} />} gradient="from-amber-500 to-orange-600" />
-        </div>
-
-        {/* Nav mobile */}
-        <div className="xl:hidden mb-4">
-          <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
-            {sectionItems.map((item) => {
-              const active = item.key === activeSection
-              const style = SECTION_STYLES[item.key]
-              return (
-                <button key={item.key} type="button" onClick={() => setActiveSection(item.key)}
-                  className={`shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-bold transition-all whitespace-nowrap ${active ? `${style.icon}` : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}>
-                  {item.icon} {item.label}
-                </button>
-              )
-            })}
+      <main className="mx-auto max-w-[1500px] px-4 pb-12 pt-7 sm:px-6 lg:px-8 lg:pt-9">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-violet-700">Centro de administración</p>
+            <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Admin Supreme</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Administra los servicios, la empresa, sus sucursales y los accesos del equipo.</p>
           </div>
         </div>
 
-        <div className="grid gap-4 xl:grid-cols-[240px_minmax(0,1fr)]">
-          {/* Sidebar desktop */}
-          <aside className="hidden xl:block xl:sticky xl:top-[68px] xl:self-start">
-            <nav className="space-y-1">
+        {status && <div role="status" aria-live="polite" className="mb-5 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm">{status}</div>}
+
+        <div className="mb-7 grid gap-3 sm:grid-cols-3" aria-label="Resumen de la empresa">
+          <button type="button" onClick={() => setActiveSection('brand')} className="group flex min-w-0 items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:border-violet-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-600">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-700"><Store size={20} /></span>
+            <span className="min-w-0"><span className="block text-xs text-slate-500">Empresa</span><span className="mt-1 block truncate text-sm font-bold text-slate-900">{form.companyName || 'Sin nombre'}</span></span>
+          </button>
+          <button type="button" onClick={() => setActiveSection('branches')} className="group flex min-w-0 items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:border-violet-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-600">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700"><MapPin size={20} /></span>
+            <span className="min-w-0"><span className="block text-xs text-slate-500">Sucursales activas</span><span className="mt-1 block text-sm font-bold text-slate-900">{activeCount} de {form.branches.length}</span></span>
+          </button>
+          <button type="button" onClick={() => setActiveSection('users')} className="group flex min-w-0 items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:border-violet-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-600">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-700"><Users size={20} /></span>
+            <span className="min-w-0"><span className="block text-xs text-slate-500">Usuarios</span><span className="mt-1 block text-sm font-bold text-slate-900">{loadingUsers ? 'Cargando…' : users.length}</span></span>
+          </button>
+        </div>
+
+        <div className="mb-4 lg:hidden">
+          <nav aria-label="Secciones de Admin Supreme" className="flex gap-2 overflow-x-auto pb-2">
+            {sectionItems.map((item) => (
+              <button key={item.key} type="button" onClick={() => setActiveSection(item.key)} aria-pressed={activeSection === item.key} className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-600 ${activeSection === item.key ? 'border-violet-700 bg-violet-700 text-white' : 'border-slate-200 bg-white text-slate-600'}`}>
+                {item.icon}<span>{item.label}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        <div className="grid items-start gap-5 lg:grid-cols-[250px_minmax(0,1fr)] xl:grid-cols-[270px_minmax(0,1fr)]">
+          <aside className="sticky top-[82px] hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-sm lg:block">
+            <p className="px-3 pb-2 pt-1 text-xs font-semibold text-slate-500">Configuración</p>
+            <nav aria-label="Secciones de Admin Supreme" className="space-y-1">
               {sectionItems.map((item) => {
-                const active = item.key === activeSection
-                const style = SECTION_STYLES[item.key]
-                return (
-                  <button key={item.key} type="button" onClick={() => setActiveSection(item.key)}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all border ${active ? 'ring-2 ring-slate-300 shadow-xs ' + style.icon : 'border-transparent hover:bg-white hover:border-slate-200 bg-transparent'}`}>
-                    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${active ? 'bg-white/20' : 'bg-slate-100 text-slate-500'}`}>
-                      {item.icon}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className={`text-[12px] font-bold truncate ${active ? 'text-white' : 'text-slate-700'}`}>{item.label}</div>
-                      <div className={`truncate text-[10px] ${active ? 'text-white/70' : 'text-slate-400'}`}>{item.detail}</div>
-                    </div>
-                  </button>
-                )
+                const active = activeSection === item.key
+                return <button key={item.key} type="button" onClick={() => setActiveSection(item.key)} aria-pressed={active} className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-600 ${active ? 'bg-violet-50 text-violet-800' : 'text-slate-600 hover:bg-slate-50'}`}>
+                  <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${active ? 'bg-violet-100 text-violet-700' : 'bg-slate-100 text-slate-500'}`}>{item.icon}</span>
+                  <span className="min-w-0"><span className={`block text-sm font-semibold ${active ? 'text-violet-900' : 'text-slate-700'}`}>{item.label}</span><span className="mt-0.5 block text-xs text-slate-500">{item.detail}</span></span>
+                </button>
               })}
             </nav>
           </aside>
 
-          {/* Content */}
-          <section className="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden">
-            <div className="border-b border-slate-100 px-4 py-3 sm:px-5">
-              <div className="flex items-center gap-2.5">
-                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${SECTION_STYLES[activeSection].icon}`}>{activeSectionMeta.icon}</div>
-                <div className="min-w-0 flex-1">
-                  <h2 className="text-[15px] font-bold text-slate-900 truncate">{activeSectionMeta.detail}</h2>
-                  <p className="text-[11px] text-slate-500">{activeSectionMeta.label}</p>
-                </div>
-                <div className="hidden md:block rounded-lg border border-slate-100 bg-slate-50 px-3 py-1 text-right shrink-0">
-                  <div className="text-[8px] font-bold uppercase tracking-wider text-slate-400">Dato</div>
-                  <div className="text-[11px] font-bold text-slate-900 truncate max-w-[160px]" title={String(activeSectionMeta.badge)}>{activeSectionMeta.badge}</div>
-                </div>
-              </div>
-            </div>
-            <div className="p-4 sm:p-5">{activeSectionContent}</div>
-          </section>
+          <div className="min-w-0" aria-label={activeSectionMeta.label}>
+            <div className="mb-3 px-1 text-sm text-slate-500">Configuración <span aria-hidden="true" className="px-1 text-slate-300">/</span> <span className="font-semibold text-slate-700">{activeSectionMeta.label}</span></div>
+            {['brand', 'owner', 'branches'].includes(activeSection) && <p className="mb-3 px-1 text-xs leading-5 text-slate-500">Los cambios de esta sección se aplican al pulsar «Guardar cambios».</p>}
+            {activeSectionContent}
+          </div>
         </div>
-      </div>
+      </main>
       <AdminOnboarding open={onboardingOpen} onClose={() => setOnboardingOpen(false)} obCompanyName={obCompanyName} setObCompanyName={setObCompanyName} obOwnerName={obOwnerName} setObOwnerName={setObOwnerName} obBranchName={obBranchName} setObBranchName={setObBranchName} obBranchSlug={obBranchSlug} setObBranchSlug={setObBranchSlug} obBranchImage={obBranchImage} setObBranchImage={setObBranchImage} obSparkMode={obSparkMode} setObSparkMode={setObSparkMode} obLogoUrl={obLogoUrl} setObLogoUrl={setObLogoUrl} obAvatarUrl={obAvatarUrl} setObAvatarUrl={setObAvatarUrl} obGradient={obGradient} setObGradient={setObGradient} obWorkerName={obWorkerName} setObWorkerName={setObWorkerName} obWorkerNac={obWorkerNac} setObWorkerNac={setObWorkerNac} obWorkerGenero={obWorkerGenero} setObWorkerGenero={setObWorkerGenero} onFinish={submitOnboarding} />
     </div>
   )

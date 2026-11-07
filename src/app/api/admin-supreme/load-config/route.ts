@@ -79,10 +79,10 @@ export async function GET() {
       ],
       empresa: empresaData || {
         nombreEmpresa: 'Importadora Carlitos',
-        rut: '77.862.693-4',
+        rut: '77.890.123-4',
         giro: 'Comercializadora y Retail',
         direccion: 'Santiago, Chile',
-        telefono: '+56 9 8552 0703',
+        telefono: '+56 9 6729 4975',
         email: '',
         modoVentaPOS: 'cajera_cobra',
       },

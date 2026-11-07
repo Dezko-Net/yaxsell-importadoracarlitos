@@ -14,6 +14,7 @@ import { NotificationProvider } from '@/context/NotificationContext';
 import ScrollToTop from '@/components/ScrollToTop';
 import HomeOnlyWidgets from '@/components/HomeOnlyWidgets';
 import ClientFetchCache from '@/components/ClientFetchCache';
+import NumberInputWheelGuard from '@/components/NumberInputWheelGuard';
 import GlobalMobileNav from '@/components/GlobalMobileNav';
 import CartDrawerHost from '@/components/CartDrawerHost';
 import ClientSideWidgets from '@/components/ClientSideWidgets';
@@ -75,6 +76,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Fallback mouse-cursor para scripts de Shopify Concept theme */}
         <div id="mouseCursorMount" style={{ display: 'none' }} dangerouslySetInnerHTML={{ __html: '<mouse-cursor style="display:none" aria-hidden="true"></mouse-cursor>' }} />
         <ClientFetchCache />
+        <NumberInputWheelGuard />
         <AuthProvider>
           <ToastProvider>
             <NotificationProvider>

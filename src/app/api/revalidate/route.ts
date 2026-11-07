@@ -17,9 +17,11 @@ export async function GET(request: NextRequest) {
     }
     if (tag && tag !== 'products') {
       revalidateTag(tag);
+    }
+    if (tag) {
       // Invalidación selectiva por dominio para no purgar categorías/subcategorías/ofertas innecesariamente
       if (tag === 'products' || tag === 'catalog') {
-        clearCatalogMemoryCache(); // También invalida la caché compartida del catálogo.
+        clearCatalogMemoryCache(); // También invalida el tag compartido `products`.
         clearCatalogDataCache();
         revalidateTag('home');
         revalidateTag('catalog');

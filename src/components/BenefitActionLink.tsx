@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ChevronRight, ExternalLink } from 'lucide-react';
 import { getBenefitLink } from '@/lib/loyalty-levels';
+import { useWebClientConfig } from '@/hooks/useWebClientConfig';
 
 interface Props {
   benefit: string;
@@ -11,7 +12,8 @@ interface Props {
 }
 
 export default function BenefitActionLink({ benefit, accentColor, compact }: Props) {
-  const link = getBenefitLink(benefit);
+  const { config } = useWebClientConfig();
+  const link = getBenefitLink(benefit, config.supportPhone || config.botPhone);
   if (!link) return null;
 
   const isExternal = link.href.startsWith('http');

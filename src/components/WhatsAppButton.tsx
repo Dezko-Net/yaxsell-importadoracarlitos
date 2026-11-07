@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { getWhatsAppUrl } from '@/lib/store-contact';
+import { useWebClientConfig } from '@/hooks/useWebClientConfig';
 
 export default function WhatsAppButton() {
   const [mounted, setMounted] = useState(false);
@@ -10,6 +10,7 @@ export default function WhatsAppButton() {
   const [hidden, setHidden] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
+  const { config } = useWebClientConfig();
 
   useEffect(() => {
     setMounted(true);
@@ -25,7 +26,9 @@ export default function WhatsAppButton() {
   if (pathname !== '/') return null;
   if (pathname.startsWith('/admin') || pathname.startsWith('/login') || pathname.startsWith('/inventario')) return null;
 
-  const url = getWhatsAppUrl();
+  const phone = config.supportPhone || config.botPhone;
+  if (!phone) return null;
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent('Hola, tengo una consulta sobre la tienda 🛒')}`;
 
   return (
     <a

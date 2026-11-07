@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useCallback } from 'react';
 import { useStoreSettings } from '@/hooks/useStoreSettings';
 import { useFavorites } from '@/context/FavoritesContext';
 import { useCart } from '@/context/CartContext';
+import { useWebClientConfig } from '@/hooks/useWebClientConfig';
 
 function getMinPurchaseFromStorage(): number {
   try {
@@ -22,10 +23,11 @@ interface CatalogoClientProps {
 }
 
 export default function CatalogoClient({ defaultHash = '' }: CatalogoClientProps = {}) {
-    const iframeSrc = `/shopify/catalogo-original/index.html?v=20261106_mis_pedidos${defaultHash}`;
+    const iframeSrc = `/shopify/catalogo-original/index.html?v=20261107_news_banners_v1${defaultHash}`;
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const { favorites, toggleFavorite } = useFavorites();
   const { addBundleItem } = useCart();
+  const { config: webConfig } = useWebClientConfig();
   const {
     storeName,
     logoUrl,
@@ -42,11 +44,11 @@ export default function CatalogoClient({ defaultHash = '' }: CatalogoClientProps
   // Refs para evitar re-renders: mantenemos los valores actuales en refs
   const settingsRef = useRef({
     storeName, logoUrl, minimumPurchase, whatsappContacts, balatinContact,
-    attendantMode, allowWhatsappOrders, allowWebOrders, whatsappMessageTemplate, homeMarketing, favorites,
+    attendantMode, allowWhatsappOrders, allowWebOrders, whatsappMessageTemplate, homeMarketing, favorites, webConfig,
   });
   settingsRef.current = {
     storeName, logoUrl, minimumPurchase, whatsappContacts, balatinContact,
-    attendantMode, allowWhatsappOrders, allowWebOrders, whatsappMessageTemplate, homeMarketing, favorites,
+    attendantMode, allowWhatsappOrders, allowWebOrders, whatsappMessageTemplate, homeMarketing, favorites, webConfig,
   };
 
   // Un cambio de sección solo actualiza el hash del iframe. Cambiar `src`
@@ -69,8 +71,9 @@ export default function CatalogoClient({ defaultHash = '' }: CatalogoClientProps
     iframeRef.current?.contentWindow?.postMessage(
       {
         type: 'YAXSEL_SETTINGS',
-        storeName: s.storeName || 'Importadora Carlitos',
-        logoUrl: s.logoUrl || '',
+        storeName: s.webConfig.storeName,
+        logoUrl: s.webConfig.logoUrl,
+        webConfig: s.webConfig,
         minPurchase,
         whatsappContacts: s.whatsappContacts,
         balatinContact: s.balatinContact,
@@ -81,9 +84,11 @@ export default function CatalogoClient({ defaultHash = '' }: CatalogoClientProps
         homeMarketing: s.homeMarketing,
         favorites: s.favorites,
       },
-      '*'
+      window.location.origin
     );
   }, []);
+
+  useEffect(() => { sendSettings(); }, [sendSettings, webConfig, minimumPurchase, whatsappContacts, balatinContact, attendantMode, allowWhatsappOrders, allowWebOrders, whatsappMessageTemplate, homeMarketing]);
 
   // Un solo effect: envía settings al cargar el iframe y cuando el catálogo está listo
   useEffect(() => {
@@ -130,7 +135,7 @@ export default function CatalogoClient({ defaultHash = '' }: CatalogoClientProps
     );
   }, [favorites]);
 
-  const displayTitle = `Catálogo Mayorista | ${storeName || 'Importadora Carlitos'}`;
+  const displayTitle = `Catálogo Mayorista | ${webConfig.storeName}`;
 
   return (
     <div className="w-full h-[100dvh] overflow-hidden bg-[#f7f7f9]" style={{ height: '100dvh' }}>

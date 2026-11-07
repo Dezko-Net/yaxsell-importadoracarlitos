@@ -28,19 +28,8 @@ interface SavedAddress { id: string; alias: string; name: string; phone: string;
 
 // Fallback agencies if API fails — debe coincidir con las agencias de Appwrite
 const FALLBACK_AGENCIES: AgencyOption[] = [
-  { name: 'RETIRO EN TIENDA', color: '#e65c00', bg: '#fff3e0', desc: 'Retiro en Chacabuco 08, Estación Central (Al lado de Carnicería El Carnicero)', logo: '', active: true },
-  { name: 'STARKEN', color: '#ffffff', bg: '#f5f5f5', desc: 'Tarifa Cara - Cobertura Nacional', logo: 'https://cdn.shopify.com/app-store/listing_images/250a2eb754c4528e183002b0064a0dea/icon/CPSaw-Pd8e8CEAE=.jpeg', active: true },
-  { name: 'PULLMAN CARGO', color: '#002855', bg: '#e6f0fa', desc: 'Tarifa económica - Ideal para cajas grandes', logo: 'https://media.licdn.com/dms/image/v2/C4E0BAQFbzoEKacuZyg/company-logo_200_200/company-logo_200_200/0/1678472951084/pullman_go_logo?e=2147483647&v=beta&t=xjy_N8LPAe1f7lvBLKVLO7mdNzEZ3_Zv_IIZNj7zXnI', active: true },
-  { name: 'VARMONTT', color: '#c62828', bg: '#fce8e6', desc: 'Tarifa económica - Especialistas al Sur de Chile', logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXEnhvSY8qCumnADJcC_SNl1fqFnKuYKsQhuygDA5o-RCraqCNStogGqQ&s=10', active: true },
-  { name: 'BLUEXPRESS', color: '#1558b0', bg: '#e8f0fe', desc: 'Tarifa media/alta - Entrega express', logo: 'https://www.beetrack.com/hubfs/Logos%20Clientes/Logo%20BlueExpress.png', active: true },
-  { name: 'CYC', color: '#3483fa', bg: '#e8f0fe', desc: 'Empresa Express', logo: 'https://www.cyccargo.cl/wp-content/uploads/2023/05/brand.png', active: true },
-  { name: 'TVP', color: '#3483fa', bg: '#e8f0fe', desc: '', logo: 'https://tvp.cl/brand/logo-tvp-isotipo.png', active: true },
-  { name: 'CRUZ DEL SUR', color: '#3483fa', bg: '#e8f0fe', desc: '', logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ5UHOw-IEx4fNPTTsjGK7SjjN5MxWSIp_EMJ4TsRwmwg0c8fCzw5IshNZm&s=10', active: true },
-  { name: 'TRAMAR', color: '#3483fa', bg: '#e8f0fe', desc: '', logo: '', active: true },
-  { name: '5SUR', color: '#3483fa', bg: '#e8f0fe', desc: '', logo: '', active: true },
-  { name: 'MENA', color: '#3483fa', bg: '#e8f0fe', desc: '', logo: '', active: true },
-  { name: 'CACEM', color: '#3483fa', bg: '#e8f0fe', desc: '', logo: '', active: true },
-  { name: 'JT TRANSPORTES', color: '#3483fa', bg: '#e8f0fe', desc: '', logo: '', active: true },
+  { name: 'STARKEN', color: '#1a7f37', bg: '#e6f4ea', desc: 'Cobertura nacional', logo: '', active: true },
+  { name: 'BLUEXPRESS', color: '#1558b0', bg: '#e8f0fe', desc: 'Envío por Blue Express', logo: '', active: true },
 ];
 
 const PINK = '#2563eb'; const PINK_LIGHT = '#60a5fa'; const PINK_BG = '#eff6ff'; const FF = '"DM Sans", system-ui, sans-serif';

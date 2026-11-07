@@ -3,6 +3,8 @@ import type { NextConfig } from 'next';
 process.env.TZ = 'America/Santiago';
 
 const nextConfig: NextConfig = {
+  // Cada servidor local puede usar su propia compilación para no pisar los chunks.
+  ...(process.env.NEXT_DEV_DIST_DIR ? { distDir: process.env.NEXT_DEV_DIST_DIR } : {}),
   typescript: {
     // Temporal durante migración Appwrite → Firebase
     ignoreBuildErrors: true,
@@ -75,6 +77,10 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
+      ...(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ? [
+        { protocol: 'https' as const, hostname: 'firebasestorage.googleapis.com', pathname: `/v0/b/${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/**` },
+        { protocol: 'https' as const, hostname: 'storage.googleapis.com', pathname: `/${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/**` },
+      ] : []),
       { protocol: 'https', hostname: 'firebasestorage.googleapis.com', pathname: '/v0/b/importadora-carlitos.firebasestorage.app/**' },
       { protocol: 'https', hostname: 'firebasestorage.googleapis.com', pathname: '/v0/b/yaxselldemo.firebasestorage.app/**' },
       { protocol: 'https', hostname: 'firebasestorage.googleapis.com', pathname: '/v0/b/asistoraerp.firebasestorage.app/**' },
@@ -129,6 +135,10 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      ...['/api/web-client-config', '/api/admin/web-client-config', '/api/catalogo/firebase-config'].map(source => ({
+        source,
+        headers: [{ key: 'Cache-Control', value: 'private, no-store, max-age=0' }],
+      })),
       {
         // Páginas HTML - caché de navegador largo + CDN largo
         source: '/((?!_next|api|favicon.ico).*)',

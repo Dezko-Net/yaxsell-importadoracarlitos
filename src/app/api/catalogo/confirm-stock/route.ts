@@ -11,7 +11,7 @@ import { getConfiguredOrderExpirationMinutes } from '@/lib/order-expiration-sett
 import { PAYMENT_PROOF_GRACE_MS } from '@/lib/payment-deadline';
 import { resolveOrderByCode, resolveOrderById } from '@/lib/order-identity';
 import { invalidatePosWebReservations } from '@/lib/pos-web-reservations';
-import { getPublicSiteUrl } from '@/lib/public-site-url';
+import { getWebClientConfig } from '@/lib/web-client-config-server';
 import { isMainStoreProduct } from '@/lib/catalog-cache';
 import { getInventoryStock, getOrderInventoryConnectionMode } from '@/lib/inventory-mode';
 
@@ -168,16 +168,19 @@ async function getBankDetails() {
     ...(mainSnap.exists ? mainSnap.data() : {}),
   } as any;
   return {
-    holder: data.bankAccountHolder || data.BANKACCOUNTHOLDER || 'Importadora Carlitos',
-    rut: data.bankRut || data.BANKRUT || '78267426-9',
-    bank: data.bankName || data.BANKNAME || 'Banco de Chile',
-    type: data.bankAccountType || data.BANKACCOUNTTYPE || 'Cuenta Corriente',
-    number: data.bankAccountNumber || data.BANKACCOUNTNUMBER || '4081220201',
+    holder: data.bankAccountHolder || data.BANKACCOUNTHOLDER || '',
+    rut: data.bankRut || data.BANKRUT || '',
+    bank: data.bankName || data.BANKNAME || '',
+    type: data.bankAccountType || data.BANKACCOUNTTYPE || '',
+    number: data.bankAccountNumber || data.BANKACCOUNTNUMBER || '',
     email: data.bankEmail || data.BANKEMAIL || '',
   };
 }
 
 function buildBankMessage(bank: any, total: number): string {
+  if (![bank.bank, bank.holder, bank.rut, bank.type, bank.number].every(value => String(value || '').trim())) {
+    return 'Para coordinar el pago, contacta directamente a la tienda.\n';
+  }
   return `*Datos de transferencia:*
 
 Banco: ${bank.bank}
@@ -467,7 +470,8 @@ export async function POST(request: NextRequest) {
 
     customerMsg += buildBankMessage(bank, orderTotal);
     customerMsg += buildDeadlineReminder(expiresAt, expirationMinutes);
-    customerMsg += `\n\nCompleta tus datos aquí: ${getPublicSiteUrl()}/pedido/${order.$id}`;
+    const siteUrl = (await getWebClientConfig()).siteUrl;
+    if (siteUrl) customerMsg += `\n\nCompleta tus datos aquí: ${siteUrl}/pedido/${order.$id}`;
 
     let waSent = false;
     if (customerPhone && WA_TOKEN) {

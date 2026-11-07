@@ -112,8 +112,8 @@ export async function GET(request: NextRequest) {
 
     // Fetch cached data
     const [allProductsRaw, activeOffers, apertura] = await Promise.all([
-      // El catálogo web se invalida al crear o editar productos e inventario.
-      // No se refresca con polling ni lecturas periódicas de Firestore.
+      // El catálogo web lee de la caché compartida, que solo se purga al crear
+      // productos o guardar cambios de inventario. No hay polling por intervalo.
       getCachedAllProducts(minimal ? { eventDriven: true } : undefined),
       minimal && !ofertasOnly ? Promise.resolve([]) : getCachedActiveOffers(),
       minimal ? Promise.resolve(null) : getCachedAperturaSettings()

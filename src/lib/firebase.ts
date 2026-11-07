@@ -8,15 +8,9 @@ import {
 } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged, browserLocalPersistence, setPersistence } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
+import { FIREBASE_PUBLIC_CONFIG } from './firebase-public-config';
 
-const FIREBASE_CONFIG = {
-  apiKey:            process.env.NEXT_PUBLIC_FIREBASE_API_KEY            || "AIzaSyClqpsQ5eHECOQAXz3ls6-RUgoH8nthdkE",
-  authDomain:        process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN        || "importadora-carlitos.firebaseapp.com",
-  projectId:         process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID         || "importadora-carlitos",
-  storageBucket:     process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET     || "importadora-carlitos.firebasestorage.app",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID|| "289604179340",
-  appId:             process.env.NEXT_PUBLIC_FIREBASE_APP_ID             || "1:289604179340:web:9d3f876c8aafeceedef2a9",
-};
+const FIREBASE_CONFIG = FIREBASE_PUBLIC_CONFIG;
 
 const app        = !getApps().length ? initializeApp(FIREBASE_CONFIG) : getApp();
 const databaseId = process.env.NEXT_PUBLIC_FIREBASE_DATABASE_ID || '(default)';

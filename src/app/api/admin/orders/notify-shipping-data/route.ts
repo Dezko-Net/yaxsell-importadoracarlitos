@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { serverGetDocument } from '@/lib/db-server';
 import { ORDERS_COLLECTION_ID } from '@/lib/db';
 import { sendWhatsAppMessage, formatWhatsAppPhone, addToHistory } from '@/lib/whatsapp';
-import { getPublicSiteUrl } from '@/lib/public-site-url';
+import { getWebClientConfig } from '@/lib/web-client-config-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,10 +25,12 @@ export async function POST(req: NextRequest) {
 
     const customerName = (order.CUSTOMERNAME || 'Cliente').split(' ')[0];
     const orderCode = order.ORDERCODE || '#' + order.$id.slice(-6);
-    const siteUrl = getPublicSiteUrl();
+    const webConfig = await getWebClientConfig();
+    const siteUrl = webConfig.siteUrl;
+    if (!siteUrl) return NextResponse.json({ error: 'Configura la URL pública en Admin Supreme Web.' }, { status: 503 });
     const shippingUrl = `${siteUrl}/datos-envio?id=${encodeURIComponent(order.$id)}`;
 
-    const message = `¡Hola ${customerName}! 🐾✨ Te escribimos de Importadora Carlitos.\n\n` +
+    const message = `¡Hola ${customerName}! 🐾✨ Te escribimos de ${webConfig.storeName}.\n\n` +
       `✅ Tu pago del pedido *#${orderCode}* fue verificado y confirmado con éxito, y tus productos ya están *100% apartados en bodega* 📦.\n\n` +
       `👉 Para poder armar tu paquete y despacharlo lo antes posible, por favor completa tu dirección y selecciona tu agencia de transporte en este enlace:\n` +
       `🔗 ${shippingUrl}\n\n` +

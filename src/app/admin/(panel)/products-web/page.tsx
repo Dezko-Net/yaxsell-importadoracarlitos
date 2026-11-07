@@ -8,24 +8,32 @@ export default function AdminWebProductsPage() {
   const { isLoading, inventoryMode } = useStoreSettings();
   if (isLoading) {
     return (
-      <div className="space-y-4 animate-pulse">
-        <div className="flex items-center justify-between">
-          <div className="h-7 w-44 rounded-xl bg-gray-100" />
-          <div className="flex gap-2">
-            <div className="h-9 w-28 rounded-xl bg-gray-100" />
-            <div className="h-9 w-36 rounded-xl bg-indigo-100" />
+      <div className="wpw-app space-y-3.5 animate-pulse">
+        <style>{`.admin-main-content:has(.wpw-app), .admin-content-wrap:has(.wpw-app) { background: #eef2f6 !important; }`}</style>
+        {/* Mobile Bento Hero Skeleton */}
+        <div className="sm:hidden h-36 rounded-[24px] bg-white border border-slate-300 border-t-[3px] border-t-indigo-500 p-4 flex flex-col justify-between shadow-sm">
+          <div className="h-5 w-40 rounded-lg bg-slate-200/80" />
+          <div className="grid grid-cols-3 gap-2">
+            <div className="h-14 rounded-2xl bg-slate-100 border border-slate-200" />
+            <div className="h-14 rounded-2xl bg-slate-100 border border-slate-200" />
+            <div className="h-14 rounded-2xl bg-slate-100 border border-slate-200" />
           </div>
         </div>
-        <div className="h-28 rounded-3xl bg-sky-50/70 border border-sky-100 flex items-center px-6">
-          <p className="text-xs font-semibold text-slate-500">Cargando productos web…</p>
+        {/* Desktop Header + Bento Skeleton */}
+        <div className="hidden sm:flex items-center justify-between">
+          <div className="h-7 w-48 rounded-xl bg-slate-200/80" />
+          <div className="flex gap-2">
+            <div className="h-9 w-28 rounded-xl bg-white border border-slate-300" />
+            <div className="h-9 w-40 rounded-xl bg-indigo-200/70" />
+          </div>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-24 rounded-2xl bg-gray-100/80" />
+            <div key={i} className="h-24 rounded-2xl bg-white border border-slate-300 border-t-[3px] border-t-indigo-400 shadow-xs" />
           ))}
         </div>
-        <div className="h-28 rounded-[20px] bg-indigo-50/50" />
-        <div className="h-64 rounded-2xl bg-gray-100/70" />
+        <div className="h-24 rounded-[22px] bg-white border border-slate-300 shadow-xs" />
+        <div className="h-64 rounded-[24px] bg-white border border-slate-300 shadow-xs" />
       </div>
     );
   }

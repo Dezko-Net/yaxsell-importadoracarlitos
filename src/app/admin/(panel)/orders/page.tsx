@@ -25,6 +25,7 @@ import { getWarehouseLocationFromFeatures, getSkuFromFeatures } from '@/lib/prod
 import { generateOrderPdf } from '@/lib/generateOrderPdf';
 import Link from 'next/link';
 import StockRiskBadge from '@/components/admin/StockRiskBadge';
+import { useStoreSettings } from '@/hooks/useStoreSettings';
 import { getProductRisk, calculateOrderStockRisk, type OrderStockRisk } from '@/lib/stock-risk';
 import { ShippingNotificationModal } from '@/components/admin/ShippingNotificationModal';
 import OrdersCloudMascot from '@/components/admin/OrdersCloudMascot';
@@ -32,10 +33,13 @@ import { hasShippingData } from '@/lib/order-rules';
 import { evaluateOrderWindow } from '@/lib/store-schedule';
 import BulkPaymentReviewModal, { type BulkPaymentReviewOrder, type ReviewDecision } from '@/components/admin/BulkPaymentReviewModal';
 import { buildBulkPaymentReviewPrintHtml } from '@/lib/bulkPaymentReviewPrint';
+import { buildPackedListHtml, type PackedListOrder } from '@/lib/packed-orders-print';
 
 const STATUS_FLOW = ['payment_expired', 'paid', 'payment_review', 'payment_confirmed', 'shipped', 'delivered'];
 const STOCK_CONFIRMED_STATUSES = ['paid', 'pending', 'pending_stock', 'processing'];
-const FLOW_STATUS_KEYS = [...new Set([...STATUS_FLOW, 'pending', 'pending_stock', 'processing', 'negotiation', 'cancelled'])];
+const UNPAID_REVIEW_STATUSES = [...STOCK_CONFIRMED_STATUSES, 'payment_expired', 'payment_review'];
+const hasProof = (order: any) => { const value = order?.PAYMENTPROOFURL; if (Array.isArray(value)) return value.length > 0; const text = String(value || '').trim(); return !!text && text !== '[]' && text !== 'null'; };
+const FLOW_STATUS_KEYS = [...new Set([...STATUS_FLOW, 'pending', 'pending_stock', 'processing', 'negotiation', 'cancelled', 'warehouse_shortage'])];
 
 // Barra de Caducidad y Relojero en tiempo real para pedidos según Horario de Tienda Importadora Carlitos
 function OrderExpirationBar({
@@ -122,6 +126,7 @@ const STATUS_SVG: Record<string, React.ReactNode> = {
   payment_confirmed:  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-5"/></svg>,
   payment_review:     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 3h14v18l-2.5-1.6L14 21l-2-1.6L10 21l-2.5-1.6L5 21z"/><path d="M9 8h6M9 12h4"/></svg>,
   negotiation:        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 01-2 2H8l-4 3V5a2 2 0 012-2h13a2 2 0 012 2z"/><path d="M8.5 10h.01M12 10h.01M15.5 10h.01"/></svg>,
+  warehouse_shortage: <AlertTriangle size={24} />,
   shipped:            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>,
   delivered:          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M3 21h18"/><path d="M9 21v-7h6v7"/></svg>,
   cancelled:          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>,
@@ -136,6 +141,7 @@ const STATUS_COLORS: Record<string, { color: string; bg: string }> = {
   payment_review:     { color: '#60a5fa', bg: '#f5f9ff' },
   payment_confirmed:  { color: '#34d399', bg: '#f0fdf4' },
   negotiation:        { color: '#f472b6', bg: '#fefcfd' },
+  warehouse_shortage: { color: '#dc2626', bg: '#fef2f2' },
   shipped:            { color: '#a78bfa', bg: '#f3effe' },
   delivered:          { color: '#4ade80', bg: '#f7fef9' },
   cancelled:          { color: '#f87171', bg: '#feebeb' },
@@ -155,6 +161,7 @@ const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string }>
   payment_review:     { label: 'Revisando Pago',          bg: 'bg-blue-100',    text: 'text-blue-700' },
   payment_confirmed:  { label: 'Pago Confirmado',         bg: 'bg-green-100',   text: 'text-green-700' },
   negotiation:        { label: 'Negociando',                bg: 'bg-pink-100',    text: 'text-pink-700' },
+  warehouse_shortage: { label: 'Faltantes',                bg: 'bg-red-100',     text: 'text-red-700' },
   shipped:            { label: 'Embalado',                   bg: 'bg-violet-100',  text: 'text-violet-700' },
   delivered:          { label: 'Entregado a Agencia',      bg: 'bg-green-100',   text: 'text-green-700' },
 };
@@ -177,7 +184,8 @@ const SHORT_LABEL: Record<string, string> = {
 const STATUS_KEYS = Object.keys(STATUS_CONFIG);
 
 const CASHIERS = [
-  { name: 'Importadora Carlitos', phone: '56954592656' },
+  { name: 'Lissy', phone: '56962293893' },
+  { name: 'Fernanda', phone: '56967294975' },
 ];
 
 type DateFilter = 'all' | 'today' | 'yesterday' | 'day_before' | 'custom';
@@ -238,6 +246,10 @@ function getOrdersDateBounds(
 }
 
 function OrdersContent() {
+  const { inventoryMode, isLoading: loadingInventoryMode } = useStoreSettings();
+  const showStockHealth = !loadingInventoryMode && inventoryMode === 'erp_integrated';
+  const independentWeb = !loadingInventoryMode && inventoryMode === 'web_independent';
+  const statusFlow = independentWeb ? ['paid', 'payment_review', 'payment_confirmed', 'shipped', 'delivered'] : STATUS_FLOW;
   const searchParams = useSearchParams();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -295,30 +307,6 @@ function OrdersContent() {
   const [sourceFilter, setSourceFilter] = useState<string>('all');
   const [regionFilter, setRegionFilter] = useState<string>('all');
   const [vendorFilter, setVendorFilter] = useState<string>('all');
-  const [showStoreDropdown, setShowStoreDropdown] = useState(false);
-  const [registeredVendors, setRegisteredVendors] = useState<Array<{ id: string; name: string }>>([]);
-  const storeDropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleOutside = (e: MouseEvent) => {
-      if (storeDropdownRef.current && !storeDropdownRef.current.contains(e.target as Node)) {
-        setShowStoreDropdown(false);
-      }
-    };
-    document.addEventListener('mousedown', handleOutside);
-    return () => document.removeEventListener('mousedown', handleOutside);
-  }, []);
-
-  useEffect(() => {
-    fetch('/api/admin/vendors?basic=true')
-      .then(r => r.json())
-      .then(d => {
-        if (d?.vendors && Array.isArray(d.vendors)) {
-          setRegisteredVendors(d.vendors.map((v: any) => ({ id: String(v.$id || v.id || ''), name: String(v.NAME || v.name || '') })));
-        }
-      })
-      .catch(() => {});
-  }, []);
   const [liveOnly, setLiveOnly] = useState(false);
   const [trackingPending, setTrackingPending] = useState(false);
   const [pickupReady, setPickupReady] = useState(false);
@@ -359,6 +347,7 @@ function OrdersContent() {
   const [hasNextPage, setHasNextPage] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [bulkReviewOpen, setBulkReviewOpen] = useState(false);
+  const [printingPacked, setPrintingPacked] = useState(false);
   const [bulkReviewLoading, setBulkReviewLoading] = useState(false);
   const [bulkReviewConfirming, setBulkReviewConfirming] = useState(false);
   const [bulkReviewOrders, setBulkReviewOrders] = useState<BulkPaymentReviewOrder[]>([]);
@@ -446,8 +435,8 @@ function OrdersContent() {
 
   const FLOW_COUNTS_TTL = 2 * 60 * 1000;
   const loadFlowStatusCounts = useCallback(async (force = false) => {
-    const cacheKey = `yaxsel_flow_counts_v1_${dateFilter}_${customDateStart || ''}_${customDateEnd || ''}`;
-    if (!force && typeof window !== 'undefined') {
+    const cacheKey = `yaxsel_flow_counts_v2_${dateFilter}_${customDateStart || ''}_${customDateEnd || ''}`;
+    if (!force && !independentWeb && typeof window !== 'undefined') {
       try {
         const raw = sessionStorage.getItem(cacheKey);
         if (raw) {
@@ -463,13 +452,27 @@ function OrdersContent() {
     try {
       const bounds = getOrdersDateBounds(dateFilter, customDateStart, customDateEnd);
       const counts = await Promise.all(FLOW_STATUS_KEYS.map(async status => {
-        const constraints: any[] = [fsWhere('STATUS', '==', status)];
+        const constraints: any[] = [status === 'warehouse_shortage' ? fsWhere('WAREHOUSE_SHORTAGE_PENDING', '==', true) : fsWhere('STATUS', '==', status)];
+        if (status === 'warehouse_shortage' && (bounds.start !== undefined || bounds.end !== undefined)) {
+          const snapshot = await fsGetDocs(fsQuery(fsCollection(db, ORDERS_COLLECTION_ID), ...constraints));
+          return [status, snapshot.docs.filter(doc => { const date = Number(doc.data().CREATEDAT || 0); return (bounds.start === undefined || date >= bounds.start) && (bounds.end === undefined || date < bounds.end); }).length] as const;
+        }
         if (bounds.start !== undefined) constraints.push(fsWhere('CREATEDAT', '>=', bounds.start));
         if (bounds.end !== undefined) constraints.push(fsWhere('CREATEDAT', '<', bounds.end));
         const result = await getCountFromServer(fsQuery(fsCollection(db, ORDERS_COLLECTION_ID), ...constraints));
         return [status, result.data().count] as const;
       }));
       trackReadsBatch('list', ORDERS_COLLECTION_ID, FLOW_STATUS_KEYS.length, 'flow status counts batch', new Error().stack || '');
+      if (independentWeb) {
+        const snap = await fsGetDocs(fsQuery(fsCollection(db, ORDERS_COLLECTION_ID), fsWhere('STATUS', 'in', UNPAID_REVIEW_STATUSES)));
+        const relevant = snap.docs.map(doc => doc.data()).filter(order => (bounds.start === undefined || Number(order.CREATEDAT || 0) >= bounds.start) && (bounds.end === undefined || Number(order.CREATEDAT || 0) < bounds.end));
+        const obj = Object.fromEntries(counts);
+        obj.paid = relevant.filter(order => !hasProof(order)).length;
+        obj.pending = 0; obj.pending_stock = 0; obj.processing = 0;
+        obj.payment_review = relevant.filter(hasProof).length;
+        setFlowStatusCounts(obj);
+        return;
+      }
       const countsObj = Object.fromEntries(counts);
       setFlowStatusCounts(countsObj);
       if (typeof window !== 'undefined') {
@@ -483,7 +486,7 @@ function OrdersContent() {
     } finally {
       setFlowCountsLoading(false);
     }
-  }, [dateFilter, customDateStart, customDateEnd]);
+  }, [dateFilter, customDateStart, customDateEnd, independentWeb]);
 
   const reconcileExpiredOrders = useCallback(async () => {
     await authReady;
@@ -578,6 +581,29 @@ function OrdersContent() {
     setIsLoading(true);
     setError('');
     try {
+      if (independentWeb && (activeFilter === 'paid' || activeFilter === 'payment_review')) {
+        const snap = await fsGetDocs(fsQuery(fsCollection(db, ORDERS_COLLECTION_ID), fsWhere('STATUS', 'in', UNPAID_REVIEW_STATUSES)));
+        trackReadsBatch('list', ORDERS_COLLECTION_ID, snap.docs.length, 'independent payment orders', new Error().stack || '');
+        const bounds = getOrdersDateBounds(dateFilter, customDateStart, customDateEnd);
+        const matches = snap.docs.map(doc => ({ ...doc.data(), $id: doc.id } as Order))
+          .filter(order => (activeFilter === 'payment_review' ? hasProof(order) : !hasProof(order)) && (bounds.start === undefined || Number(order.CREATEDAT || 0) >= bounds.start) && (bounds.end === undefined || Number(order.CREATEDAT || 0) < bounds.end))
+          .sort((a, b) => Number(b.CREATEDAT || 0) - Number(a.CREATEDAT || 0));
+        setOrders(matches); setHasNextPage(false); setCurrentPage(1); setPageStarts([null]);
+        return;
+      }
+      if (activeFilter === 'warehouse_shortage') {
+        const snap = await fsGetDocs(fsQuery(fsCollection(db, ORDERS_COLLECTION_ID), fsWhere('WAREHOUSE_SHORTAGE_PENDING', '==', true)));
+        trackReadsBatch('list', ORDERS_COLLECTION_ID, snap.docs.length, 'warehouse shortage orders', new Error().stack || '');
+        const bounds = getOrdersDateBounds(dateFilter, customDateStart, customDateEnd);
+        const shortageOrders = snap.docs.map(doc => ({ ...doc.data(), $id: doc.id } as Order))
+          .filter(order => (bounds.start === undefined || Number(order.CREATEDAT || 0) >= bounds.start) && (bounds.end === undefined || Number(order.CREATEDAT || 0) < bounds.end))
+          .sort((a, b) => Number(b.CREATEDAT || 0) - Number(a.CREATEDAT || 0));
+        setOrders(shortageOrders);
+        setHasNextPage(false);
+        setCurrentPage(1);
+        setPageStarts([null]);
+        return;
+      }
       const isVendorMode = vendorFilter === 'vendors' || (vendorFilter !== 'all' && vendorFilter !== 'main');
 
       // ── MODO TIENDAS ALIADAS: consultar directamente pedidos de vendors para no fragmentar por páginas ──
@@ -697,7 +723,7 @@ function OrdersContent() {
       });
     } catch (e: any) { setError(e.message); }
     finally { setIsLoading(false); }
-  }, [activeFilter, dateFilter, customDateStart, customDateEnd, vendorFilter, pageStarts]);
+  }, [activeFilter, dateFilter, customDateStart, customDateEnd, vendorFilter, pageStarts, independentWeb]);
 
   const autoDeliverShippedOrders = useCallback(async () => {
     try {
@@ -723,6 +749,8 @@ function OrdersContent() {
 
       // Notificaciones movidas a API route para evitar importar firebase-admin en el cliente
       for (const doc of resp.documents) {
+        // Escanear confirma el embalaje, no la entrega a la agencia.
+        if (doc.PACKEDBY) continue;
         const orderId = doc.$id;
         await databases.updateDocument(databaseId, ORDERS_COLLECTION_ID, orderId, {
           STATUS: 'delivered',
@@ -748,7 +776,7 @@ function OrdersContent() {
     setCurrentPage(1);
     load(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeFilter, dateFilter, customDateStart, customDateEnd, vendorFilter, expiredOrdersReady]);
+  }, [activeFilter, dateFilter, customDateStart, customDateEnd, vendorFilter, expiredOrdersReady, independentWeb]);
 
   // Cargar stock físico consolidado para los productos de los pedidos visibles
   useEffect(() => {
@@ -892,7 +920,7 @@ function OrdersContent() {
     loadFlowStatusCounts();
     // Los conteos solo se actualizan al entrar o al pulsar Actualizar.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [expiredOrdersReady]);
+  }, [expiredOrdersReady, independentWeb]);
 
 
   const toggleSelect = (id: string) => setSelected(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
@@ -991,7 +1019,7 @@ function OrdersContent() {
         if (prevStatus && next[prevStatus] !== undefined) next[prevStatus] = Math.max(0, next[prevStatus] - 1);
         if (next[newStatus] !== undefined) next[newStatus] = (next[newStatus] || 0) + 1;
         try {
-          const cacheKey = `yaxsel_flow_counts_v1_${dateFilter}_${customDateStart || ''}_${customDateEnd || ''}`;
+          const cacheKey = `yaxsel_flow_counts_v2_${dateFilter}_${customDateStart || ''}_${customDateEnd || ''}`;
           sessionStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), counts: next }));
         } catch {}
         return next;
@@ -1086,6 +1114,33 @@ function OrdersContent() {
     const currentUser = auth.currentUser;
     if (!currentUser) throw new Error('Tu sesión no está activa. Inicia sesión nuevamente.');
     return currentUser.getIdToken();
+  };
+
+  const printPackedOrders = async () => {
+    if (printingPacked) return;
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) { alert('Permite las ventanas emergentes para imprimir la lista.'); return; }
+    printWindow.document.write('<!doctype html><title>Preparando pedidos embalados</title><p>Preparando la lista…</p>');
+    printWindow.document.close();
+    setPrintingPacked(true);
+    try {
+      await authReady;
+      const user = auth.currentUser;
+      if (!user) throw new Error('Inicia sesión para imprimir los pedidos.');
+      const response = await fetch('/api/admin/orders/packed-list', { headers: { Authorization: `Bearer ${await user.getIdToken()}` }, cache: 'no-store' });
+      const data = await response.json();
+      if (!response.ok || !Array.isArray(data.orders)) throw new Error(data.error || 'No se pudo generar la lista.');
+      const orders = data.orders as PackedListOrder[];
+      if (!orders.length) throw new Error('No hay pedidos embalados para imprimir.');
+      printWindow.document.open();
+      printWindow.document.write(buildPackedListHtml(orders));
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+    } catch (error: any) {
+      if (!printWindow.closed) printWindow.close();
+      alert(error?.message || 'No se pudo generar la lista de pedidos embalados.');
+    } finally { setPrintingPacked(false); }
   };
 
   const openBulkPaymentReview = async () => {
@@ -1436,11 +1491,12 @@ function OrdersContent() {
   }, [orders, statsCache?.reviewOrders]);
 
   const criticalReviewOrders = useMemo(() => {
+    if (!showStockHealth) return [];
     return activeReviewOrders.filter(o => {
       const r = getOrderRisk(o);
       return r.pct <= 20 || r.level === 'rojo' || r.hasRed;
     });
-  }, [activeReviewOrders, getOrderRisk]);
+  }, [activeReviewOrders, getOrderRisk, showStockHealth]);
 
   const soldOutReviewCount = useMemo(() => {
     return criticalReviewOrders.filter(o => getOrderRisk(o).pct === 0).length;
@@ -1448,7 +1504,7 @@ function OrdersContent() {
 
   const sortedFiltered = [...sourceOrders].sort((a, b) => {
     // Cuando se filtra por 'revisando pago', mostrar primero los que menor porcentaje tengan (0%, 10%, 15%, 20%)
-    if (activeFilter === 'payment_review') {
+    if (showStockHealth && activeFilter === 'payment_review') {
       const vendorA = isVendorOrderDocument(a);
       const vendorB = isVendorOrderDocument(b);
       if (vendorA !== vendorB) return vendorA ? 1 : -1;
@@ -1477,35 +1533,14 @@ function OrdersContent() {
   const paymentMethods = ['all', ...Array.from(new Set(sourceOrders.map(o => o.PAYMENTMETHOD || 'Sin método').filter(Boolean)))];
   const regions = ['all', ...Array.from(new Set(sourceOrders.map(o => (o as any).REGION || '').filter(Boolean))).sort()];
 
-  const centralOrdersCount = useMemo(() => {
-    return sourceOrders.filter(o => !Boolean((o as any).IS_VENDOR_ORDER || (o as any).VENDOR_NAME)).length;
-  }, [sourceOrders]);
 
-  const vendorStoresWithOrders = useMemo(() => {
-    const countsMap = new Map<string, { name: string; count: number }>();
-    for (const v of registeredVendors) {
-      if (v.name) {
-        countsMap.set(v.name.toLowerCase().trim(), { name: v.name.trim(), count: 0 });
-      }
-    }
-    for (const o of (sourceOrders.length > 0 ? sourceOrders : orders)) {
-      const vName = String((o as any).VENDOR_NAME || '').trim();
-      if (vName) {
-        const key = vName.toLowerCase();
-        const existing = countsMap.get(key);
-        if (existing) {
-          existing.count += 1;
-        } else {
-          countsMap.set(key, { name: vName, count: 1 });
-        }
-      }
-    }
-    return Array.from(countsMap.values()).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
-  }, [sourceOrders, orders, registeredVendors]);
 
 
 
   const filtered = sortedFiltered.filter(o => {
+    if (activeFilter === 'warehouse_shortage' && !(o as any).WAREHOUSE_SHORTAGE_PENDING) return false;
+    if (independentWeb && activeFilter === 'paid' && (!UNPAID_REVIEW_STATUSES.includes(o.STATUS) || hasProof(o))) return false;
+    if (independentWeb && activeFilter === 'payment_review' && (!UNPAID_REVIEW_STATUSES.includes(o.STATUS) || !hasProof(o))) return false;
     if (filterUserId && o.USERID !== filterUserId) return false;
     // Si no estamos usando búsqueda global en servidor pero hay término local, filtramos
     if (!searchResults && search) {
@@ -1819,18 +1854,18 @@ function OrdersContent() {
           setVendorFilter('all');
         };
         const statusCounts = flowStatusCounts || {};
-        const counts = STATUS_FLOW.map(st => st === 'paid'
+        const counts = statusFlow.map(st => st === 'paid'
           ? STOCK_CONFIRMED_STATUSES.reduce((sum, key) => sum + (statusCounts[key] || 0), 0)
           : statusCounts[st] || 0);
         let furthestIdx = -1;
         // Pago vencido es una salida hacia atrás, no un paso completado antes del inicio.
-        counts.forEach((c, i) => { if (c > 0 && STATUS_FLOW[i] !== 'payment_expired') furthestIdx = i; });
+        counts.forEach((c, i) => { if (c > 0 && statusFlow[i] !== 'payment_expired') furthestIdx = i; });
         const flowTotal = counts.reduce((s, c) => s + c, 0);
 
         // Nodo del flujo principal — glossy + anillo activo + badge
         const renderNode = (status: string, idx: number) => {
           const sc = STATUS_COLORS[status] || { color: '#6b7280', bg: '#f3f4f6' };
-          const cfg = STATUS_CONFIG[status] || { label: status };
+          const cfg = independentWeb && status === 'paid' ? { label: 'No pagados' } : STATUS_CONFIG[status] || { label: status };
           const count = counts[idx];
           const isActive = activeFilter === status;
           const dim = count === 0;
@@ -1991,14 +2026,14 @@ function OrdersContent() {
             <div className="relative px-4 sm:px-5 pb-5 pt-3 overflow-x-auto">
               <div className="flex items-start gap-0 min-w-max relative">
                 {/* Flujo principal */}
-                {STATUS_FLOW.map((status, idx) => {
+                {statusFlow.map((status, idx) => {
                   const a = STATUS_COLORS[status]?.color || '#6b7280';
-                  const b = STATUS_COLORS[STATUS_FLOW[idx + 1]]?.color || a;
+                  const b = STATUS_COLORS[statusFlow[idx + 1]]?.color || a;
                   const filled = idx > 0 && idx < furthestIdx;
                   return (
                     <React.Fragment key={status}>
                       {renderNode(status, idx)}
-                      {idx < STATUS_FLOW.length - 1 && (
+                      {idx < statusFlow.length - 1 && (
                         <div className="relative self-start mt-[18px] sm:mt-[25px] flex-shrink-0 -mx-1 sm:-mx-1.5 rounded-full overflow-hidden"
                           style={{ height: 3, width: 20, background: filled ? `linear-gradient(90deg, ${a}, ${b})` : '#e5e7eb' }}>
                           {filled && (
@@ -2014,6 +2049,8 @@ function OrdersContent() {
                 {renderSideNode('negotiation')}
                 {renderDashedSep('sep-cancel')}
                 {renderSideNode('cancelled')}
+                {renderDashedSep('sep-shortage')}
+                {renderSideNode('warehouse_shortage')}
               </div>
             </div>
 
@@ -2036,10 +2073,10 @@ function OrdersContent() {
           Todos
         </button>
         {/* Pagados — soft green */}
-        <button onClick={() => setActiveFilter('paid_group')}
+        {!independentWeb && <button onClick={() => setActiveFilter('paid_group')}
           className={`px-3 py-1.5 rounded-xl text-sm font-medium transition bg-green-100 text-green-700 border border-green-200 ${activeFilter === 'paid_group' ? 'ring-2 ring-green-500 ring-inset shadow-sm' : 'hover:opacity-80'}`}>
           Confirmados
-        </button>
+        </button>}
         {/* Cancelado — soft red */}
         <button onClick={() => setActiveFilter('cancelled')}
           className={`px-3 py-1.5 rounded-xl text-sm font-medium transition bg-red-100 text-red-700 border border-red-200 ${activeFilter === 'cancelled' ? 'ring-2 ring-red-500 ring-inset shadow-sm' : 'hover:opacity-80'}`}>
@@ -2061,74 +2098,14 @@ function OrdersContent() {
             <FileImage className="h-4 w-4" /> Revisión masiva
           </button>
         )}
-        {/* Filtro: Tiendas (Selector de tiendas con pedidos) */}
-        <div className="relative inline-block" ref={storeDropdownRef}>
-          <button
-            type="button"
-            onClick={() => setShowStoreDropdown(v => !v)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition border cursor-pointer ${
-              vendorFilter !== 'all'
-                ? 'bg-amber-100 text-amber-900 border-amber-300 ring-2 ring-amber-500/40 shadow-xs'
-                : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-            }`}
-            title="Filtrar por tienda con pedidos"
-          >
-            <span>🏪 Tiendas</span>
-            {vendorFilter !== 'all' && (
-              <span className="text-xs font-bold text-amber-800 truncate max-w-[140px]">
-                : {vendorFilter === 'main' ? 'Importadora Carlitos' : vendorFilter}
-              </span>
-            )}
-            <ChevronDown size={14} className={`text-gray-400 transition-transform ${showStoreDropdown ? 'rotate-180' : ''}`} />
+        {activeFilter === 'shipped' && (
+          <button type="button" onClick={() => void printPackedOrders()} disabled={printingPacked}
+            className="inline-flex items-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-3 py-1.5 text-sm font-bold text-violet-800 hover:bg-violet-100 disabled:opacity-60"
+            title="Imprimir todos los pedidos embalados, de todas las páginas y fechas">
+            {printingPacked ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
+            {printingPacked ? 'Preparando lista…' : 'Imprimir lista de embalados'}
           </button>
-
-          {showStoreDropdown && (
-            <div className="absolute left-0 mt-1.5 w-60 bg-white rounded-2xl shadow-xl border border-gray-200 py-1.5 z-40 animate-in fade-in-50 slide-in-from-top-2 duration-150">
-              <div className="px-3 py-1.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100">
-                Tiendas con pedidos
-              </div>
-              <button
-                type="button"
-                onClick={() => { setVendorFilter('all'); setShowStoreDropdown(false); }}
-                className={`w-full text-left px-3.5 py-2 text-xs font-semibold flex items-center justify-between hover:bg-gray-50 transition cursor-pointer ${
-                  vendorFilter === 'all' ? 'text-indigo-600 bg-indigo-50/60 font-bold' : 'text-gray-700'
-                }`}
-              >
-                <span>🌐 Todas las tiendas</span>
-                <span className="text-[10px] text-gray-400 font-mono">{sourceOrders.length}</span>
-              </button>
-              {centralOrdersCount > 0 && (
-                <button
-                  type="button"
-                  onClick={() => { setVendorFilter('main'); setShowStoreDropdown(false); }}
-                  className={`w-full text-left px-3.5 py-2 text-xs font-semibold flex items-center justify-between hover:bg-gray-50 transition cursor-pointer ${
-                    vendorFilter === 'main' ? 'text-indigo-600 bg-indigo-50/60 font-bold' : 'text-gray-700'
-                  }`}
-                >
-                  <span>🏠 Importadora Carlitos (Central)</span>
-                  <span className="text-[10px] text-gray-400 font-mono">{centralOrdersCount}</span>
-                </button>
-              )}
-              {vendorStoresWithOrders.map(({ name, count }) => {
-                const isSelected = vendorFilter.toLowerCase() === name.toLowerCase();
-                return (
-                  <button
-                    key={name}
-                    type="button"
-                    onClick={() => { setVendorFilter(name); setShowStoreDropdown(false); }}
-                    className={`w-full text-left px-3.5 py-2 text-xs font-semibold flex items-center justify-between hover:bg-amber-50/60 transition cursor-pointer ${
-                      isSelected ? 'text-amber-800 bg-amber-50 font-bold' : 'text-gray-700'
-                    }`}
-                  >
-                    <span className="truncate pr-2">🏪 {name}</span>
-                    <span className="text-[10px] text-amber-700 font-bold font-mono">{count}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
+        )}
         {orders.some(o => (o as any).PURCHASEDFROMLIVE) && (
           <button onClick={() => setLiveOnly(v => !v)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition border ${liveOnly ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}>
@@ -2169,7 +2146,7 @@ function OrdersContent() {
               <button onClick={() => setShowStatusModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 text-xl leading-none">×</button>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-              {(['payment_expired', 'paid', 'payment_review', 'payment_confirmed', 'negotiation', 'shipped', 'delivered'] as const).map(key => {
+              {(independentWeb ? ['paid', 'payment_review', 'payment_confirmed', 'negotiation', 'shipped', 'delivered'] : ['payment_expired', 'paid', 'payment_review', 'payment_confirmed', 'negotiation', 'shipped', 'delivered']).map(key => {
                 const color = STATUS_COLORS[key]?.color || '#6b7280';
                 const bg = STATUS_COLORS[key]?.bg || '#f3f4f6';
                 return (
@@ -2177,7 +2154,7 @@ function OrdersContent() {
                     className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition ${activeFilter === key ? 'ring-2 ring-offset-1 shadow-sm' : 'hover:shadow-md'} hover:scale-105`}
                     style={{ background: bg, borderColor: color + '33', color }}>
                     <div style={{ color }}>{STATUS_SVG[key] && React.cloneElement(STATUS_SVG[key] as any, { width: 32, height: 32 })}</div>
-                    <span className="text-xs font-semibold text-center" style={{ color }}>{STATUS_CONFIG[key]?.label || key}</span>
+                    <span className="text-xs font-semibold text-center" style={{ color }}>{independentWeb && key === 'paid' ? 'No pagados' : STATUS_CONFIG[key]?.label || key}</span>
                   </button>
                 );
               })}
@@ -2398,6 +2375,7 @@ function OrdersContent() {
                 </div>
 
                 {/* Salud General del Pedido y Plazo Estimado de Pago */}
+                {showStockHealth && (
                 <div className="bg-slate-50/80 border border-slate-200/80 rounded-2xl p-3 flex items-center justify-between gap-2 flex-wrap">
                   <div className="flex items-center gap-2">
                     <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Salud general:</span>
@@ -2420,6 +2398,7 @@ function OrdersContent() {
                     )}
                   </div>
                 </div>
+                )}
 
                 {/* Resumen Financiero Dinámico */}
                 {hasRemoved ? (
@@ -2601,17 +2580,17 @@ function OrdersContent() {
 
                         {/* Barra de estado / Salud de stock animada */}
                         <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap">
-                          <div className="flex items-center gap-2">
+                          {showStockHealth && <div className="flex items-center gap-2">
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Salud stock:</span>
                             <StockRiskBadge risk={pRisk} compact />
-                          </div>
+                          </div>}
 
                           <div className="flex items-center gap-1.5 text-xs font-semibold">
                             {notFound ? (
                               <span className="text-slate-400 text-[11px] bg-slate-100 px-2 py-0.5 rounded">No en BD</span>
                             ) : stockVal <= 0 ? (
                               <span className="text-rose-700 bg-rose-100/90 text-[11px] font-bold px-2 py-0.5 rounded border border-rose-200">
-                                0 un. en tienda (Agotado)
+                                0 un. disponibles (Agotado)
                               </span>
                             ) : !ok ? (
                               <span className="text-amber-800 bg-amber-100 text-[11px] font-bold px-2 py-0.5 rounded border border-amber-200">
@@ -2624,14 +2603,14 @@ function OrdersContent() {
                               </span>
                             ) : (
                               <span className="text-emerald-800 bg-emerald-50 text-[11px] font-bold px-2 py-0.5 rounded border border-emerald-200/60">
-                                {stockVal} en tienda (Quedarán {remaining})
+                                {stockVal} disponibles (quedarán {remaining})
                               </span>
                             )}
                           </div>
                         </div>
 
                         {/* Deuda de Stock Pendiente si existe */}
-                        {pendiente > 0 ? (
+                        {showStockHealth && pendiente > 0 ? (
                           <div className="mt-2 py-1.5 px-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between text-xs text-amber-900">
                             <div className="flex items-center gap-1.5 font-semibold">
                               <span>⚠️</span>
@@ -2949,14 +2928,14 @@ Email: ${bankDetails.email}`;
         const tOrder = orders.find(o => o.$id === timelineOrderId);
         if (!tOrder) return null;
         const effStatus = STOCK_CONFIRMED_STATUSES.includes(tOrder.STATUS) ? 'paid' : tOrder.STATUS;
-        const currentIdx = STATUS_FLOW.indexOf(effStatus);
-        const actionFlow = STATUS_FLOW.filter(status => status !== 'payment_expired');
-        const actionCurrentStatus = effStatus === 'payment_expired' ? 'paid' : effStatus;
+        const actionFlow = statusFlow.filter(status => status !== 'payment_expired');
+        const actionCurrentStatus = independentWeb && UNPAID_REVIEW_STATUSES.includes(effStatus) ? (hasProof(tOrder) ? 'payment_review' : 'paid') : effStatus === 'payment_expired' ? 'paid' : effStatus;
         const actionIdx = actionFlow.indexOf(actionCurrentStatus);
+        const currentIdx = statusFlow.indexOf(actionCurrentStatus);
         const isCancelled = tOrder.STATUS === 'cancelled';
         const tIsPickup = isPickup(tOrder.SHIPPINGAGENCY);
         const STATUS_DESC: Record<string, string> = {
-          paid: 'Stock confirmado, esperando pago del cliente.',
+          paid: independentWeb ? 'Esperando el comprobante de pago del cliente.' : 'Stock confirmado, esperando pago del cliente.',
           payment_expired: 'El plazo de pago terminó. Se puede subir el comprobante hasta que el pedido cumpla 24 horas desde su creación; entonces se cancelará automáticamente.',
           processing: 'Se recibió el comprobante de pago, hay que verificarlo.',
           payment_confirmed: 'El pago fue confirmado y verificado correctamente.',
@@ -2968,7 +2947,7 @@ Email: ${bankDetails.email}`;
         // Etiquetas dependientes de retiro/agencia para el timeline
         const labelFor = (status: string) => {
           if (status === 'delivered' && tIsPickup) return 'Entregado';
-          return STATUS_CONFIG[status]?.label || status;
+          return independentWeb && status === 'paid' ? 'No pagados' : STATUS_CONFIG[status]?.label || status;
         };
         return (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -2996,7 +2975,7 @@ Email: ${bankDetails.email}`;
               {/* Timeline */}
               <div className="px-4 py-3 sm:px-6 sm:py-4 max-h-[50vh] overflow-y-auto">
                 <div className="relative">
-                  {STATUS_FLOW.map((status, idx) => {
+                  {statusFlow.map((status, idx) => {
                     const isPast = idx < currentIdx;
                     const isCurrent = idx === currentIdx;
                     const isFuture = idx > currentIdx;
@@ -3005,7 +2984,7 @@ Email: ${bankDetails.email}`;
                     return (
                       <div key={status} className="flex items-start gap-3 relative pb-1" style={{ minHeight: 60 }}>
                         {/* Vertical connector line */}
-                        {idx < STATUS_FLOW.length - 1 && (
+                        {idx < statusFlow.length - 1 && (
                           <div className="absolute left-[15px] top-9 bottom-0 w-[2px] rounded-full" style={{ background: isPast ? sc.color : '#e5e7eb', opacity: isPast ? 0.4 : 1 }} />
                         )}
                         {/* Node — clickable */}
@@ -3155,7 +3134,7 @@ Email: ${bankDetails.email}`;
         const isRetiro = order.STATUS === 'shipped' && order.SHIPPINGAGENCY?.toUpperCase() === 'RETIRO EN TIENDA';
         const statusColor = isRetiro ? '#c026d3' : (STATUS_COLORS[order.STATUS]?.color || '#6b7280');
         const statusBg = isRetiro ? '#fdf4ff' : (STATUS_COLORS[order.STATUS]?.bg || '#f3f4f6');
-        const statusLabel = isRetiro ? 'Listo para Retirar' : (STATUS_CONFIG[order.STATUS]?.label || order.STATUS);
+        const statusLabel = isRetiro ? 'Listo para Retirar' : (independentWeb && UNPAID_REVIEW_STATUSES.includes(order.STATUS) ? (hasProof(order) ? 'Revisando Pago' : 'No pagado') : (STATUS_CONFIG[order.STATUS]?.label || order.STATUS));
         
         const phoneClean = order.CUSTOMERPHONE ? order.CUSTOMERPHONE.replace(/\D/g, '') : '';
         const waPhone = phoneClean.length === 9 ? '56' + phoneClean : phoneClean;
@@ -3608,7 +3587,7 @@ Email: ${bankDetails.email}`;
             filtered.map(order => {
               const date = order.CREATEDAT ? new Date(order.CREATEDAT) : new Date(order.$createdAt);
               const ageMs = Date.now() - date.getTime();
-              const isOverdue = !isVendorOrderDocument(order) && order.STATUS === 'payment_expired';
+              const isOverdue = !independentWeb && !isVendorOrderDocument(order) && order.STATUS === 'payment_expired';
               let items: any[] = [];
               try { items = JSON.parse(order.ITEMS || '[]'); } catch {}
               const hasMissing = items.some((it: any) => it.missing === true);
@@ -3696,6 +3675,7 @@ Email: ${bankDetails.email}`;
 
                   {/* Row 2.2: Barra de Salud de Stock y Plazo Dinámico para Pagar */}
                   {(() => {
+                    if (!showStockHealth) return null;
                     const isConfirmed = ['payment_confirmed', 'preparing', 'shipped', 'delivered'].includes(order.STATUS);
                     const isCancelled = order.STATUS === 'cancelled';
                     const isNegotiation = order.STATUS === 'negotiation';
@@ -3743,7 +3723,7 @@ Email: ${bankDetails.email}`;
 
                     const oRisk = getOrderRisk(order);
                     const isWaitingPayment = (order.STATUS === 'paid' || order.STATUS === 'pending' || order.STATUS === 'pending_stock' || order.STATUS === 'processing') && !order.PAYMENTPROOFURL;
-                    const showPaymentExpiration = !isVendorOrderDocument(order) && (isWaitingPayment || isOverdue) && !order.PAYMENTPROOFURL;
+                    const showPaymentExpiration = !independentWeb && !isVendorOrderDocument(order) && (isWaitingPayment || isOverdue) && !order.PAYMENTPROOFURL;
                     return (
                       <div className="flex items-center justify-between gap-2 mb-2 px-2.5 py-1.5 rounded-xl bg-white/85 border border-slate-200/80 shadow-xs" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center gap-1.5 min-w-0" title={oRisk.label}>
@@ -3932,7 +3912,7 @@ Email: ${bankDetails.email}`;
                   const date = order.CREATEDAT ? new Date(order.CREATEDAT) : new Date(order.$createdAt);
                   const isUpdating = updatingId === order.$id;
                   const ageMs = Date.now() - date.getTime();
-                  const isOverdue = !isVendorOrderDocument(order) && order.STATUS === 'payment_expired';
+                  const isOverdue = !independentWeb && !isVendorOrderDocument(order) && order.STATUS === 'payment_expired';
                   const ageH = Math.floor(ageMs / 3600000);
                   const ageD = Math.floor(ageH / 24);
                   const ageStrRel = ageH < 1 ? 'ahora' : ageH < 24 ? `${ageH}h` : `${ageD}d ${ageH % 24}h`;
@@ -3945,7 +3925,7 @@ Email: ${bankDetails.email}`;
                   const isWarning = hasMissing && ['pending', 'processing'].includes(order.STATUS);
                   const totalItems = items.reduce((s: number, it: any) => s + (it.qty || 1), 0);
                   const isWaitingPayment = (order.STATUS === 'paid' || order.STATUS === 'pending' || order.STATUS === 'pending_stock' || order.STATUS === 'processing') && !order.PAYMENTPROOFURL;
-                  const showPaymentExpiration = !isVendorOrderDocument(order) && (isWaitingPayment || isOverdue) && !order.PAYMENTPROOFURL;
+                  const showPaymentExpiration = !independentWeb && !isVendorOrderDocument(order) && (isWaitingPayment || isOverdue) && !order.PAYMENTPROOFURL;
                   const oRisk = getOrderRisk(order);
                   const isRetiro = order.STATUS === 'shipped' && order.SHIPPINGAGENCY?.toUpperCase() === 'RETIRO EN TIENDA';
                   const statusColor = isRetiro ? '#c026d3' : (STATUS_COLORS[order.STATUS]?.color || '#6b7280');
@@ -3956,7 +3936,7 @@ Email: ${bankDetails.email}`;
                   const cardBorder = isSel ? '#6366f1' : isWarning ? '#f59e0b' : isOverdue ? '#ef4444' : '#e5e7eb';
                   const cardBg = isSel ? '#eef2ff' : isRetiro ? '#fdf4ff' : (STATUS_COLORS[order.STATUS]?.bg || '#f3f4f6');
                   const statusBg = isRetiro ? '#fdf4ff' : (STATUS_COLORS[order.STATUS]?.bg || '#f3f4f6');
-                  const statusLabel = isRetiro ? 'Retirar' : (STATUS_CONFIG[order.STATUS]?.label || order.STATUS);
+                  const statusLabel = isRetiro ? 'Retirar' : (independentWeb && UNPAID_REVIEW_STATUSES.includes(order.STATUS) ? (hasProof(order) ? 'Revisando Pago' : 'No pagado') : (STATUS_CONFIG[order.STATUS]?.label || order.STATUS));
                   const hasCanje = (() => { try { const it = JSON.parse(order.ITEMS || '[]'); const cc = (order as any).CANJE_COUNT || 0; return cc > 0 || it.some((i: any) => i.isCanjeReplacement); } catch { return false; } })();
 
                   return (
@@ -4063,6 +4043,7 @@ Email: ${bankDetails.email}`;
                         {/* Izquierda: Semáforo de stock y timer de caducidad */}
                         <div className="flex items-center gap-2 flex-wrap min-w-0" onClick={e => e.stopPropagation()}>
                           {(() => {
+                            if (!showStockHealth) return null;
                             const isConfirmed = ['payment_confirmed', 'preparing', 'shipped', 'delivered'].includes(order.STATUS);
                             const isCancelled = order.STATUS === 'cancelled';
                             const isNegotiation = order.STATUS === 'negotiation';

@@ -6,7 +6,7 @@ import {
   CheckCircle2, Bot, Truck, MessageCircle 
 } from 'lucide-react';
 import { hasShippingData } from '@/lib/order-rules';
-import { getPublicSiteUrl } from '@/lib/public-site-url';
+import { useWebClientConfig } from '@/hooks/useWebClientConfig';
 
 export interface ShippingNotificationModalProps {
   isOpen: boolean;
@@ -43,6 +43,7 @@ export function ShippingNotificationModal({
   const [botSentSuccess, setBotSentSuccess] = useState<boolean | null>(null);
   const [botSentError, setBotSentError] = useState<string | null>(null);
   const [customMsg, setCustomMsg] = useState('');
+  const { config: webConfig } = useWebClientConfig();
 
   const orderCode = order?.ORDERCODE || (order?.$id ? '#' + order.$id.slice(-6) : '');
   const customerName = (order?.CUSTOMERNAME || 'Cliente').split(' ')[0];
@@ -50,13 +51,13 @@ export function ShippingNotificationModal({
   const cleanDigits = rawPhone.replace(/[^0-9]/g, '');
   const phoneWithCountry = cleanDigits.startsWith('56') ? cleanDigits : '56' + cleanDigits;
 
-  const siteUrl = getPublicSiteUrl();
-  const shippingUrl = order ? `${siteUrl}/datos-envio?id=${encodeURIComponent(order.$id)}` : '';
+  const siteUrl = webConfig.siteUrl;
+  const shippingUrl = order && siteUrl ? `${siteUrl}/datos-envio?id=${encodeURIComponent(order.$id)}` : '';
 
-  const defaultMessage = `¡Hola ${customerName}! 🐾✨ Te escribimos de Importadora Carlitos.\n\n` +
+  const defaultMessage = `¡Hola ${customerName}! 🐾✨ Te escribimos de ${webConfig.storeName}.\n\n` +
     `✅ Tu pago del pedido *#${orderCode}* fue verificado y confirmado con éxito, y tus productos ya están *100% apartados en bodega* 📦.\n\n` +
     `👉 Para poder armar tu paquete y despacharlo lo antes posible, por favor completa tu dirección y selecciona tu agencia de transporte en este enlace:\n` +
-    `🔗 ${shippingUrl}\n\n` +
+    `🔗 ${shippingUrl || 'Configura la URL pública en Admin Supreme Web'}\n\n` +
     `*(Solo te tomará 1 minuto; tu comprobante de transferencia ya está guardado en el sistema)*. ¡Muchas gracias por tu compra! 🙌`;
 
   useEffect(() => {
@@ -67,7 +68,7 @@ export function ShippingNotificationModal({
       setCopiedMsg(false);
       setCopiedLink(false);
     }
-  }, [isOpen, order, initialData]);
+  }, [isOpen, order, initialData, webConfig.siteUrl, webConfig.storeName]);
 
   if (!isOpen || !order) return null;
 

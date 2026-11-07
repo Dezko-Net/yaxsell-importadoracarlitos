@@ -99,6 +99,7 @@ import { fetchAllFirebaseErpProducts } from '@/lib/firebaseErpService'
 // useAuth → auth real de Firebase
 import { useAuth } from '@/hooks/useAuth'
 import { isAdminEmail } from '@/lib/admin-access'
+import { useServiceModules } from '@/hooks/useServiceModules'
 import { getErpUserByEmail, getRedirectForModules, type AppModule } from '@/lib/erpUserService'
 import { isSellerCargo } from '@/lib/posSellerRoles'
 import { normalizePosAccessLevel } from '@/lib/posAccessLevels'
@@ -171,6 +172,7 @@ export default function ErpDashboardLayout({ children }: { children: React.React
   const navigate = useNavigate()
   const location = useLocation()
   const { user, isLoading: authLoading, isLoggedIn, logout } = useAuth()
+  const { modules: services, ready: servicesReady } = useServiceModules()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [avatarLoaded, setAvatarLoaded] = useState(false)
   const [avatarError, setAvatarError] = useState(false)
@@ -816,7 +818,7 @@ export default function ErpDashboardLayout({ children }: { children: React.React
     { to: '/pos', label: 'POS', icon: <ShoppingCart size={18} />, color: 'fuchsia', desc: 'Punto de venta' },
   ], [])
 
-  const sidebarLinks = navLinks
+  const sidebarLinks = useMemo(() => navLinks.filter(link => !('to' in link) || !link.to || !['/pos', '/pos-admin'].includes(link.to) || (servicesReady && services.pos)), [navLinks, servicesReady, services.pos])
 
   type RouteStatus = 'exists' | 'shared' | 'missing'
 
@@ -903,10 +905,10 @@ export default function ErpDashboardLayout({ children }: { children: React.React
 
   const paletteResults = useMemo(() => {
     const q = paletteQuery.toLowerCase().trim()
-    if (!q) return navLinks.filter(l => 'to' in l) as Array<{to:string;label:string;icon:React.ReactNode;color:string;desc:string}>
-    return (navLinks.filter(l => 'to' in l) as Array<{to:string;label:string;icon:React.ReactNode;color:string;desc:string}>)
+    if (!q) return sidebarLinks.filter(l => 'to' in l) as Array<{to:string;label:string;icon:React.ReactNode;color:string;desc:string}>
+    return (sidebarLinks.filter(l => 'to' in l) as Array<{to:string;label:string;icon:React.ReactNode;color:string;desc:string}>)
       .filter(l => l.label.toLowerCase().includes(q) || l.desc.toLowerCase().includes(q))
-  }, [paletteQuery, navLinks])
+  }, [paletteQuery, sidebarLinks])
 
   const auditCounts = useMemo(() => {
     let exist = 0, shared = 0, missing = 0
@@ -1409,15 +1411,15 @@ export default function ErpDashboardLayout({ children }: { children: React.React
               <TrendingUp size={14} />
               <span>Ganancias</span>
             </Link>
-            <Link to="/pos" className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold transition" title="POS o POS-admin según tus permisos">
+            {servicesReady && services.pos && <Link to="/pos" className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold transition" title="POS o POS-admin según tus permisos">
               <BarChart2 size={14} />
               <span>POS</span>
-            </Link>
+            </Link>}
             <Link to="/base-datos" className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 text-xs font-semibold transition" title="Base de Datos">
               <Database size={14} />
               <span>BD</span>
             </Link>
-            {(erpUserInfo?.modules?.includes('web') || erpUserInfo?.modules?.includes('admin_supreme') || isSupreme) && (
+            {servicesReady && services.web && (erpUserInfo?.modules?.includes('web') || erpUserInfo?.modules?.includes('admin_supreme') || isSupreme) && (
               <a
                 href="/admin/dashboard"
                 target="_blank"
@@ -1517,7 +1519,7 @@ export default function ErpDashboardLayout({ children }: { children: React.React
                     </Link>
 
                     {/* POS */}
-                    <Link
+                    {servicesReady && services.pos && <Link
                       to="/pos"
                       onClick={() => setAtajosOpen(false)}
                       className="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50/70 dark:hover:bg-blue-900/20 transition group"
@@ -1530,10 +1532,10 @@ export default function ErpDashboardLayout({ children }: { children: React.React
                         <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate leading-tight">POS o POS-admin según tu rol</p>
                       </div>
                       <ChevronRight size={12} className="text-slate-300 group-hover:text-slate-500 transition-colors shrink-0" />
-                    </Link>
+                    </Link>}
 
                     {/* Tienda Web */}
-                    {(erpUserInfo?.modules?.includes('web') || erpUserInfo?.modules?.includes('admin_supreme') || isSupreme) && (
+                    {servicesReady && services.web && (erpUserInfo?.modules?.includes('web') || erpUserInfo?.modules?.includes('admin_supreme') || isSupreme) && (
                       <a
                         href="/admin/dashboard"
                         target="_blank"

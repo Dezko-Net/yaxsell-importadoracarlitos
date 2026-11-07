@@ -34,6 +34,12 @@
 
 * { box-sizing: border-box; }
 
+/* Los valores se escriben manualmente; la rueda queda para desplazar la página. */
+input[type="number"] { appearance: textfield; -moz-appearance: textfield; }
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+
 html { scroll-behavior: smooth; }
 
 body {

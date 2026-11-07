@@ -158,9 +158,13 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'Solo se pueden modificar pedidos embalados' }, { status: 409 });
     }
     const boxPhotos = parseBoxPhotos(order.BOXPHOTOS).filter(photo => photo.bulto <= normalizedCount);
+    const boxSizes = Array.isArray(order.BOXSIZES) && order.BOXSIZES.length === normalizedCount
+      ? order.BOXSIZES
+      : [];
 
     await serverUpdateDocument(ORDERS_COLLECTION_ID, orderId, {
       BULTOCOUNT: normalizedCount,
+      BOXSIZES: boxSizes,
       BOXPHOTOS: JSON.stringify(boxPhotos),
       UPDATEDAT: Date.now(),
     });

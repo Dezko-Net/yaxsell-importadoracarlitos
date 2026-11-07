@@ -27,7 +27,7 @@ export function buildBulkPaymentReviewPrintHtml(orders: BulkPaymentReviewOrder[]
   const sheets = orders.map((order, index) => {
     const proofs = parsePaymentProofs(order.PAYMENTPROOFURL).map((url, proofIndex) => {
       const safeUrl = safeImageUrl(url);
-      const isPdf = /\.pdf(?:\?|$)/i.test(url);
+      const isPdf = /(?:\.pdf(?:\?|$)|[?&]ext=pdf(?:&|$))/i.test(url);
       return safeUrl
         ? isPdf
           ? `<a class="proof-link" href="${escapeHtml(safeUrl)}">Comprobante ${proofIndex + 1}: abrir PDF</a>`

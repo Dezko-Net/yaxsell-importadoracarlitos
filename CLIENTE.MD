@@ -6,18 +6,29 @@ Este archivo registra las decisiones acordadas para esta copia de Yaxsell. Añad
 
 - Cliente: Importadora Carlitos SPA. Plan contratado: tienda web y catálogo.
 - Firebase: proyecto `importadora-carlitos`, Firestore `(default)` y bucket propio.
-- Inventario: modo **web independiente** seleccionado. El modo conjunto con ERP sigue disponible en la configuración.
-- POS y ERP: deshabilitados para esta copia mediante `src/lib/module-access.ts` y middleware.
-- Acceso administrativo: `/admin/login` muestra únicamente el acceso a la plataforma web cuando ERP y POS están deshabilitados. Los parámetros de acceso no reactivan esos módulos y los usuarios sin permiso web reciben un aviso.
+- Inventario: el modo **web independiente** o **conjunto con ERP** se administra en «Mi Tienda → Admin Supreme Web», visible para `dezkonet@gmail.com`.
+- Servicios: Web, ERP y POS están habilitados inicialmente para pruebas. Sus estados se guardan en `system_settings/module_access` de Firebase y el middleware restringe las rutas de cada módulo.
+- Admin Supreme Web, el Supreme del ERP y Admin Supreme POS permiten a `dezkonet@gmail.com` activar o desactivar los otros servicios. Cada panel impide apagar su propio módulo para conservar una vía de administración.
+- Acceso administrativo: `/admin/login` adapta las opciones y destinos a los servicios activos. El cambio de servicios requiere la sesión Firebase de la cuenta autorizada.
+- En **Admin Supreme Web → Datos de la web** se configuran nombre, logo, imagen y textos de portada, dirección, WhatsApp de atención, número del bot, dominio público e identificador del número de Meta. Estos datos se guardan en `web_settings`; no sustituyen la configuración del ERP o del POS. Productos, pedidos y pagos se gestionan desde sus pantallas enlazadas.
+- El token de Meta sigue en la variable de servidor `WHATSAPP_ACCESS_TOKEN`, nunca se muestra en el navegador. El webhook requiere el dominio público de la tienda configurado antes de procesar mensajes. Si faltan datos bancarios completos, el bot no inventa una cuenta para recibir pagos.
+- Para otro cliente se requiere una copia y un proyecto Firebase propios, configurar todas las variables públicas y credenciales de ese proyecto, crear la cuenta propietaria e indicar `NEXT_PUBLIC_SUPREME_OWNER_UID` (y si corresponde `NEXT_PUBLIC_SUPREME_OWNER_EMAIL`), adaptar y desplegar sus reglas de Firebase, y configurar hosting y secretos. Los datos comerciales se completan luego en Supreme Web. No copiar productos, pedidos, usuarios, credenciales ni respaldos entre clientes.
+- La separación absoluta entre web y ERP aún requiere trabajo: por ejemplo, el dashboard del ERP consulta pedidos web para sus informes. Revisar esas lecturas y las demás integraciones antes de prometer aislamiento total dentro de una misma instalación.
+- La configuración nueva ya alimenta el catálogo, la cuenta, el webhook y la notificación de despacho. Otras plantillas y funciones heredadas, incluidos cron de negociación e IA de administración, conservan configuraciones propias y deben revisarse antes de reutilizarlas con otro cliente.
 
 ### Productos en modo web independiente
 
-- El menú muestra **0. Productos Web** y oculta **1. Seleccionar de Tienda**, **2. Revisión Web** y **3. Productos Publicados**. Las categorías y los packs siguen disponibles.
+- El menú muestra **Productos Web** y oculta **1. Seleccionar de Tienda**, **2. Revisión Web** y **3. Productos Publicados**. Las categorías y los packs siguen disponibles.
 - La pantalla 0 permite crear, editar y cargar fotos para el catálogo web. El stock web se guarda en `WEB_STOCK` y no requiere las rutas del ERP o POS.
 - La pantalla independiente usa un diseño propio de catálogo, con marca y datos opcionales de talla, color y contenido. Estos datos son referencias internas: aún no crean variantes seleccionables ni stock por variante.
 - En modo conjunto con ERP vuelven a mostrarse los pasos 1, 2 y 3 y se conserva el flujo integrado.
 
 ## Funciones ocultas o restringidas
+
+### Salud del catálogo y stock
+
+- En productos web independientes se retiraron el resumen y el flujo de salud del catálogo, junto con los indicadores de riesgo de stock. Se mantiene la cantidad disponible o la opción de stock ilimitado.
+- En pedidos, el modo web independiente oculta los indicadores y alertas de salud de stock vinculados al inventario integrado. En modo conjunto se conservan. La comprobación de existencias y las reglas existentes del pedido siguen funcionando.
 
 ### Imágenes del inicio
 

@@ -5,8 +5,10 @@ import Link from 'next/link';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import { SEDES, DEFAULT_SEDE, SedeSlug } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
+import { useServiceModules } from '@/hooks/useServiceModules';
 import { auth } from '@/lib/firebase';
 import { isAdminEmail } from '@/lib/admin-access';
+import { isSupremeOwner } from '@/lib/supreme-owner';
 import { getErpUserByEmail, hasModuleAccess, type AppModule } from '@/lib/erpUserService';
 import { normalizePosAccessLevel, type PosAccessLevel } from '@/lib/posAccessLevels';
 import { isSellerCargo } from '@/lib/posSellerRoles';
@@ -14,7 +16,7 @@ import { workerBranchSlugs, matchBranchSlug } from '@/lib/posBranchAccess';
 import { getDefaultRuntimeConfig } from '@/app/admin-supreme/helpers';
 import { LayoutDashboard, ShoppingCart, RotateCcw, FileText, Store,
   Lock, Settings, Menu, X, ArrowLeft, ArrowRight, Boxes, ClipboardList,
-  PackageCheck, UserCog, LogOut, Tag, Edit3, Database, Globe } from 'lucide-react';
+  PackageCheck, UserCog, LogOut, Tag, Edit3, Database, Globe, Shield } from 'lucide-react';
 
 import PosBrand from '@/components/pos/PosBrand';
 import design from '@/components/pos/pos-design.module.css';
@@ -64,6 +66,7 @@ export default function PosAdminSedeLayout({ children }: { children: React.React
   const pathname = usePathname();
   const currentSede = ((params?.sede) || DEFAULT_SEDE) as SedeSlug;
   const { user, isLoading: authLoading, isLoggedIn, logout } = useAuth();
+  const { modules: services, ready: servicesReady } = useServiceModules();
   const pathnameRef = useRef(pathname);
   useEffect(() => { pathnameRef.current = pathname }, [pathname]);
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
@@ -244,11 +247,11 @@ export default function PosAdminSedeLayout({ children }: { children: React.React
   };
   const canManageTeam = userInfo.isSupreme || userInfo.nivelAccesoPos === 'alto';
   const canAccessModule = (module: AppModule) => userInfo.isSupreme || hasModuleAccess(userInfo.modules, module);
-  const platformLinks: Array<{ label: string; href: string; icon: typeof Store; module: AppModule }> = [
+  const platformLinks = ([
     { label: 'Base de datos', href: '/erp-dashboard/base-datos', icon: Database, module: 'base_datos' },
     { label: 'Web', href: '/admin/dashboard', icon: Globe, module: 'web' },
     { label: 'Dashboard ERP', href: '/erp-dashboard', icon: LayoutDashboard, module: 'erp' },
-  ].filter(item => canAccessModule(item.module));
+  ] satisfies Array<{ label: string; href: string; icon: typeof Store; module: AppModule }>).filter(item => servicesReady && (item.module === 'web' ? services.web : services.erp) && canAccessModule(item.module));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -321,6 +324,7 @@ export default function PosAdminSedeLayout({ children }: { children: React.React
           <p className={styles.groupLabel}>Administración</p>
           {canManageTeam && navLink('Usuarios y roles', 'usuarios', UserCog)}
           {userInfo.isSupreme && navLink('Configuración', 'config', Settings)}
+          {isSupremeOwner(user?.id, user?.email) && navLink('Admin Supreme POS', 'supreme', Shield)}
         </div>}
         {platformLinks.length > 0 && <div className={styles.group}>
           <p className={styles.groupLabel}>Plataformas</p>

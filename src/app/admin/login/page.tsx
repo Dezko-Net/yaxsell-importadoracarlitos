@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { isFirebaseConfigured } from '@/lib/db';
 import { isAdminEmail } from '@/lib/admin-access';
-import { DISABLED_MODULE_PATHS, MODULE_ACCESS } from '@/lib/module-access';
+import { DISABLED_MODULE_PATHS, moduleForPath } from '@/lib/module-access';
+import { useServiceModules } from '@/hooks/useServiceModules';
 import {
   getErpUserByEmail,
   getRedirectForModules,
@@ -27,7 +28,6 @@ import {
 
 type TargetPlatform = 'erp' | 'yaxsell';
 type LoginQualityMode = 'light' | 'promax' | 'mobile' | null;
-const WEB_ONLY = !MODULE_ACCESS.erp && !MODULE_ACCESS.pos;
 
 const LOGIN_QUALITY_STORAGE_KEY = 'asistora-admin-login-promax';
 
@@ -62,10 +62,17 @@ function buildAnimatedSpans(text: string, dir: 'left' | 'right' | 'center') {
 }
 
 export default function LoginPage() {
+  const { modules: services, ready: servicesReady } = useServiceModules();
+  const WEB_ONLY = services.web && !services.erp && !services.pos;
   const [animKey, setAnimKey] = useState(0);
   const [visualReady, setVisualReady] = useState(false);
   const [visualEngineReady, setVisualEngineReady] = useState(false);
-  const [platform, setPlatform] = useState<TargetPlatform>(WEB_ONLY ? 'yaxsell' : 'erp');
+  const [platform, setPlatform] = useState<TargetPlatform>('yaxsell');
+  useEffect(() => {
+    if (!servicesReady) return;
+    if (!services.web) setPlatform('erp');
+    else if (!services.erp && !services.pos) setPlatform('yaxsell');
+  }, [servicesReady, services.web, services.erp, services.pos]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -228,7 +235,7 @@ export default function LoginPage() {
     } catch {
       /* noop */
     }
-  }, []);
+  }, [WEB_ONLY]);
 
   const getNext = useCallback(() => {
     try {
@@ -238,13 +245,15 @@ export default function LoginPage() {
       if (destination.origin !== window.location.origin) return null;
       const path = destination.pathname;
       if (DISABLED_MODULE_PATHS.some(prefix => path === prefix || path.startsWith(`${prefix}/`))) return null;
+      const module = moduleForPath(path);
+      if (module && !services[module]) return null;
       if (WEB_ONLY && (!(path === '/admin' || path.startsWith('/admin/')) || path === '/admin/login' || path.startsWith('/admin/login/'))) return null;
       return destination.pathname + destination.search + destination.hash;
     } catch {
       /* noop */
     }
     return null;
-  }, []);
+  }, [services, WEB_ONLY]);
 
   const isNextAllowed = useCallback(
     (next: string, modules: AppModule[], isSupreme: boolean): boolean => {
@@ -272,6 +281,7 @@ export default function LoginPage() {
 
   const resolveDestinationAndRedirect = useCallback(
     async (userEmail: string, targetPlatform: TargetPlatform) => {
+      if (!servicesReady) { setError('No se pudo consultar el estado de los servicios.'); return false; }
       const emailLower = userEmail.toLowerCase().trim();
       const next = getNext();
       const isSupreme = isAdminEmail(emailLower);
@@ -294,7 +304,7 @@ export default function LoginPage() {
           router.replace(next);
           return true;
         }
-        router.replace(targetPlatform === 'yaxsell' ? '/admin/dashboard' : '/erp-dashboard');
+        router.replace(targetPlatform === 'yaxsell' && services.web ? '/admin/dashboard' : services.erp ? '/erp-dashboard' : services.pos ? '/pos-acceso' : '/admin/dashboard');
         return true;
       }
 
@@ -311,16 +321,16 @@ export default function LoginPage() {
       }
 
       if (targetPlatform === 'yaxsell') {
-        if (hasModuleAccess(erpUser.modules, 'web')) {
+        if (services.web && hasModuleAccess(erpUser.modules, 'web')) {
           router.replace('/admin/dashboard');
           return true;
         }
       } else {
-        if (hasModuleAccess(erpUser.modules, 'erp') || hasModuleAccess(erpUser.modules, 'erp_admin')) {
+        if (services.erp && (hasModuleAccess(erpUser.modules, 'erp') || hasModuleAccess(erpUser.modules, 'erp_admin'))) {
           router.replace('/erp-dashboard');
           return true;
         }
-        if (hasModuleAccess(erpUser.modules, 'base_datos')) {
+        if (services.erp && hasModuleAccess(erpUser.modules, 'base_datos')) {
           router.replace('/erp-dashboard/base-datos');
           return true;
         }
@@ -331,10 +341,17 @@ export default function LoginPage() {
         false,
         erpUser.defaultModule
       );
+      const fallbackModule = moduleForPath(fallbackDest);
+      if (fallbackModule && !services[fallbackModule]) {
+        if (services.pos && (hasModuleAccess(erpUser.modules, 'pos') || hasModuleAccess(erpUser.modules, 'pos_admin'))) { router.replace('/pos-acceso'); return true; }
+        if (services.web && hasModuleAccess(erpUser.modules, 'web')) { router.replace('/admin/dashboard'); return true; }
+        setError('Tu cuenta no tiene acceso a los servicios activos.');
+        return false;
+      }
       router.replace(fallbackDest);
       return true;
     },
-    [getNext, isNextAllowed, logout, router]
+    [getNext, isNextAllowed, logout, router, services, servicesReady, WEB_ONLY]
   );
 
   // If URL has explicit ?next= and user is already authenticated, honor it
@@ -3336,6 +3353,7 @@ export default function LoginPage() {
           type="button"
           onClick={() => scrollToLoginSection('yaxsell')}
           className="astra-side-trigger astra-side-trigger-right"
+          style={{ display: services.web ? undefined : 'none' }}
           title="Iniciar sesión en Web"
         >
           <span className="astra-label" key={`yaxsell-label-${animKey}`}>{yaxsellTitleSpans}</span>
@@ -3517,6 +3535,7 @@ export default function LoginPage() {
                     type="button"
                     role="tab"
                     aria-selected={platform === 'yaxsell'}
+                    disabled={!services.web}
                     data-selected={platform === 'yaxsell'}
                     onClick={() => {
                       setPlatform('yaxsell');

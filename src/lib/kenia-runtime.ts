@@ -2,7 +2,6 @@ import 'server-only';
 
 
 import { serverGetDocument, serverUpdateDocument, serverCreateDocument } from './db-server';
-import { OWNER_WHATSAPP_PHONE } from '@/lib/store-contact';
 
 export const DEFAULT_ADMIN_PROMPT = `Eres Importadora Carlitos IA, el copiloto administrativo y asistente virtual del negocio Importadora Carlitos por WhatsApp.
 Estás hablando con el DUEÑO/ADMINISTRADOR de la tienda.
@@ -239,7 +238,7 @@ function getDefaultConfig(): KeniaConfig {
   return {
     adminPrompt: DEFAULT_ADMIN_PROMPT,
     customerPrompt: DEFAULT_CUSTOMER_PROMPT,
-    adminAlertPhone: OWNER_WHATSAPP_PHONE,
+    adminAlertPhone: process.env.ADMIN_WHATSAPP_NUMBER || '56992139185',
     tokenLimitPerCustomer: 15000,
     smartNotifications: true,
     messageThresholdForPause: 10,
@@ -265,7 +264,7 @@ async function fetchConfigFromAppwrite(): Promise<KeniaFirebaseConfigData> {
       const data: KeniaFirebaseConfigData = {
         adminPrompt: parsed.adminPrompt || DEFAULT_ADMIN_PROMPT,
         customerPrompt: parsed.customerPrompt || DEFAULT_CUSTOMER_PROMPT,
-        adminAlertPhone: OWNER_WHATSAPP_PHONE,
+        adminAlertPhone: parsed.adminAlertPhone || '',
         tokenLimitPerCustomer: parsed.tokenLimitPerCustomer || 15000,
         smartNotifications: parsed.smartNotifications !== false,
         messageThresholdForPause: parsed.messageThresholdForPause || 10,
@@ -355,7 +354,7 @@ export async function saveKeniaConfig(partial: Partial<KeniaConfig>): Promise<Ke
     ...dbConfig,
     adminPrompt: partial.adminPrompt ?? dbConfig.adminPrompt,
     customerPrompt: partial.customerPrompt ?? dbConfig.customerPrompt,
-    adminAlertPhone: OWNER_WHATSAPP_PHONE,
+    adminAlertPhone: normalizePhone(partial.adminAlertPhone ?? dbConfig.adminAlertPhone),
     tokenLimitPerCustomer: Math.max(1000, Number(partial.tokenLimitPerCustomer ?? dbConfig.tokenLimitPerCustomer) || dbConfig.tokenLimitPerCustomer),
     smartNotifications: partial.smartNotifications ?? dbConfig.smartNotifications,
     messageThresholdForPause: Math.max(1, Number(partial.messageThresholdForPause ?? dbConfig.messageThresholdForPause) || dbConfig.messageThresholdForPause),

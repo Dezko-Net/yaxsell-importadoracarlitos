@@ -724,6 +724,7 @@ export async function markOrderPaymentExpired(orderId: string, now: number = Dat
   if (!target) return false;
   const { ref: orderRef, collectionId, snapshot } = target;
   const mirrorRef = getMirrorOrderRef(orderId, collectionId, snapshot.data() || {});
+  if (!isVendorOrder(snapshot.data() || {}) && await getOrderInventoryConnectionMode(snapshot.data() || {}) === 'web_independent') return false;
 
   const marked = await adminDb.runTransaction(async (transaction) => {
     const [freshOrder, freshMirror] = await Promise.all([
@@ -766,6 +767,7 @@ export async function expireUnpaidOrder(orderId: string, now: number = Date.now(
 
   const order = initialOrder.data() || {};
   const inventoryMode = await getOrderInventoryConnectionMode(order);
+  if (!isVendorOrder(order) && inventoryMode === 'web_independent') return false;
   const mirrorRef = getMirrorOrderRef(orderId, collectionId, order);
   const autoCancelAt = getOrderAutoCancelAt(order);
   // El fin del temporizador de pago solo mueve el pedido a "payment_expired".

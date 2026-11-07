@@ -60,6 +60,7 @@ import {
 } from './db';
 import { trackRead, trackReadsBatch } from './firebase-read-tracker';
 import { db as clientDb } from './firebase';
+import { FIREBASE_PUBLIC_CONFIG } from './firebase-public-config';
 import {
   collection as clientCollection,
   doc as clientDoc,
@@ -170,7 +171,7 @@ export function getAdminApp(): App {
       adminApp = initializeApp({
         credential: cert(cred),
         projectId: targetProjectId,
-        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'importadora-carlitos.firebasestorage.app',
+        storageBucket: FIREBASE_PUBLIC_CONFIG.storageBucket || undefined,
       });
       return adminApp;
     } catch (e) {
@@ -189,7 +190,7 @@ export function getAdminApp(): App {
           clientEmail,
           privateKey: privateKey.replace(/\\n/g, '\n'),
         }),
-        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'importadora-carlitos.firebasestorage.app',
+        storageBucket: FIREBASE_PUBLIC_CONFIG.storageBucket || undefined,
       });
       return adminApp;
     } catch (e) {
@@ -200,7 +201,7 @@ export function getAdminApp(): App {
   // Fallback: Application Default Credentials
   adminApp = initializeApp({
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'importadora-carlitos',
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'importadora-carlitos.firebasestorage.app',
+    storageBucket: FIREBASE_PUBLIC_CONFIG.storageBucket || undefined,
   });
   return adminApp;
 }

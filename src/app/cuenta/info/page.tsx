@@ -169,7 +169,7 @@ export default function InfoPage() {
             ¿Escribiste mal tu número al registrarte? Haz click aquí para vincular tu WhatsApp actual a Yaxbot y recibir notificaciones.
           </p>
           <a
-            href={`https://wa.me/56954592656?text=vincular_cuenta%20${user.id}`}
+            href={`https://wa.me/56962293893?text=vincular_cuenta%20${user.id}`}
             target="_blank"
             rel="noopener noreferrer"
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px 0', background: '#25D366', color: '#fff', borderRadius: 8, textDecoration: 'none', fontWeight: 700, fontSize: 15, transition: 'all .2s' }}

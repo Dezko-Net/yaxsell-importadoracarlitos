@@ -22,6 +22,10 @@ import {
   getAdminDb,
 } from "@/lib/db-server";
 import { getAdminAlertPhone, notifyPaymentUploaded } from "@/lib/notify-admin";
+import { getWebClientConfig, getWebMetaPhoneNumberId } from '@/lib/web-client-config-server';
+import { hasCompleteBankDetails } from '@/lib/bank-details';
+
+const GEMINI_MODELS = GEMINI_TEXT_MODELS;
 import { AI_ENABLED, WHATSAPP_BOT_ENABLED } from '@/lib/feature-flags';
 import { MEDIA_BUCKET_ID } from "@/lib/db";
 import {
@@ -52,16 +56,13 @@ import { calculateOrderStockRisk } from "@/lib/stock-risk";
 import { PAYMENT_PROOF_GRACE_MS } from "@/lib/payment-deadline";
 import { reserveOrderCode, resolveOrderByCode, resolveOrderById } from "@/lib/order-identity";
 import { invalidatePosWebReservations } from '@/lib/pos-web-reservations';
-import { getPublicSiteUrl } from '@/lib/public-site-url';
-import { BOT_WHATSAPP_PHONE, OWNER_WHATSAPP_PHONE } from '@/lib/store-contact';
 
 // ─── Config ────────────────────────────────────────────────────────────────────
-const SITE_URL = getPublicSiteUrl();
 const WA_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN || "";
 const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN || "";
-const ADMIN_PHONES = [OWNER_WHATSAPP_PHONE];
-const CUSTOMER_SUPPORT_PHONE = BOT_WHATSAPP_PHONE;
-const WORKER_WHATSAPP_PHONE = "";
+const ENV_ADMINS = process.env.ADMIN_WHATSAPP_NUMBER || "";
+const ADMIN_PHONES = ENV_ADMINS.split(",").map((num) => num.replace(/\D/g, "").trim()).filter(Boolean);
+const WORKER_WHATSAPP_PHONE = (process.env.WHATSAPP_WORKER_NUMBER || "").replace(/\D/g, "");
 
 async function resolveWebhookOrder(reference: string) {
   const cleanReference = String(reference || '').trim();
@@ -69,9 +70,8 @@ async function resolveWebhookOrder(reference: string) {
   if (byId.status === 'found') return byId;
   return resolveOrderByCode(cleanReference, [ORDERS_COLLECTION_ID, VENDOR_ORDERS_COLLECTION_ID]);
 }
-const CUSTOMER_SITE_URL = SITE_URL.replace(/\/+$/, "");
 // Número histórico del flujo de confirmación manual; se conserva para compatibilidad con pedidos antiguos.
-const STOCK_VERIFIER_PHONE = OWNER_WHATSAPP_PHONE;
+const STOCK_VERIFIER_PHONE = (process.env.STOCK_VERIFIER_WHATSAPP_NUMBER || "").replace(/\D/g, "");
 const PAYMENT_PROOF_ELIGIBLE_STATUSES = new Set([
   "pending",
   "pending_stock",
@@ -141,43 +141,26 @@ const BANK_CACHE_TTL = 30_000; // 30 segundos
 
 async function getBankDetails() {
   const now = Date.now();
-  if (cachedBankDetails && (now - cachedBankDetailsTime < BANK_CACHE_TTL)) {
-    return cachedBankDetails;
-  }
+  if (cachedBankDetails && now - cachedBankDetailsTime < BANK_CACHE_TTL) return cachedBankDetails;
   try {
     const col = getAdminDb().collection(STORE_SETTINGS_COLLECTION);
-    const [mainSnap, configSnap] = await Promise.all([
-      col.doc("main").get(),
-      col.doc("config").get(),
-    ]);
-    if (mainSnap.exists || configSnap.exists) {
-      const doc = {
-        ...(configSnap.exists ? configSnap.data() : {}),
-        ...(mainSnap.exists ? mainSnap.data() : {}),
-      } as any;
-      const details = {
-        holder: doc.bankAccountHolder || doc.BANKACCOUNTHOLDER || "Importadora Carlitos",
-        rut: doc.bankRut || doc.BANKRUT || "",
-        bank: doc.bankName || doc.BANKNAME || "",
-        type: doc.bankAccountType || doc.BANKACCOUNTTYPE || "",
-        account: doc.bankAccountNumber || doc.BANKACCOUNTNUMBER || "",
-        email: doc.bankEmail || doc.BANKEMAIL || "",
-      };
-      cachedBankDetails = details;
-      cachedBankDetailsTime = now;
-      return details;
-    }
-  } catch (e) {
-    console.warn("[WhatsApp Webhook] Error leyendo datos bancarios:", e);
+    const [mainSnap, configSnap] = await Promise.all([col.doc("main").get(), col.doc("config").get()]);
+    const doc = { ...(configSnap.exists ? configSnap.data() : {}), ...(mainSnap.exists ? mainSnap.data() : {}) } as any;
+    const details = {
+      holder: doc.bankAccountHolder || doc.BANKACCOUNTHOLDER || "",
+      rut: doc.bankRut || doc.BANKRUT || "",
+      bank: doc.bankName || doc.BANKNAME || "",
+      type: doc.bankAccountType || doc.BANKACCOUNTTYPE || "",
+      account: doc.bankAccountNumber || doc.BANKACCOUNTNUMBER || "",
+      email: doc.bankEmail || doc.BANKEMAIL || "",
+    };
+    cachedBankDetails = details;
+    cachedBankDetailsTime = now;
+    return details;
+  } catch (error) {
+    console.warn("[WhatsApp Webhook] No se pudieron leer los datos bancarios.");
+    return { holder: "", rut: "", bank: "", type: "", account: "", email: "" };
   }
-  return {
-    holder: "Importadora Carlitos",
-    rut: "",
-    bank: "",
-    type: "",
-    account: "",
-    email: "",
-  };
 }
 
 function buildBankMessage(bank: any, orderTotal: number, prefix = "") {
@@ -201,7 +184,7 @@ let _adminContextCache: {
 const ADMIN_CACHE_TTL = 5 * 60 * 1000; // 5 minutes for Admin Context
 
 // ─── Admin system prompt ───────────────────────────────────────────────────────
-const ADMIN_PROMPT = `Eres Yaxbot IA, el asistente administrativo de Importadora Carlitos por WhatsApp.
+const buildAdminPrompt = (storeName: string) => `Eres Yaxbot IA, el asistente administrativo de ${storeName} por WhatsApp.
 Estás hablando con el DUEÑO/ADMINISTRADOR de la tienda.
 
 ## Capacidades de Admin:
@@ -273,14 +256,14 @@ Y preguntar siempre: "¿Deseas que notifique al cliente para que elija reemplazo
 Los datos de productos y pedidos te serán inyectados en el contexto.`;
 
 // ─── Customer system prompt ────────────────────────────────────────────────────
-const CUSTOMER_PROMPT = `Eres Importadora Carlitos, el dueño de la tienda Importadora Carlitos en Chile.
+const buildCustomerPrompt = (SITE_URL: string, storeName: string, businessDescription: string) => `Eres ${storeName}, el dueño de la tienda ${storeName} en Chile.
 Eres un comerciante directo, respetuoso, trabajador, muy atento y resolutivo. Hablas en español chileno natural, educado y cercano como dueño que cuida a sus clientes y a su negocio.
-¡NUNCA digas que eres un bot, inteligencia artificial o asistente virtual! Atiendes personalmente como Importadora Carlitos.
+¡NUNCA digas que eres un bot, inteligencia artificial o asistente virtual! Atiendes personalmente como ${storeName}.
 
 ## Saludo personalizado:
 - Si en el contexto ves "DATOS DEL CLIENTE" con un nombre, salúdalo con respeto y cercanía por su nombre.
-- En el primer saludo preséntate como Iván de Importadora Carlitos o Importadora Carlitos.
-- Ejemplo correcto: "¡Hola María! Te saluda Iván de Importadora Carlitos. ¿En qué te puedo ayudar hoy?"
+- En el primer saludo preséntate como el equipo de ${storeName} o ${storeName}.
+- Ejemplo correcto: "¡Hola María! Te saluda el equipo de ${storeName}. ¿En qué te puedo ayudar hoy?"
 - Ejemplo incorrecto: "¡Hola bella! ¿Cómo estás hermosa?"
 
 ## TU FORMA DE HABLAR:
@@ -303,7 +286,7 @@ Si en el contexto ves que el cliente tiene un pedido en estado "negotiation" (En
 5. Si te dice que la ayudes tú, muéstrale alternativas disponibles del catálogo y ayúdalo a decidir.
 
 ## Información de la tienda:
-- Tienda: Importadora Carlitos — artículos de hogar, aseo y variedad (NO somos tienda de belleza ni cosméticos).
+- Tienda: ${storeName} — ${businessDescription}.
 - Sitio web: ${SITE_URL}
 - País: Chile
 
@@ -314,7 +297,7 @@ Tú misma tomas los pedidos conversando, como si fueras la cajera. NUNCA envíes
 3. Pídele su NOMBRE COMPLETO (nada más por ahora, el teléfono ya lo tienes tú automáticamente).
 4. En cuanto tengas los productos + el nombre, genera EXACTAMENTE este bloque oculto al final de tu respuesta (no esperes a tener dirección ni nada más):
 [ACTION:CREATE_ORDER]{"items":[{"id":"ID_REAL_DEL_PRODUCTO","qty":2}],"customerName":"Nombre Completo"}[/ACTION]
-Dile al cliente que registraste su pedido y que el stock quedó confirmado y reservado automáticamente. Indícale que el equipo le enviará los datos de pago confirmados y explícale el plazo configurado; ya no existe una etapa de espera por confirmación de la cajera.
+Dile al cliente que registraste su pedido y que el stock quedó confirmado y reservado automáticamente. Envíale los datos de transferencia y explícale el plazo de pago configurado; ya no existe una etapa de espera por confirmación de la cajera.
 5. A partir de ahí, tu trabajo es recolectar los datos de envío UNO A LA VEZ de forma conversacional (nunca los pidas todos juntos en una lista fría).
 6. Si el cliente escribe un dato incompleto o ambiguo (ej. le falta el número de la casa, o pone una comuna que no existe), pídele amablemente que lo repita o aclare antes de seguir con el siguiente dato.
 7. Cada vez que el cliente te dé uno o más datos de envío nuevos, guárdalos de inmediato generando este bloque oculto (solo incluye los campos que el cliente te acaba de dar, no inventes los demás):
@@ -323,8 +306,9 @@ Dile al cliente que registraste su pedido y que el stock quedó confirmado y res
 9. Cuando el cliente envíe una imagen para un pedido pendiente, el sistema le preguntará si es el comprobante. No afirmes que está recibido, asociado ni en revisión hasta que el cliente confirme "Sí"; si confirma, el sistema lo adjunta y le comparte el enlace de despacho.
 10. El stock se confirma automáticamente al crear el pedido. Si por alguna razón un producto no tiene stock, el sistema te avisará y activarás la sección "Negociación de productos faltantes" con ese cliente.
 
-## Información de pago:
-Los datos de transferencia de Importadora Carlitos están pendientes de confirmación. No entregues números de cuenta, RUT ni datos bancarios; informa que el equipo proporcionará los datos correctos.
+## Información de pago
+- Usa únicamente los datos bancarios reales entregados en el contexto de este pedido.
+- Si faltan datos bancarios, no inventes cuentas y pide apoyo al equipo.
 
 ## ⛔ REGLAS ABSOLUTAS (PROHIBIDO ROMPER):
 1. NUNCA inventes nombres de productos. Solo menciona productos que aparezcan EXACTAMENTE en el catálogo que se te inyecta como contexto. Si no hay productos en el contexto, di que puedes mostrarle el catálogo en la web.
@@ -371,20 +355,20 @@ function isOrderStatusRequest(text: string): boolean {
   return /\bpedidos?\b|\bcompras?\b|\b(?:orden|órdenes?)\b|\b[\w]{2,8}-\d{3,10}\b/i.test(text);
 }
 
-function customerOrderStatusReply(): string {
-  const contactNumber = CUSTOMER_SUPPORT_PHONE ? `+${CUSTOMER_SUPPORT_PHONE}` : "este mismo WhatsApp";
-  return `Puedes revisar tus pedidos aquí:\n${CUSTOMER_SITE_URL}/cuenta?pedidos=1\n\nSi compraste por la web, inicia sesión con tu cuenta. Si hiciste el pedido por WhatsApp, sincroniza tu número de teléfono en Mi cuenta. Cuando despachemos tu pedido, podrás ver el estado en tu historial. Cuando salga de la tienda, ${contactNumber} te enviará el comprobante de envío.`;
+function customerOrderStatusReply(supportPhone: string, siteUrl: string): string {
+  const contactNumber = supportPhone ? `+${supportPhone}` : "este mismo WhatsApp";
+  return `Puedes revisar tus pedidos aquí:\n${siteUrl}/cuenta\n\nSi compraste por la web, inicia sesión con tu cuenta. Si hiciste el pedido por WhatsApp, sincroniza tu número de teléfono en Mi cuenta. Cuando despachemos tu pedido, podrás ver el estado en tu historial. Cuando salga de la tienda, ${contactNumber} te enviará el comprobante de envío.`;
 }
 
-function customerSupportReply(): string {
-  const contact = CUSTOMER_SUPPORT_PHONE
-    ? `Escríbele a *Importadora Carlitos* por WhatsApp: https://wa.me/${CUSTOMER_SUPPORT_PHONE}`
+function customerSupportReply(supportPhone: string, storeName: string): string {
+  const contact = supportPhone
+    ? `Escríbele a *${storeName}* por WhatsApp: https://wa.me/${supportPhone}`
     : `Consulta el WhatsApp de contacto publicado en la tienda.`;
   return `Lo siento, este bot no puede responder esa consulta por ahora. ${contact}\n\nHorario de atención: *10:00 a 18:00 hrs*.`;
 }
 
-function customerCatalogReply(): string {
-  return `Puedes elegir tus productos y realizar el pedido desde nuestro catálogo:\n${CUSTOMER_SITE_URL}/productos\n\nAl terminar, el bot te ayudará con los datos de pago y el envío del comprobante.`;
+function customerCatalogReply(siteUrl: string): string {
+  return `Puedes elegir tus productos y realizar el pedido desde nuestro catálogo:\n${siteUrl}/productos\n\nAl terminar, el bot te ayudará con los datos de pago y el envío del comprobante.`;
 }
 
 // Helper: match two phone numbers by comparing last 8 digits
@@ -681,6 +665,7 @@ async function sendWelcomeMenu(
   customerName: string,
   token: string,
   customBody?: string,
+  storeName = 'Mi tienda',
 ) {
   const firstName = customerName.split(" ")[0] || customerName || "amigo";
   const body =
@@ -693,7 +678,7 @@ async function sendWelcomeMenu(
     {
       header: "🐾 ¡Hola! Soy Yaxbot",
       body,
-      footer: "Importadora Carlitos · Hogar, aseo y variedad",
+      footer: storeName.slice(0, 60),
       buttonText: "Opciones de ayuda 🐾",
       sections: [
         {
@@ -741,10 +726,15 @@ export async function GET(req: NextRequest) {
 // ─── Incoming messages handler (POST) ─────────────────────────────────────────
 export async function POST(req: NextRequest) {
   if (!WHATSAPP_BOT_ENABLED) return NextResponse.json({ error: 'Feature no disponible' }, { status: 404 });
-  if (!WA_TOKEN || !process.env.WHATSAPP_PHONE_NUMBER_ID) {
+  let configuredPhoneId: string;
+  try { configuredPhoneId = await getWebMetaPhoneNumberId(); }
+  catch { return NextResponse.json({ error: 'No se pudo cargar la configuración de WhatsApp.' }, { status: 503 }); }
+  if (!WA_TOKEN || !configuredPhoneId) {
     return NextResponse.json({ error: 'WhatsApp no está configurado para esta tienda' }, { status: 503 });
   }
   try {
+    const webConfig = await getWebClientConfig();
+    const CUSTOMER_SUPPORT_PHONE = webConfig.supportPhone.replace(/\D/g, "");
     const body = await req.json();
 
     // Meta sends test pings with empty changes
@@ -778,9 +768,17 @@ export async function POST(req: NextRequest) {
     const value = messageChange?.value;
     const messages = value?.messages;
 
+    const incomingPhoneId = value?.metadata?.phone_number_id;
+    if (incomingPhoneId && String(incomingPhoneId) !== configuredPhoneId) {
+      return NextResponse.json({ status: 'ignored_phone_number' });
+    }
+
     if (!messages?.length) {
       return NextResponse.json({ status: statuses.length ? "statuses_received" : "no_messages", statusCount: statuses.length });
     }
+
+    const SITE_URL = webConfig.siteUrl;
+    if (!SITE_URL) return NextResponse.json({ error: 'Configura la URL pública de la tienda antes de activar el bot.' }, { status: 503 });
 
     const msg = messages[0];
     const fromPhone = msg.from as string; // sender's phone number
@@ -1274,18 +1272,6 @@ export async function POST(req: NextRequest) {
             ? customerName
             : "Cliente";
 
-          // Registrar estado en espera de comprobante
-          await recordKeniaUsage(fromPhone, {
-            isGuestWithOrders: true,
-            isRegistered: true,
-            customerName: displayName,
-            balatinOrderFlow: true,
-            balatinOrderId: orderId,
-            balatinOrderCode: orderCode,
-            balatinStep: "awaiting_payment",
-            balatinComprobanteReceived: false,
-          });
-
           // Obtener datos de la cuenta bancaria (del vendor si es pedido de tienda aliada, o central si es Importadora Carlitos)
           const isVendorOrder = Boolean(order.IS_VENDOR_ORDER || order.VENDOR_NAME || order.VENDOR_ID);
           const vendorName = String(order.VENDOR_NAME || "la tienda aliada").trim();
@@ -1294,8 +1280,8 @@ export async function POST(req: NextRequest) {
           if (isVendorOrder) {
             const bd = order.BANK_DETAILS || {};
             bank = {
-              bank: bd.bank || order.VENDOR_BANK_NAME || "Banco Estado",
-              type: bd.type || order.VENDOR_BANK_TYPE || "Cuenta Vista / RUT",
+              bank: bd.bank || order.VENDOR_BANK_NAME || "",
+              type: bd.type || order.VENDOR_BANK_TYPE || "",
               account: bd.number || bd.account || order.VENDOR_BANK_ACCOUNT || "",
               rut: bd.rut || order.VENDOR_BANK_RUT || "",
               holder: bd.holder || order.VENDOR_BANK_HOLDER || vendorName,
@@ -1323,6 +1309,26 @@ export async function POST(req: NextRequest) {
             bank = await getBankDetails();
           }
 
+          if (!hasCompleteBankDetails(bank)) {
+            const contact = CUSTOMER_SUPPORT_PHONE ? ` Comunícate con nosotros: https://wa.me/${CUSTOMER_SUPPORT_PHONE}` : " Comunícate con la tienda para recibir ayuda.";
+            const unavailable = `No tenemos datos bancarios completos para el pedido #${orderCode}.${contact}`;
+            await sendWhatsAppMessage(fromPhone, unavailable, WA_TOKEN);
+            await addToHistory(fromPhone, "assistant", unavailable, `bank-missing-${Date.now()}`);
+            return NextResponse.json({ status: "bank_details_missing" });
+          }
+
+          // Registrar estado en espera de comprobante
+          await recordKeniaUsage(fromPhone, {
+            isGuestWithOrders: true,
+            isRegistered: true,
+            customerName: displayName,
+            balatinOrderFlow: true,
+            balatinOrderId: orderId,
+            balatinOrderCode: orderCode,
+            balatinStep: "awaiting_payment",
+            balatinComprobanteReceived: false,
+          });
+
           const greeting = displayName !== "Cliente" ? `¡Hola ${displayName}! ` : "¡Hola! ";
           const paymentDeadline = Number(order.EXPIRESAT || order.STATUSDEADLINE || 0);
           const deadlineText = isVendorOrder
@@ -1333,11 +1339,11 @@ export async function POST(req: NextRequest) {
 
           let confirmStockMsg = "";
           const hasVendorBank = isVendorOrder && Boolean(bank?.account && String(bank.account).trim());
-          if (!isVendorOrder || !hasVendorBank) {
-            confirmStockMsg = `${greeting}Recibimos tu pedido *#${orderCode}* por un total de *$${orderTotal.toLocaleString("es-CL")}*. El stock está confirmado y reservado.\n\n${deadlineText}\n\nEl equipo te enviará los datos de transferencia confirmados para continuar con el pago.`;
-          } else if (isVendorOrder && hasVendorBank) {
+          if (isVendorOrder && hasVendorBank) {
             const emailPart = bank.email ? `\n- Correo: ${bank.email}` : "";
-            confirmStockMsg = `${greeting}Te saluda el equipo de Importadora Carlitos. Recibimos tu pedido de la tienda aliada *${vendorName}* con código *#${orderCode}* por un total de *$${orderTotal.toLocaleString("es-CL")}*. El stock está confirmado y reservado.\n\n${deadlineText}\n\n*Datos para transferir a la tienda (${vendorName}):*\n- Banco: ${bank.bank} (${bank.type})\n- N° Cuenta: ${bank.account}\n- RUT: ${bank.rut}\n- Titular: ${bank.holder}${emailPart}\n\nPor favor realiza la transferencia directamente a la cuenta bancaria de la tienda indicada arriba y *envía la foto de tu comprobante por este chat* para que podamos validar tu pago y continuar con el despacho.`;
+            confirmStockMsg = `${greeting}Te saluda el equipo de ${webConfig.storeName}. Recibimos tu pedido de la tienda aliada *${vendorName}* con código *#${orderCode}* por un total de *$${orderTotal.toLocaleString("es-CL")}*. El stock está confirmado y reservado.\n\n${deadlineText}\n\n*Datos para transferir a la tienda (${vendorName}):*\n- Banco: ${bank.bank} (${bank.type})\n- N° Cuenta: ${bank.account}\n- RUT: ${bank.rut}\n- Titular: ${bank.holder}${emailPart}\n\nPor favor realiza la transferencia directamente a la cuenta bancaria de la tienda indicada arriba y *envía la foto de tu comprobante por este chat* para que podamos validar tu pago y continuar con el despacho.`;
+          } else {
+            confirmStockMsg = `${greeting}Te saluda el equipo de ${webConfig.storeName}. El stock de tu pedido *#${orderCode}* por un total de *$${orderTotal.toLocaleString("es-CL")}* está confirmado y reservado.\n\n${deadlineText}\n\n*Datos para transferir:*\n- Banco: ${bank.bank} (${bank.type})\n- N° Cuenta: ${bank.account}\n- RUT: ${bank.rut}\n- Titular: ${bank.holder}\n- Correo: ${bank.email || "No informado"}\n\nPor favor realiza el pago y *envía la foto de tu comprobante por este chat* para validar el pago y continuar con el despacho.`;
           }
 
           await sendWhatsAppMessage(fromPhone, confirmStockMsg, WA_TOKEN);
@@ -1579,21 +1585,23 @@ export async function POST(req: NextRequest) {
     if (!isAdmin && interactiveId) {
       let interceptReply = "";
       if (interactiveId === "func_pedido") {
-        interceptReply = customerOrderStatusReply();
+        interceptReply = customerOrderStatusReply(CUSTOMER_SUPPORT_PHONE, SITE_URL);
       } else if (interactiveId === "func_comprobante") {
         interceptReply =
           "🧾 Para registrar tu pago, envía la foto del comprobante por este chat. Te preguntaré si esa es la imagen correcta y, al confirmarla, quedará asociada a tu pedido para revisión.";
       } else if (interactiveId === "func_ofertas") {
-        interceptReply = customerSupportReply();
+        interceptReply = customerSupportReply(CUSTOMER_SUPPORT_PHONE, webConfig.storeName);
       } else if (interactiveId === "func_negociacion") {
-        interceptReply = customerSupportReply();
+        interceptReply = customerSupportReply(CUSTOMER_SUPPORT_PHONE, webConfig.storeName);
       } else if (interactiveId === "func_humano") {
-        const MAIN_ADMIN_PHONE = ADMIN_PHONES[0];
+        const MAIN_ADMIN_PHONE = (
+          keniaConfig.adminAlertPhone || ADMIN_PHONES[0] || ""
+        ).replace(/\D/g, "");
         const alertMsg = `🚨 *ASISTENCIA REQUERIDA*\n\nEl cliente +${fromPhone} presionó el botón de "Hablar con persona".\n ${SITE_URL}/admin/ia/whatsapp`;
         await sendWhatsAppMessage(MAIN_ADMIN_PHONE, alertMsg, WA_TOKEN);
 
         await setKeniaBlocked(fromPhone, true, "admin_takeover");
-        interceptReply = customerSupportReply();
+        interceptReply = customerSupportReply(CUSTOMER_SUPPORT_PHONE, webConfig.storeName);
       }
 
       if (interceptReply) {
@@ -1659,7 +1667,7 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ status: "comprobante_link_sent" });
         } else {
           // No pending order found
-          const interceptReply = customerOrderStatusReply();
+          const interceptReply = customerOrderStatusReply(CUSTOMER_SUPPORT_PHONE, SITE_URL);
           await sendWhatsAppMessage(fromPhone, interceptReply, WA_TOKEN);
           await addToHistory(fromPhone, "user", userText, msgId);
           await addToHistory(
@@ -1907,7 +1915,7 @@ export async function POST(req: NextRequest) {
                 ? usageMaint.customerName.split(" ")[0]
                 : "";
               const supportContact = CUSTOMER_SUPPORT_PHONE
-                ? `el soporte de Importadora Carlitos por WhatsApp al *+${CUSTOMER_SUPPORT_PHONE}* (https://wa.me/${CUSTOMER_SUPPORT_PHONE})`
+                ? `el soporte de ${webConfig.storeName} por WhatsApp al *+${CUSTOMER_SUPPORT_PHONE}* (https://wa.me/${CUSTOMER_SUPPORT_PHONE})`
                 : `el WhatsApp de contacto publicado en la tienda`;
               const welcomeReply = `Hola${customerFirstName ? " " + customerFirstName : ""}, el bot está pausado temporalmente. Para recibir ayuda, escribe a ${supportContact}.\n\nHorario de atención: *10:00 a 18:00 hrs*.`;
 
@@ -2619,7 +2627,9 @@ ${products.join("\n") || "Sin productos."}`;
       ) {
         // Auto-bloquear por spam
         await setKeniaBlocked(fromPhone, true, "spam");
-        const MAIN_ADMIN_PHONE = ADMIN_PHONES[0];
+        const MAIN_ADMIN_PHONE = (
+          keniaConfig.adminAlertPhone || ADMIN_PHONES[0] || ""
+        ).replace(/\D/g, "");
         const spamAlert = `🚫 *ALERTA ANTI-SPAM*\nEl número +${fromPhone} fue bloqueado automáticamente por enviar ${recentTimestamps.length} mensajes en menos de 2 minutos.\n\nÚltimo mensaje: "${userText}"\n\n🔗 Revisa en el panel: ${SITE_URL}/admin/ia/whatsapp`;
         await sendWhatsAppMessage(MAIN_ADMIN_PHONE, spamAlert, WA_TOKEN);
         return NextResponse.json({ status: "spam_blocked" });
@@ -2634,7 +2644,9 @@ ${products.join("\n") || "Sin productos."}`;
           return NextResponse.json({ status: "spam_blocked" });
         }
         if (usageCheck.adminTakeover || usageCheck.escalated) {
-          const MAIN_ADMIN_PHONE = ADMIN_PHONES[0];
+          const MAIN_ADMIN_PHONE = (
+            keniaConfig.adminAlertPhone || ADMIN_PHONES[0] || ""
+          ).replace(/\D/g, "");
           const adminNotif = `📩 *Cliente esperando respuesta*\n+${fromPhone} escribió: "${userText.slice(0, 300)}"\n\n🔗 Conversación: ${SITE_URL}/admin/ia/whatsapp?phone=${encodeURIComponent(fromPhone)}\n💬 WhatsApp: https://wa.me/${fromPhone}`;
           const nowWaiting = Date.now();
           const lastWaitingNotice = usageCheck.lastStallReplyTs || 0;
@@ -2649,7 +2661,9 @@ ${products.join("\n") || "Sin productos."}`;
         const lastBlockedTs = usageCheck.lastStallReplyTs || 0;
         const BLOCKED_NOTIFY_COOLDOWN = 3 * 60 * 1000; // 3 min
         if (nowBlocked - lastBlockedTs > BLOCKED_NOTIFY_COOLDOWN) {
-          const MAIN_ADMIN_PHONE = ADMIN_PHONES[0];
+          const MAIN_ADMIN_PHONE = (
+            keniaConfig.adminAlertPhone || ADMIN_PHONES[0] || ""
+          ).replace(/\D/g, "");
           const adminNotifBlocked = `⚠️ *Cliente pausado escribió*\n+${fromPhone}: "${userText}"\n\n🔗 Atiéndelo en: ${SITE_URL}/admin/ia/whatsapp`;
           await sendWhatsAppMessage(
             MAIN_ADMIN_PHONE,
@@ -2671,27 +2685,27 @@ ${products.join("\n") || "Sin productos."}`;
       let status: string;
 
       if (isNewCatalogOrderRequest(userText)) {
-        reply = customerCatalogReply();
+        reply = customerCatalogReply(SITE_URL);
         status = "customer_catalog_link_sent";
       } else if (isOrderStatusRequest(userText)) {
-        reply = customerOrderStatusReply();
+        reply = customerOrderStatusReply(CUSTOMER_SUPPORT_PHONE, SITE_URL);
         status = "customer_order_status_link_sent";
       } else if (isGreeting(userText)) {
         const firstName = (customerName || "").trim().split(/\s+/)[0];
         if (!usage.welcomeShown) {
           reply = `¡Hola${firstName ? ` ${firstName}` : ""}! Soy Yaxbot. Puedo ayudarte con el proceso de compra y el comprobante. Para revisar el estado de un pedido, toca *Ver mi pedido*.`;
-          await sendWelcomeMenu(fromPhone, customerName || "amigo", WA_TOKEN, reply);
+          await sendWelcomeMenu(fromPhone, customerName || "amigo", WA_TOKEN, reply, webConfig.storeName);
           await addToHistory(fromPhone, "assistant", reply, msgId);
           await recordKeniaUsage(fromPhone, { welcomeShown: true });
           return NextResponse.json({ status: "welcome_menu_sent" });
         }
         const supportContact = CUSTOMER_SUPPORT_PHONE
-          ? `escríbele a *Importadora Carlitos* al *+${CUSTOMER_SUPPORT_PHONE}*.`
+          ? `escríbele a *${webConfig.storeName}* al *+${CUSTOMER_SUPPORT_PHONE}*.`
           : `revisa el WhatsApp de contacto de la tienda.`;
-        reply = `¡Hola${firstName ? ` ${firstName}` : ""}! Soy Yaxbot. ${customerOrderStatusReply()}\n\nPara otras consultas, ${supportContact}`;
+        reply = `¡Hola${firstName ? ` ${firstName}` : ""}! Soy Yaxbot. ${customerOrderStatusReply(CUSTOMER_SUPPORT_PHONE, SITE_URL)}\n\nPara otras consultas, ${supportContact}`;
         status = "customer_greeting_sent";
       } else {
-        reply = customerSupportReply();
+        reply = customerSupportReply(CUSTOMER_SUPPORT_PHONE, webConfig.storeName);
         status = "customer_support_contact_sent";
       }
 
@@ -2717,7 +2731,7 @@ ${products.join("\n") || "Sin productos."}`;
     let basePrompt: string;
     if (balatinDataMode) {
       // Special Yaxbot prompt for parsing shipping data
-      basePrompt = `Eres Yaxbot, el gato de la suerte de Importadora Carlitos. Estás ayudando al cliente ${customerName} a completar los datos de envío de su pedido ${balatinOrderCode}.
+      basePrompt = `Eres Yaxbot, el asistente de ${webConfig.storeName}. Estás ayudando al cliente ${customerName} a completar los datos de envío de su pedido ${balatinOrderCode}.
 
 ## TU ÚNICA TAREA AHORA:
 El cliente te mandó todos sus datos de envío juntos. Debes EXTRAER los datos y guardarlos con la acción UPDATE_SHIPPING. Luego mostrar un resumen y pedir confirmación.
@@ -2752,9 +2766,9 @@ El cliente te mandó todos sus datos de envío juntos. Debes EXTRAER los datos y
 - Cuando tengas todos los datos obligatorios (RUT, dirección, comuna, región, agencia), muestra el resumen y pide confirmación con "CORRECTO".`;
     } else {
       basePrompt = isAdmin
-        ? keniaConfig.adminPrompt || ADMIN_PROMPT
+        ? keniaConfig.adminPrompt || buildAdminPrompt(webConfig.storeName)
         : hydratePrompt(
-            keniaConfig.customerPrompt || CUSTOMER_PROMPT,
+            keniaConfig.customerPrompt || buildCustomerPrompt(SITE_URL, webConfig.storeName, webConfig.heroDescription),
             SITE_URL,
           );
     }
@@ -2881,7 +2895,9 @@ El cliente te mandó todos sus datos de envío juntos. Debes EXTRAER los datos y
     // If all Gemini models failed, notify admin
     if (!rawText && !isAdmin) {
       try {
-        const MAIN_ADMIN_PHONE = ADMIN_PHONES[0];
+        const MAIN_ADMIN_PHONE = (
+          keniaConfig.adminAlertPhone || ADMIN_PHONES[0] || ""
+        ).replace(/\D/g, "");
         const failAlert = `⚠️ *BALATIN: Error de Gemini*\n\nNo pude responder a +${fromPhone}. Todos los modelos fallaron.\n\nMensaje del cliente: "${userText.substring(0, 100)}"\n\nRevisa el log del servidor para más detalles.`;
         await sendWhatsAppMessage(MAIN_ADMIN_PHONE, failAlert, WA_TOKEN);
       } catch {}
@@ -3502,7 +3518,9 @@ El cliente te mandó todos sus datos de envío juntos. Debes EXTRAER los datos y
 
     // ── Report to main admin if from customer ────────────────────────────────
     if (!isAdmin) {
-      const MAIN_ADMIN_PHONE = ADMIN_PHONES[0];
+      const MAIN_ADMIN_PHONE = (
+        keniaConfig.adminAlertPhone || ADMIN_PHONES[0] || ""
+      ).replace(/\D/g, "");
       const askAdminRegex = /\[ACTION:ASK_ADMIN\]([\s\S]*?)\[\/ACTION\]/;
       const askAdminMatch = rawText.match(askAdminRegex);
       const escalateRegex = /\[ACTION:ESCALATE_ADMIN\]([\s\S]*?)\[\/ACTION\]/;

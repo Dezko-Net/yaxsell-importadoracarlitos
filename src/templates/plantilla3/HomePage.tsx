@@ -586,7 +586,7 @@ export default function HomePage3() {
         <li class="header--menu-item">
           <a 
             class="header--menu-link heading-font text" 
-            href="https://wa.me/56954592656?text=Hola%2C%20quisiera%20ver%20el%20cat%C3%A1logo%20de%20productos%20por%20WhatsApp"
+            href="https://wa.me/56900000000?text=Hola%2C%20quisiera%20ver%20el%20cat%C3%A1logo%20de%20productos%20por%20WhatsApp" 
             target="_blank" 
             rel="noopener noreferrer"
             style="color: #25D366 !important; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;"

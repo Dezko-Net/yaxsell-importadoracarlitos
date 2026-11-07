@@ -1,3 +1,4 @@
+import { getOrderInventoryConnectionMode } from '@/lib/inventory-mode';
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
 import { ORDERS_COLLECTION_ID, WHOLESALE_ORDERS_COLLECTION_ID } from '@/lib/db';
@@ -23,11 +24,11 @@ async function getBankDetails() {
     ...(mainSnap.exists ? mainSnap.data() : {}),
   } as any;
   return {
-    holder: data.bankAccountHolder || data.BANKACCOUNTHOLDER || 'Importadora Carlitos',
-    rut: data.bankRut || data.BANKRUT || '78267426-9',
-    bank: data.bankName || data.BANKNAME || 'Banco de Chile',
-    type: data.bankAccountType || data.BANKACCOUNTTYPE || 'Cuenta Corriente',
-    number: data.bankAccountNumber || data.BANKACCOUNTNUMBER || '4081220201',
+    holder: data.bankAccountHolder || data.BANKACCOUNTHOLDER || '',
+    rut: data.bankRut || data.BANKRUT || '',
+    bank: data.bankName || data.BANKNAME || '',
+    type: data.bankAccountType || data.BANKACCOUNTTYPE || '',
+    number: data.bankAccountNumber || data.BANKACCOUNTNUMBER || '',
     email: data.bankEmail || data.BANKEMAIL || '',
   };
 }
@@ -57,7 +58,7 @@ export async function GET(request: NextRequest) {
         await expireUnpaidOrder(order.$id);
         order = await serverGetDocument(collectionId, order.$id);
       }
-    } else if (collectionId !== WHOLESALE_ORDERS_COLLECTION_ID) {
+    } else if (collectionId !== WHOLESALE_ORDERS_COLLECTION_ID && await getOrderInventoryConnectionMode(order) !== 'web_independent') {
       if (PAYMENT_PENDING_STATUSES.includes(order.STATUS) && !order.PAYMENTPROOFURL && isOrderPaymentWindowExpired(order)) {
         await markOrderPaymentExpired(order.$id);
         order = await serverGetDocument(collectionId, order.$id);
@@ -71,6 +72,8 @@ export async function GET(request: NextRequest) {
     let bankDetails = await getBankDetails();
     let vendorInfo: Record<string, any> | null = null;
     if (order.IS_VENDOR_ORDER || order.VENDOR_ID) {
+      // Los datos de una tienda asociada nunca se completan con la cuenta principal.
+      bankDetails = { holder: '', rut: '', bank: '', type: '', number: '', email: '' };
       if (order.VENDOR_ID) {
         try {
           const vSnap = await getAdminDb().collection('vendors').doc(String(order.VENDOR_ID)).get();

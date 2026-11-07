@@ -6,6 +6,7 @@ import { hashPassword, generateVendorPassword } from '@/lib/vendor-auth';
 import { Query } from '@/lib/db';
 import { revalidateTag, unstable_cache } from 'next/cache';
 import { isSupremeAdminRequest } from '@/lib/admin-api-auth';
+import { isWebAdminRequest } from '@/lib/web-admin-request';
 import { clearCatalogMemoryCache } from '@/lib/catalog-cache';
 import { clearPublicProductDetailCache } from '@/lib/public-product-detail-cache';
 
@@ -29,9 +30,10 @@ const getCachedVendorOptions = unstable_cache(
 
 // GET: lista vendors con métrica agregada (para calcular comisión) — sin exponer pedidos detallados
 export async function GET(req: NextRequest) {
-  if (!await isSupremeAdminRequest(req)) return NextResponse.json({ error: 'Acceso administrativo requerido' }, { status: 401 });
+  const basic = req.nextUrl.searchParams.get('basic') === 'true';
+  if (!(basic ? await isWebAdminRequest(req) : await isSupremeAdminRequest(req))) return NextResponse.json({ error: 'Acceso administrativo requerido' }, { status: 401 });
   try {
-    if (req.nextUrl.searchParams.get('basic') === 'true') {
+    if (basic) {
       const vendors = await getCachedVendorOptions();
       return NextResponse.json({ vendors });
     }

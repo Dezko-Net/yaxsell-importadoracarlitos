@@ -1,30 +1,29 @@
 import type { Metadata } from 'next';
-import { Suspense } from 'react';
 import CatalogoClient from './CatalogoClient';
 import { getCachedAllProducts, isMainStoreProduct } from '@/lib/catalog-cache';
+import { getWebClientConfig } from '@/lib/web-client-config-server';
+import { DEFAULT_WEB_CLIENT_CONFIG } from '@/lib/web-client-config';
+import { Suspense } from 'react';
 
 // ISR: Cacheado en CDN Edge durante 1 hora. Evita ejecuciones SSR de lambdas
 // y llamadas a Firestore en cada visita de usuarios o bots/crawlers.
 export const revalidate = 3600;
 
-const BASE = 'https://yaxsell.cl';
+async function webConfig() { try { return await getWebClientConfig(); } catch { return DEFAULT_WEB_CLIENT_CONFIG; } }
 
-export const metadata: Metadata = {
-  title: 'Catálogo de Productos | Perfumes, Ropa y Más',
-  description:
-    'Explora el catálogo de Importadora Carlitos: perfumes, ropa y productos para todos los gustos. Compra online en Chile.',
-  alternates: { canonical: `${BASE}/productos` },
-  openGraph: {
-    title: 'Catálogo de Productos | Importadora Carlitos',
-    description:
-      'Descubre perfumes, ropa y más en el catálogo de Importadora Carlitos.',
-    url: `${BASE}/productos`,
-    type: 'website',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const config = await webConfig();
+  const title = `Catálogo de productos | ${config.storeName}`;
+  const description = config.heroDescription || `Explora el catálogo de ${config.storeName}.`;
+  const url = config.siteUrl ? `${config.siteUrl}/productos` : undefined;
+  return { title: { absolute: title }, description, alternates: url ? { canonical: url } : undefined,
+    icons: config.logoUrl ? { icon: config.logoUrl, apple: config.logoUrl } : undefined,
+    openGraph: { title, description, siteName: config.storeName, url, type: 'website' } };
+}
 
 async function CatalogSeo() {
   let products: any[] = [];
+  const config = await webConfig();
   try {
     const all = (await getCachedAllProducts()) as any[];
     products = all.filter(isMainStoreProduct).slice(0, 24);
@@ -33,29 +32,28 @@ async function CatalogSeo() {
   }
 
   return (
-    <>
-      {/* Contenido estatico para SEO - visible para crawlers y usuarios sin JS */}
       <div style={{ position: 'absolute', left: '-9999px', top: 0, width: 1, height: 1, overflow: 'hidden' }}>
-        <h1>Catálogo de Productos - Importadora Carlitos</h1>
+        <h1>Catálogo de Productos - {config.storeName}</h1>
         <p>
-          Tienda online de perfumes, ropa y productos para todos los gustos en Chile. Explora el
-          catálogo de Importadora Carlitos y encuentra tus favoritos.
+          {config.heroDescription || `Explora el catálogo de ${config.storeName} y encuentra tus favoritos.`}
         </p>
         <ul>
           {products.map(p => (
             <li key={p.$id}>
-              <a href={`${BASE}/productos/${p.$id}`}>{p.NAME}</a>
+              <a href={`/productos/${p.$id}`}>{p.NAME}</a>
               {p.BRAND && ` - ${p.BRAND}`}
             </li>
           ))}
         </ul>
       </div>
 
-    </>
   );
 }
 
-
 export default function ProductosPage() {
-  return <><Suspense fallback={null}><CatalogSeo /></Suspense><CatalogoClient /></>;
+  return <>
+    <Suspense fallback={null}><CatalogSeo /></Suspense>
+    <CatalogoClient />
+  </>;
 }
+

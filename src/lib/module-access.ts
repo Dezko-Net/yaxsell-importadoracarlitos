@@ -1,8 +1,8 @@
 /** Modules included in the Importadora Carlitos e-commerce plan. */
 export const MODULE_ACCESS = {
   ecommerce: true,
-  pos: false,
-  erp: false,
+  pos: true,
+  erp: true,
   whatsappManagement: false,
   whatsappInbox: true,
 } as const;
@@ -17,7 +17,7 @@ export function isProductNavigationVisible(href: string, inventoryMode: unknown)
   return inventoryMode === 'erp_integrated' || !INTEGRATED_PRODUCT_STEPS.has(href);
 }
 
-const POS_PATHS = [
+export const POS_PATHS = [
   '/pos',
   '/pos-admin',
   '/pos-acceso',
@@ -28,7 +28,7 @@ const POS_PATHS = [
   '/admin/pos-admin',
 ] as const;
 
-const ERP_PATHS = [
+export const ERP_PATHS = [
   '/erp',
   '/erp-dashboard',
   '/cuadres',
@@ -50,14 +50,48 @@ const ERP_PATHS = [
   '/admin-supreme',
 ] as const;
 
-// Bandeja de atención del bot: se puede ofrecer aunque no se contrate la gestión
-// general de WhatsApp integrada con pedidos, configuración y herramientas del ERP.
+export type ServiceModule = 'web' | 'erp' | 'pos';
+export type ServiceModules = Record<ServiceModule, boolean>;
+export const DEFAULT_SERVICE_MODULES: ServiceModules = { web: true, erp: true, pos: true };
+
+const WEB_PATHS = [
+  '/productos', '/checkout', '/carrito', '/cuenta', '/favoritos', '/comparar',
+  '/pedido', '/confirmar-pedido', '/datos-envio', '/ofertas', '/admin', '/shopify/catalogo-original',
+] as const;
+
+function matchesPath(path: string, prefixes: readonly string[]) {
+  return prefixes.some(prefix => path === prefix || path.startsWith(`${prefix}/`));
+}
+
+export function moduleForPath(path: string): ServiceModule | null {
+  if (path === '/admin/login' || path.startsWith('/admin/login/')) return null;
+  if (matchesPath(path, POS_PATHS)) return 'pos';
+  if (matchesPath(path, ERP_PATHS)) return 'erp';
+  if (path === '/' || matchesPath(path, WEB_PATHS)) return 'web';
+  return null;
+}
+
+export function normalizeServiceModules(value: unknown): ServiceModules {
+  const data = value && typeof value === 'object' ? value as Partial<ServiceModules> : {};
+  return {
+    web: typeof data.web === 'boolean' ? data.web : true,
+    erp: typeof data.erp === 'boolean' ? data.erp : true,
+    pos: typeof data.pos === 'boolean' ? data.pos : true,
+  };
+}
+
+export function changeServiceModule(current: ServiceModules, source: ServiceModule, target: ServiceModule, enabled: boolean): ServiceModules {
+  if (!current[source]) throw new Error('MODULE_DISABLED');
+  if (source === target && !enabled) throw new Error('CANNOT_DISABLE_CURRENT');
+  return { ...current, [target]: enabled };
+}
+
+// Bandeja del bot, habilitada aparte de la gestión general de WhatsApp.
 const WHATSAPP_INBOX_PATHS = [
   '/admin/ia/whatsapp',
   '/api/admin/ia/config',
   '/api/admin/ia/threads',
   '/api/admin/ia/thread',
-  '/api/admin/ia/threads/backfill',
   '/api/admin/ia/send',
   '/api/admin/ia/send-template',
   '/api/admin/ia/customer-lookup',
@@ -69,7 +103,7 @@ const WHATSAPP_INBOX_PATHS = [
   '/api/admin/ia/interact',
 ] as const;
 
-// Funciones generales de WhatsApp ligadas a pedidos y ajustes comerciales.
+// Herramientas generales de WhatsApp asociadas a pedidos y operaciones.
 const WHATSAPP_MANAGEMENT_PATHS = [
   '/api/admin/whatsapp-send',
   '/api/admin/orders/notify-shipping-data',

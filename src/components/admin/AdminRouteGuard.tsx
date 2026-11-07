@@ -5,11 +5,13 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { isAdminEmail } from '@/lib/admin-access';
 import { getErpUserByEmail, getRedirectForModules, hasModuleAccess } from '@/lib/erpUserService';
-import { MODULE_ACCESS } from '@/lib/module-access';
+import { moduleForPath } from '@/lib/module-access';
+import { useServiceModules } from '@/hooks/useServiceModules';
 
 /** Protege rutas /admin/* (excepto login) y puede reutilizarse en /inventario */
 export default function AdminRouteGuard({ children }: { children: React.ReactNode }) {
   const { user, isLoggedIn, isLoading, logout } = useAuth();
+  const { modules: services, ready: servicesReady } = useServiceModules();
   const router = useRouter();
   const pathname = usePathname();
   const [accessChecked, setAccessChecked] = useState(false);
@@ -18,7 +20,7 @@ export default function AdminRouteGuard({ children }: { children: React.ReactNod
   const isLoginRoute = pathname === '/admin/login' || pathname?.startsWith('/admin/login/');
 
   useEffect(() => {
-    if (isLoginRoute || isLoading) return;
+    if (isLoginRoute || isLoading || !servicesReady) return;
     if (!isLoggedIn) {
       router.replace('/admin/login');
       return;
@@ -37,14 +39,21 @@ export default function AdminRouteGuard({ children }: { children: React.ReactNod
       } else {
         setHasAccess(false)
         // Redirigir al módulo correcto del usuario en vez de al login
-        const dest = !MODULE_ACCESS.erp && !MODULE_ACCESS.pos
+        let dest = !services.erp && !services.pos
           ? '/admin/login?reason=web-access'
           : getRedirectForModules(info?.modules || [], false)
+        const target = moduleForPath(dest.split('?')[0]);
+        if (target && !services[target]) {
+          dest = services.pos && (hasModuleAccess(info?.modules, 'pos') || hasModuleAccess(info?.modules, 'pos_admin'))
+            ? '/pos-acceso'
+            : services.erp && (hasModuleAccess(info?.modules, 'erp') || hasModuleAccess(info?.modules, 'erp_admin'))
+              ? '/erp-dashboard' : '/admin/login?reason=web-access';
+        }
         router.replace(dest)
       }
       setAccessChecked(true)
     })()
-  }, [isLoginRoute, isLoading, isLoggedIn, user?.email, router]);
+  }, [isLoginRoute, isLoading, isLoggedIn, user?.email, router, servicesReady, services]);
 
   if (isLoginRoute) return <>{children}</>;
   if (isLoading || (isLoggedIn && !accessChecked)) {

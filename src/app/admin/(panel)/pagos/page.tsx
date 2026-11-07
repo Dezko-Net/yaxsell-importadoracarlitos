@@ -15,12 +15,12 @@ interface BankDetails {
 }
 
 const DEFAULT: BankDetails = {
-  bankAccountHolder: 'Importadora Carlitos',
-  bankRut: '78267426-9',
-  bankName: 'Banco de Chile',
-  bankAccountType: 'Cuenta Corriente',
-  bankAccountNumber: '4081220201',
-  bankEmail: 'contacto@yaxsell.cl',
+  bankAccountHolder: '',
+  bankRut: '',
+  bankName: '',
+  bankAccountType: '',
+  bankAccountNumber: '',
+  bankEmail: '',
   bankInstructions: 'Transfiere el monto exacto del pedido y sube el comprobante para confirmar tu orden.',
   minimumPurchase: '50000',
 };

@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AI_ENABLED, WHATSAPP_BOT_ENABLED } from '@/lib/feature-flags';
+import { AI_ENABLED } from '@/lib/feature-flags';
 import { normalizePhone, deleteKeniaPhone } from '@/lib/kenia-runtime';
 import { clearHistory } from '@/lib/whatsapp';
-import { requireWhatsAppAdmin } from '@/lib/whatsapp-admin-auth';
 
 export async function POST(req: NextRequest) {
-  const denied = await requireWhatsAppAdmin(req);
-  if (denied) return denied;
-  if (!AI_ENABLED && !WHATSAPP_BOT_ENABLED) return NextResponse.json({ error: 'Feature no disponible' }, { status: 404 });
+  if (!AI_ENABLED) return NextResponse.json({ error: 'Feature no disponible' }, { status: 404 });
   try {
     const body = await req.json();
     const phone = normalizePhone(body.phone || '');

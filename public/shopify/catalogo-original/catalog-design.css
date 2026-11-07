@@ -636,9 +636,17 @@ header.glass > div > div:first-child > div:last-child { flex:1; min-width:0; }
 .catalog-service-bar > span:first-child svg { color:#fff3d4; }
 .catalog-service-bar #minPurchaseDisplay { color:#fff; }
 .catalog-shipping-icon { background:#b3555d; }
-/* A light blue announcement bar complements the yellow navigation. */
+/* Soft Carlitos yellow: distinct from the bright navbar, with calm blue contrast. */
 #announcementBar.carlitos-announcement { background:#fff0a8; color:#254c72; border-top-color:#fad502; border-bottom-color:#e3c54b; box-shadow:0 2px 8px rgba(117,89,16,.09); }
 .carlitos-announcement-copy { color:#254c72; }
 .carlitos-announcement-copy i { color:#a91e2b; }
 .carlitos-announcement-location { background:#fffdf4; border-color:#e6cf70; color:#355c7e; }
 .carlitos-announcement-location svg { color:#a9444d; }
+.carlitos-announcement-location span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+@media(max-width:639px) { .carlitos-announcement-location { max-width:48vw; } }
+
+/* Contador junto a la ubicación en la barra superior. */
+.carlitos-announcement-details { display:flex; align-items:center; justify-content:flex-end; gap:8px; min-width:0; }
+.carlitos-announcement-online { flex:none; white-space:nowrap; }
+@media(max-width:639px) { .carlitos-announcement-details { gap:5px; } .carlitos-announcement-online { gap:4px; padding:4px 6px; } .carlitos-announcement-location { max-width:38vw; } }
+@media(max-width:390px) { .carlitos-announcement-inner { flex-wrap:wrap; justify-content:center; } .carlitos-announcement-offer { flex:1 1 100%; justify-content:center; } .carlitos-announcement-details { justify-content:center; } .carlitos-announcement-location { max-width:58vw; } }

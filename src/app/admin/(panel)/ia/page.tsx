@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { whatsappAdminFetch } from '@/lib/whatsapp-admin-client';
 import {
   AlertTriangle,
   Bot,
@@ -99,7 +98,7 @@ export default function AdminIAPage() {
   const loadConfig = useCallback(async () => {
     setLoadingConfig(true);
     try {
-      const res = await whatsappAdminFetch('/api/admin/ia/config', { cache: 'no-store' });
+      const res = await fetch('/api/admin/ia/config', { cache: 'no-store' });
       const data = await res.json();
       if (data?.success) setConfig(data.config);
     } finally { setLoadingConfig(false); }
@@ -108,7 +107,7 @@ export default function AdminIAPage() {
   const loadThreads = useCallback(async () => {
     setLoadingThreads(true);
     try {
-      const res = await whatsappAdminFetch('/api/admin/ia/threads', { cache: 'no-store' });
+      const res = await fetch('/api/admin/ia/threads', { cache: 'no-store' });
       const data = await res.json();
       if (data?.success) setStats(data.stats);
     } finally { setLoadingThreads(false); }
@@ -116,7 +115,7 @@ export default function AdminIAPage() {
 
   const loadDebugInfo = useCallback(async () => {
     try {
-      const res = await whatsappAdminFetch('/api/admin/ia/debug', { cache: 'no-store' });
+      const res = await fetch('/api/admin/ia/debug', { cache: 'no-store' });
       const data = await res.json();
       if (data?.success) {
         setDebugMode(data.debugMode || false);
@@ -133,7 +132,7 @@ export default function AdminIAPage() {
     setDebugLoading(true);
     setDebugResult(null);
     try {
-      const res = await whatsappAdminFetch('/api/admin/ia/debug', {
+      const res = await fetch('/api/admin/ia/debug', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action }),
@@ -144,7 +143,7 @@ export default function AdminIAPage() {
           setDebugMode(data.debugMode);
           showToast('success', data.debugMode ? 'Modo depuración activado' : 'Modo depuración desactivado');
         } else if (action === 'resetUser') {
-          showToast('success', 'Usuario 56985520703 reseteado');
+          showToast('success', 'Usuario 56992139185 reseteado');
         } else if (action === 'simulateRegisterClick') {
           setDebugResult(data.message || '');
         }
@@ -172,7 +171,7 @@ export default function AdminIAPage() {
   async function handleSaveConfig() {
     setSavingConfig(true);
     try {
-      const res = await whatsappAdminFetch('/api/admin/ia/config', {
+      const res = await fetch('/api/admin/ia/config', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(config),
@@ -190,7 +189,7 @@ export default function AdminIAPage() {
     const next = { ...config, isEnabled: !config.isEnabled };
     setConfig(next);
     try {
-      const res = await whatsappAdminFetch('/api/admin/ia/config', {
+      const res = await fetch('/api/admin/ia/config', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(next),
@@ -389,7 +388,7 @@ export default function AdminIAPage() {
                     value={config.adminAlertPhone}
                     onChange={e => setConfig(p => ({ ...p, adminAlertPhone: e.target.value }))}
                     className="ia-input"
-                    placeholder="56954592656"
+                    placeholder="56912345678"
                   />
                 </div>
                 <div className="ia-config-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -487,7 +486,7 @@ export default function AdminIAPage() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: debugMode ? '#fef3c7' : '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: '10px 14px' }}>
                   <div>
                     <p style={{ fontSize: 13, fontWeight: 600, color: '#1e293b' }}>Modo depuracion</p>
-                    <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 1 }}>56985520703 deja de ser admin</p>
+                    <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 1 }}>56992139185 deja de ser admin</p>
                   </div>
                   <div style={{ position: 'relative', width: 44, height: 24, flexShrink: 0 }}>
                     <input type="checkbox" checked={debugMode} onChange={() => handleDebugAction('toggleDebug')} disabled={debugLoading} style={{ opacity: 0, width: 0, height: 0, position: 'absolute' }} />
@@ -510,7 +509,7 @@ export default function AdminIAPage() {
                 <button onClick={() => handleDebugAction('resetUser')} disabled={debugLoading}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '10px 14px', borderRadius: 12, border: '1px solid #fecaca', background: '#fef2f2', color: '#dc2626', fontSize: 13, fontWeight: 700, cursor: debugLoading ? 'not-allowed' : 'pointer', transition: 'all .15s' }}>
                   {debugLoading ? <Loader2 style={{ width: 14, height: 14, animation: 'spin 1s linear infinite' }} /> : <Eraser style={{ width: 14, height: 14 }} />}
-                  Resetear 56985520703
+                  Resetear 56992139185
                 </button>
 
                 <button onClick={() => handleDebugAction('simulateRegisterClick')} disabled={debugLoading}
