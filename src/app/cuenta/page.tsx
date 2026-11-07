@@ -33,6 +33,7 @@ import { getServices, getFirebaseConfig, MEDIA_BUCKET_ID } from "@/lib/db";
 import { useAuth } from "@/hooks/useAuth";
 import { useWebClientConfig } from "@/hooks/useWebClientConfig";
 import { LoyaltyService } from "@/services/loyaltyService";
+import { LOYALTY_LEVELS, getLevelMeta } from "@/lib/loyalty-levels";
 import PedidosMultiChannelSection from "@/components/cuenta/PedidosMultiChannelSection";
 import OrdersCloudMascot from "@/components/admin/OrdersCloudMascot";
 import styles from "./account.module.css";
@@ -99,9 +100,26 @@ function previewUrl(fileId: string) {
   return `${endpoint}/storage/buckets/${MEDIA_BUCKET_ID}/files/${fileId}/view?project=${projectId}`;
 }
 
+function CuentaLoading() {
+  return (
+    <div className={styles.loading} role="status" aria-live="polite">
+      <div className={styles.loadingScene} aria-hidden="true">
+        <span className={styles.loadingHalo} />
+        <svg className={styles.loadingCloud} viewBox="0 0 100 72" fill="none">
+          <path d="M25 58C12 58 6 50 8 40c1-8 7-13 15-14C27 14 38 9 48 12c8-5 20-1 24 9 11-1 20 6 20 17 1 11-7 20-19 20H25Z" fill="white" stroke="#bfd7e9" strokeWidth="2" />
+          <circle cx="41" cy="38" r="2.6" fill="#50799f"/><circle cx="58" cy="38" r="2.6" fill="#50799f"/>
+          <path d="M45 47c3 3 7 3 10 0" stroke="#50799f" strokeWidth="2" strokeLinecap="round"/>
+        </svg>
+      </div>
+      <p>Preparando tu espacio</p>
+      <span className={styles.loadingDots} aria-hidden="true"><i /><i /><i /></span>
+    </div>
+  );
+}
+
 export default function CuentaPage() {
   return (
-    <Suspense fallback={<div className={styles.loading} role="status"><Loader2 size={26} /><p>Preparando tu espacio…</p></div>}>
+    <Suspense fallback={<CuentaLoading />}>
       <CuentaWrapper />
     </Suspense>
   );
@@ -112,7 +130,7 @@ function CuentaWrapper() {
   const isEmbed = searchParams.get("embed") === "1";
 
   if (!isEmbed) {
-    return <CatalogoClient defaultHash="#/account" />;
+    return <CatalogoClient defaultHash={searchParams.get("pedidos") === "1" ? "#/account/orders" : "#/account"} />;
   }
 
   return <ActualCuentaPage />;
@@ -120,6 +138,7 @@ function CuentaWrapper() {
 
 function ActualCuentaPage() {
   const { user, isLoggedIn, isLoading, logout, loginWithGoogle } = useAuth();
+  const searchParams = useSearchParams();
   const { config: webConfig } = useWebClientConfig();
   const reduced = useReducedMotion();
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -127,10 +146,17 @@ function ActualCuentaPage() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
   const [level, setLevel] = useState("bronze");
+  const [paidOrders, setPaidOrders] = useState<number | null>(null);
   const [syncedName, setSyncedName] = useState("");
   const rootRef = useRef<HTMLElement>(null);
   const mascotRef = useRef<HTMLDivElement>(null);
   const slotRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isLoading || searchParams.get("pedidos") !== "1") return;
+    const frame = requestAnimationFrame(() => document.getElementById("historial-pedidos")?.scrollIntoView({ block: "start" }));
+    return () => cancelAnimationFrame(frame);
+  }, [isLoading, searchParams]);
 
   useEffect(() => {
     try {
@@ -155,6 +181,7 @@ function ActualCuentaPage() {
       setAvatarUrl("");
       setCoverUrl("");
       setLevel("bronze");
+      setPaidOrders(null);
       return;
     }
     let active = true;
@@ -170,7 +197,10 @@ function ActualCuentaPage() {
           setCoverUrl(prefs.coverFileId ? previewUrl(prefs.coverFileId) : "");
         }
         const loyalty = await LoyaltyService.getLoyaltyData(user.id);
-        if (active) setLevel(loyalty?.currentLevel || "bronze");
+        if (active) {
+          setLevel(loyalty?.currentLevel || "bronze");
+          setPaidOrders(Number(loyalty?.paidOrdersCount ?? 0));
+        }
       } catch (error) {
         console.error(
           "[Cuenta] No se pudieron cargar los datos del perfil:",
@@ -258,12 +288,7 @@ function ActualCuentaPage() {
     });
   }
   if (isLoading)
-    return (
-      <div className={styles.loading} role="status">
-        <Loader2 size={26} />
-        <p>Preparando tu espacio…</p>
-      </div>
-    );
+    return <CuentaLoading />;
   const guest = !isLoggedIn || !user;
   const rawFullName = (
     user?.name?.trim() ||
@@ -360,6 +385,97 @@ function ActualCuentaPage() {
             </button>
           </motion.div>
         </div>
+        {!guest && (
+          <div className={styles.profileFirst}>
+              <section
+                className={styles.profileCard}
+                aria-labelledby="profile-title"
+              >
+                <Link
+                  href="/cuenta/perfil"
+                  className={styles.profileCover}
+                  aria-label="Editar portada"
+                >
+                  {coverUrl && <img src={coverUrl} alt="" />}
+                  <Pencil size={13} />
+                </Link>
+                <div className={styles.profileBody}>
+                  <Link
+                    href="/cuenta/perfil"
+                    className={styles.avatar}
+                    aria-label="Editar foto de perfil"
+                  >
+                    {avatarUrl ? <img src={avatarUrl} alt="" /> : initials}
+                  </Link>
+                  <h2 id="profile-title">{name}</h2>
+                  <p className={styles.email}>{user?.email}</p>
+                  <Link href="/cuenta/niveles" className={styles.level}>
+                    <Trophy size={13} /> Nivel {LEVEL_NAMES[level] || "Bronce"}
+                    <ChevronRight size={13} />
+                  </Link>
+                  <Link href="/cuenta/info" className={styles.profileInfo}>
+                    <UserRound size={15} />
+                    <span>
+                      Mis datos personales
+                      <small>{user?.phone || "Agregar teléfono"}</small>
+                    </span>
+                    <ChevronRight size={14} />
+                  </Link>
+                  <Link href="/cuenta/perfil" className={styles.profileInfo}>
+                    <Pencil size={15} />
+                    <span>Personalizar mi perfil</span>
+                    <ChevronRight size={14} />
+                  </Link>
+                  <button
+                    type="button"
+                    className={styles.logout}
+                    onClick={signOut}
+                  >
+                    <LogOut size={14} /> Cerrar sesión
+                  </button>
+                </div>
+              </section>
+          </div>
+        )}
+        {isLoggedIn && paidOrders !== null && (() => {
+          const current = getLevelMeta(level);
+          const next = LOYALTY_LEVELS.find((item) => item.requiredOrders > paidOrders);
+          const previous = [...LOYALTY_LEVELS].reverse().find((item) => item.requiredOrders <= paidOrders) || LOYALTY_LEVELS[0];
+          const progress = next ? Math.min(100, Math.max(0, ((paidOrders - previous.requiredOrders) / (next.requiredOrders - previous.requiredOrders)) * 100)) : 100;
+          return (
+            <section className={styles.medals} aria-labelledby="medals-title">
+              <div className={styles.medalsSummary}>
+                <div className={styles.medalEmblem}>
+                  <img src={current.badge} alt="" onError={(event) => { event.currentTarget.style.display = "none"; }} />
+                  <Trophy size={26} aria-hidden="true" />
+                </div>
+                <div className={styles.medalsCopy}>
+                  <span className={styles.medalsEyebrow}>Tu medalla</span>
+                  <h2 id="medals-title">Nivel {current.name}</h2>
+                  <p>{next ? `Te faltan ${next.requiredOrders - paidOrders} pedidos pagados para ${next.name}.` : "Ya alcanzaste la medalla más alta."}</p>
+                  <div className={styles.medalsProgress} role="progressbar" aria-label={next ? `Progreso hacia ${next.name}` : "Nivel máximo alcanzado"} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress)}>
+                    <span style={{ width: `${progress}%` }} />
+                  </div>
+                  <small>{paidOrders} {paidOrders === 1 ? "pedido pagado" : "pedidos pagados"}</small>
+                </div>
+                <Link className={styles.medalsLink} href="/cuenta/niveles">Ver mis niveles <ChevronRight size={15} /></Link>
+              </div>
+              <div className={styles.medalsTrack} aria-label="Medallas disponibles">
+                {LOYALTY_LEVELS.map((item) => (
+                  <div key={item.id} className={`${styles.medalItem} ${item.id === current.id ? styles.medalCurrent : ""}`}>
+                    <div className={styles.medalImage}>
+                      <img src={item.badge} alt="" loading="lazy" onError={(event) => { event.currentTarget.style.display = "none"; }} />
+                      <Trophy size={18} aria-hidden="true" />
+                    </div>
+                    <span>{item.name}</span>
+                    <small>{item.requiredOrders === 0 ? "Inicio" : `${item.requiredOrders} pedidos`}</small>
+                    {item.id === current.id && <span className={styles.medalCurrentLabel}>Actual</span>}
+                  </div>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
         <div className={styles.content}>
           <aside className={styles.accountRail}>
             {guest ? (
@@ -420,65 +536,16 @@ function ActualCuentaPage() {
                   <ShieldCheck size={12} /> Tus datos, en tu cuenta.
                 </p>
               </section>
-            ) : (
-              <section
-                className={styles.profileCard}
-                aria-labelledby="profile-title"
-              >
-                <Link
-                  href="/cuenta/perfil"
-                  className={styles.profileCover}
-                  aria-label="Editar portada"
-                >
-                  {coverUrl && <img src={coverUrl} alt="" />}
-                  <Pencil size={13} />
-                </Link>
-                <div className={styles.profileBody}>
-                  <Link
-                    href="/cuenta/perfil"
-                    className={styles.avatar}
-                    aria-label="Editar foto de perfil"
-                  >
-                    {avatarUrl ? <img src={avatarUrl} alt="" /> : initials}
-                  </Link>
-                  <h2 id="profile-title">{name}</h2>
-                  <p className={styles.email}>{user?.email}</p>
-                  <Link href="/cuenta/niveles" className={styles.level}>
-                    <Trophy size={13} /> Nivel {LEVEL_NAMES[level] || "Bronce"}
-                    <ChevronRight size={13} />
-                  </Link>
-                  <Link href="/cuenta/info" className={styles.profileInfo}>
-                    <UserRound size={15} />
-                    <span>
-                      Mis datos personales
-                      <small>{user?.phone || "Agregar teléfono"}</small>
-                    </span>
-                    <ChevronRight size={14} />
-                  </Link>
-                  <Link href="/cuenta/perfil" className={styles.profileInfo}>
-                    <Pencil size={15} />
-                    <span>Personalizar mi perfil</span>
-                    <ChevronRight size={14} />
-                  </Link>
-                  <button
-                    type="button"
-                    className={styles.logout}
-                    onClick={signOut}
-                  >
-                    <LogOut size={14} /> Cerrar sesión
-                  </button>
-                </div>
-              </section>
-            )}
+            ) : null}
             <Link href="/productos" className={styles.catalogCard}>
               <span className={styles.catalogDrawing} aria-hidden="true">
-                <ShoppingBag size={32} strokeWidth={1.2} />
-                <span>DB</span>
+                <ShoppingBag size={28} strokeWidth={1.7} />
               </span>
               <div>
-                <p>Tu próxima buena compra.</p>
+                <p>Descubre el catálogo</p>
+                <small>Ropa, perfumes y más para ti.</small>
                 <span>
-                  Explorar catálogo <ArrowRight size={15} />
+                  Ver productos <ArrowRight size={15} />
                 </span>
               </div>
             </Link>
@@ -488,7 +555,7 @@ function ActualCuentaPage() {
             className={styles.orders}
             aria-label="Seguimiento de tus pedidos"
           >
-            <PedidosMultiChannelSection />
+            <PedidosMultiChannelSection carlitosTheme />
           </section>
         </div>
         <section className={styles.shortcuts} aria-labelledby="shortcuts-title">
@@ -530,8 +597,8 @@ function ActualCuentaPage() {
           <span>
             {webConfig.storeName} <span>·</span> Cerca de ti, en cada compra.
           </span>
-          {(webConfig.supportPhone || webConfig.botPhone) && <a
-            href={`https://wa.me/${webConfig.supportPhone || webConfig.botPhone}`}
+          {<a
+            href="https://wa.me/56936715405"
             target="_blank"
             rel="noopener noreferrer"
           >

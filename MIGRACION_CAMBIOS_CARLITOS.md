@@ -146,6 +146,7 @@ Este documento registra los ajustes recientes para poder evaluarlos y trasladar 
 - Se configuraron en Firebase de Carlitos los datos de transferencia proporcionados por el usuario; la web y el bot los consultan desde ajustes de tienda. No activar funciones de WhatsApp deshabilitadas sin autorización.
 - La ubicación visible se configuró como Alameda 2960 y se añadió en el catálogo un enlace al mapa indicado. La lista de agencias contiene STARKEN y BLUEXPRESS; el respaldo local del checkout usa esas mismas dos opciones.
 - Se verificó la configuración desde Firebase y desde las API del servidor local de Carlitos. El enlace del catálogo y el respaldo del checkout son cambios locales que requieren despliegue para verse en una web publicada.
+- La confirmación de despacho y el enlace del bot abren `/cuenta?pedidos=1`, que muestra Mi cuenta y desplaza al historial dentro del catálogo incrustado. El acceso normal a Mi cuenta conserva su vista inicial.
 
 ### Pedidos: filtro por tiendas
 
@@ -154,3 +155,65 @@ Este documento registra los ajustes recientes para poder evaluarlos y trasladar 
 ### Barra superior del catálogo
 
 - Se retiró el acceso rápido de WhatsApp de la barra principal y se trasladó el indicador de conectados junto a la dirección. El indicador conserva su comportamiento previo.
+
+### Pedidos en modo web independiente
+
+- Se oculta la reactivación ligada a verificación de stock físico y la etiqueta del asesor asignado. El detalle muestra un recorrido de estados más legible; el flujo integrado conserva su presentación.
+
+### Impresión de pedidos
+
+- Se retiró el botón PDF del detalle. La cortina abre el mismo detalle en otra pestaña y muestra su diálogo de impresión cuando termina de cargar.
+
+- Ajuste posterior: Imprimir desde la cortina genera directamente el documento imprimible, sin navegar al detalle del pedido.
+
+- El detalle de pedido usa nuevamente el diseño horizontal del flujo de pedidos, con los estados correspondientes al modo web independiente.
+
+- Los botones Imprimir del detalle y de la cortina usan el mismo documento naranja de pedido.
+
+### Colores de Mi cuenta
+
+- La portada conserva el lienzo de nubes y su animación con un tono amarillo; Mi cuenta y el historial usan acentos amarillos y rojos de Carlitos. El tema del historial se activa solo en Mi cuenta.
+
+- Corrección: el cielo y las nubes de Mi cuenta conservan sus colores originales; el amarillo se mantiene en los controles y acentos.
+
+### Medallas en Mi cuenta
+
+- Se muestra la medalla actual, el progreso y los cinco niveles reutilizando la consulta existente del servicio de lealtad. El enlace lleva al programa de niveles; las imágenes pertenecen a las referencias de medallas existentes.
+
+- El perfil del cliente se muestra antes de las medallas y el historial de pedidos en Mi cuenta.
+
+### Origen del pedido en Mi cuenta
+
+- El historial pregunta primero si la compra fue por WhatsApp o por la web. WhatsApp muestra la búsqueda por teléfono; Web muestra acceso, registro y Google si falta sesión, o las compras web si ya hay sesión.
+
+### Avisos de compras en Mi cuenta
+
+- Los avisos flotantes de compras se cierran al entrar a Mi cuenta y no vuelven a mostrarse mientras esté abierta esa sección, incluido el perfil.
+
+- La paleta de Mi cuenta pasó a blanco y azul claro en las tarjetas, medallas y controles; cielo y nubes siguen intactos.
+
+- Se renovó el acceso al catálogo de Mi cuenta con colores claros y texto de ropa y perfumes; se retiraron las iniciales heredadas.
+
+- Al cargar la mascota 3D de Mi cuenta, la nube de espera se desvanece y el modelo aparece creciendo; se respeta la preferencia de movimiento reducido.
+
+- El selector de origen de pedido muestra WhatsApp en verde y Tienda web en azul claro.
+
+### Contacto en la barra móvil
+
+- Se agregaron junto a Mi cuenta accesos a WhatsApp del bot y soporte del responsable. Ajustar los números para cada cliente.
+
+- Se ordenó la barra móvil con Favoritos después de Explorar y Mi pedido en el centro.
+
+- La barra inferior llama «Carrito» al acceso que antes decía «Mi pedido».
+
+- Se añadió «Mis pedidos» entre compra mínima y despachos en la cabecera del catálogo, apuntando a la sección de pedidos existente.
+
+- El acceso WhatsApp de la barra móvil dirige al número comercial indicado por Carlitos: +56 9 3671 5405.
+
+### Carga de Mi cuenta
+
+- Se unificaron las pantallas de espera en una nube animada y el fondo cubre toda la altura de la ventana; se respeta movimiento reducido.
+
+### Contactos y soporte
+
+- «Conversemos» y referencias heredadas de Don Balato apuntan al número comercial +56 9 3671 5405. El enlace de vinculación de cuenta conserva el número del bot para que pueda procesar el comando. Soporte en la barra móvil muestra «En construcción» y no abre ningún chat.

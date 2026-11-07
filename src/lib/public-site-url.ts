@@ -1,5 +1,5 @@
-const CANONICAL_SITE_ORIGIN = 'https://yaxsell.cl';
-const ALLOWED_SITE_HOSTS = new Set(['yaxsell.cl', 'www.yaxsell.cl']);
+const CANONICAL_SITE_ORIGIN = 'https://www.importadoracarlitos.cl';
+const ALLOWED_SITE_HOSTS = new Set(['importadoracarlitos.cl', 'www.importadoracarlitos.cl']);
 
 /**
  * Dominio público usado en enlaces enviados a clientes.

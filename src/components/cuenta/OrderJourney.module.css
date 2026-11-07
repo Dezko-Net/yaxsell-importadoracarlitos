@@ -2225,3 +2225,49 @@
     transform: none;
   }
 }
+
+/* Paleta de Mi cuenta para Importadora Carlitos. */
+.journey.carlitos { --ink: #34291b; --muted: #786b57; --blue: #a42b38; --blue-hover: #84202b; --line: #f0e6bf; --line-strong: #e9d995; --bg-subtle: #fffbeb; }
+.carlitos .connection { background: linear-gradient(135deg, #fff7cf, #fffdf2); border-color: #f0df91; }
+.carlitos .connectionTop p { color: #6d604a; }
+.carlitos .phoneField { border-color: #e8d88e; }
+.carlitos .phoneField:focus-within { border-color: #b12835; box-shadow: 0 0 0 3px rgba(177,40,53,.12); }
+.journey.carlitos .primary { background: #fad502; color: #34240a; }
+.journey.carlitos .primary:hover { background: #edc500; }
+.carlitos button:focus-visible, .carlitos a:focus-visible { outline-color: #b12835; }
+
+.channelChoice, .webAccess { margin-bottom:18px; padding:20px; border:1px solid #eee2ac; border-radius:18px; background:#fffdf4; }
+.channelChoice h3, .webAccess h3 { margin:0; color:#34291b; font-size:17px; font-weight:800; }
+.channelChoice p, .webAccess p { margin:5px 0 0; color:#786b57; font-size:13px; line-height:1.5; }
+.channelOptions, .webAccessActions { display:flex; flex-wrap:wrap; gap:10px; margin-top:15px; }
+.channelOptions button, .webAccessActions a, .webAccessActions button { display:inline-flex; align-items:center; justify-content:center; gap:8px; flex:1 1 145px; min-height:48px; padding:10px 16px; border:1px solid #e8dcaa; border-radius:12px; background:#fff; color:#403322; font-size:13px; font-weight:800; text-decoration:none; transition:background .15s, border-color .15s; }
+.channelOptions button:hover, .webAccessActions a:hover, .webAccessActions button:hover { background:#fff7cf; border-color:#d7b536; }
+.channelOptions button[aria-pressed="true"] { background:#fad502; border-color:#dbb400; color:#352608; }
+.webAccessActions a:first-child { background:#fad502; border-color:#dbb400; color:#352608; }
+@media(max-width:420px) { .channelChoice, .webAccess { padding:16px; } .channelOptions button { flex:1 1 110px; } .webAccessActions > * { flex-basis:100%; } }
+
+/* Superficies claras para Mi cuenta. */
+.journey.carlitos { --ink:#183657; --muted:#657c94; --blue:#326b9f; --blue-hover:#24547f; --line:#e1edf7; --line-strong:#cddfed; --bg-subtle:#f5faff; }
+.carlitos .connection { background:linear-gradient(135deg,#edf7ff,#f9fcff); border-color:#d8eaf7; }
+.carlitos .connectionTop p { color:#617c93; }
+.carlitos .phoneField { border-color:#d1e2ef; }
+.carlitos .phoneField:focus-within { border-color:#5b98c9; box-shadow:0 0 0 3px rgba(80,145,200,.14); }
+.journey.carlitos .primary { background:#d9edfc; color:#183f63; }
+.journey.carlitos .primary:hover { background:#c4e2f8; }
+.carlitos .channelChoice,.carlitos .webAccess { background:#f5faff; border-color:#dbeaf5; }
+.carlitos .channelChoice h3,.carlitos .webAccess h3 { color:#183657; }
+.carlitos .channelChoice p,.carlitos .webAccess p { color:#657c94; }
+.carlitos .channelOptions button,.carlitos .webAccessActions a,.carlitos .webAccessActions button { border-color:#d6e6f1; color:#284c6b; }
+.carlitos .channelOptions button:hover,.carlitos .webAccessActions a:hover,.carlitos .webAccessActions button:hover { background:#edf7ff; border-color:#a5c9e4; }
+.carlitos .channelOptions button[aria-pressed="true"],.carlitos .webAccessActions a:first-child { background:#d9edfc; border-color:#a9cfe9; color:#183f63; }
+
+/* Colores por canal de compra. */
+.carlitos .channelOptions .channelWhatsapp { background:#158747; border-color:#10733c; color:#fff; }
+.carlitos .channelOptions .channelWhatsapp:hover { background:#11763c; border-color:#0c6531; }
+.carlitos .channelOptions .channelWhatsapp[aria-pressed="true"] { background:#16884a; border-color:#075e2b; box-shadow:0 0 0 3px rgba(21,135,71,.25); }
+.carlitos .channelOptions .channelWeb { background:#245e92; border-color:#1e507d; color:#fff; }
+.carlitos .channelOptions .channelWeb:hover { background:#1d527f; border-color:#19466d; }
+.carlitos .channelOptions .channelWeb[aria-pressed="true"] { background:#276495; border-color:#163e60; color:#fff; box-shadow:0 0 0 3px rgba(76,143,193,.25); }
+
+.carlitos .channelOptions .channelWhatsapp[aria-pressed="true"],
+.carlitos .channelOptions .channelWeb[aria-pressed="true"] { color:#111; }

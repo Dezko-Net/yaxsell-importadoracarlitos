@@ -872,3 +872,89 @@
     animation-duration: 2s;
   }
 }
+
+/* Paleta de Carlitos en Mi cuenta; cielo y nubes conservan sus colores. */
+.page { --ink: #332719; --muted: #786b57; background: #fffdf4; }
+.topbar { color: #483406; }
+.back, .orderJump { color: #513607; background: rgba(255,255,255,.75); border-color: rgba(117,82,0,.20); }
+.back:hover, .orderJump:hover { background: #fff; }
+.explore { color: #9f2432; }
+.profileCover { background: linear-gradient(135deg, #ffe55e, #fff0ae 75%); }
+.page button:focus-visible, .page a:focus-visible { outline-color: #b12835; }
+
+/* Medallas del programa de niveles en Mi cuenta. */
+.medals { max-width:1120px; margin:0 auto 32px; padding:22px; border:1px solid #eddfaa; border-radius:22px; background:linear-gradient(135deg,#fff9e0,#fff 65%); box-shadow:0 8px 28px -20px #73560055; }
+.medalsSummary { display:flex; align-items:center; gap:16px; }
+.medalEmblem,.medalImage { position:relative; display:grid; place-items:center; flex:none; color:#a66727; background:#fff4d4; border:1px solid #efdfaf; border-radius:50%; overflow:hidden; }
+.medalEmblem { width:78px; height:78px; }
+.medalImage { width:54px; height:54px; margin:auto; }
+.medalEmblem img,.medalImage img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; z-index:1; }
+.medalsCopy { min-width:0; flex:1; }
+.medalsEyebrow { color:#9b6d24; font-size:11px; font-weight:800; }
+.medalsCopy h2 { color:#332719; font-size:21px; font-weight:800; line-height:1.2; }
+.medalsCopy p { color:#716650; font-size:12px; margin-top:4px; }
+.medalsCopy small { display:block; margin-top:5px; color:#786b57; font-size:11px; }
+.medalsProgress { height:6px; max-width:350px; margin-top:10px; overflow:hidden; border-radius:99px; background:#f0e9d5; }
+.medalsProgress span { display:block; height:100%; border-radius:inherit; background:#e7b600; }
+.medalsLink { display:inline-flex; align-items:center; gap:3px; flex:none; padding:10px 12px; border-radius:12px; color:#902632 !important; background:#fff2d0; font-size:12px; font-weight:800; }
+.medalsTrack { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; margin-top:18px; padding-top:16px; border-top:1px solid #f1e7c9; }
+.medalItem { position:relative; min-width:0; text-align:center; color:#716650; font-size:11px; font-weight:700; }
+.medalItem > span:not(.medalCurrentLabel),.medalItem > small { display:block; margin-top:5px; }
+.medalItem > small { color:#8b806f; font-size:10px; font-weight:500; }
+.medalCurrent .medalImage { border:2px solid #d0a000; box-shadow:0 0 0 3px #ffe990; }
+.medalCurrentLabel { display:inline-block; margin-top:4px; color:#8a6600; font-size:10px; font-weight:800; }
+@media(max-width:600px) { .medals { padding:16px; margin-bottom:24px; } .medalsSummary { flex-wrap:wrap; gap:12px; } .medalEmblem { width:62px; height:62px; } .medalsLink { margin-left:auto; } .medalsTrack { gap:3px; } .medalImage { width:44px; height:44px; } .medalItem { font-size:10px; } .medalItem > small { font-size:9px; } }
+
+/* El perfil se presenta antes de las medallas y los pedidos. */
+.profileFirst { max-width:1120px; margin:0 auto 24px; }
+.profileFirst .profileCard { max-width:520px; }
+@media(max-width:700px) { .profileFirst .profileCard { max-width:none; } }
+
+/* Mi cuenta: superficies blancas y azul claro. */
+.page { --ink:#183657; --muted:#657c94; background:#f4f8fc; }
+.topbar { color:#fff; }
+.back,.orderJump { color:#173b61; background:rgba(255,255,255,.85); border-color:#d6e7f5; }
+.explore { color:#315f91; }
+.profileCover { background:linear-gradient(135deg,#d6eafb,#eff7ff 75%); }
+.medals { border-color:#dbe9f5; background:linear-gradient(135deg,#eef7ff,#fff 65%); box-shadow:0 8px 28px -20px #285b9a55; }
+.medalEmblem,.medalImage { background:#f2f8fd; border-color:#dceaf5; }
+.medalsEyebrow { color:#47739a; }
+.medalsCopy h2 { color:#183657; }
+.medalsCopy p,.medalsCopy small,.medalItem { color:#657c94; }
+.medalsProgress { background:#e1edf7; }
+.medalsProgress span { background:#4c8dcc; }
+.medalsLink { color:#245b91 !important; background:#eaf4fc; }
+.medalsTrack { border-color:#e1edf7; }
+.medalCurrent .medalImage { border-color:#6da5d4; box-shadow:0 0 0 3px #dceffc; }
+.medalCurrentLabel { color:#306da4; }
+
+/* Acceso al catálogo. */
+.catalogCard { position:relative; gap:16px; padding:20px; border:1px solid #d8e9f5; border-radius:20px; background:linear-gradient(135deg,#eef8ff,#fff 80%); box-shadow:0 8px 24px -20px #315e8a55; transition:border-color .2s, box-shadow .2s, transform .2s; }
+.catalogCard:hover { border-color:#a9cce4; box-shadow:0 12px 26px -18px #315e8a66; transform:translateY(-2px); }
+.catalogDrawing { width:58px; height:58px; border-radius:17px; color:#316e9f; background:#dceffd; transform:none; }
+.catalogDrawing > svg { position:static; width:28px; height:28px; }
+.catalogCard:hover .catalogDrawing { transform:none; }
+.catalogCard p { color:#183657; font-size:16px; font-weight:800; letter-spacing:-.3px; }
+.catalogCard div > small { display:block; margin-top:5px; color:#71869b; font-size:12px; line-height:1.4; }
+.catalogCard div > span { margin-top:10px; color:#326b9f; font-size:12px; font-weight:800; }
+@media(prefers-reduced-motion:reduce) { .catalogCard { transition:none; } .catalogCard:hover { transform:none; } }
+
+/* Entrada de la nube 3D al terminar de cargar. */
+.mascot :global([data-cloud-loaded="true"]) > canvas { animation: cuentaCloudEnter 720ms cubic-bezier(.2,.8,.25,1) both; transform-origin:50% 60%; }
+.mascot :global([data-cloud-loaded="true"]) > span { opacity:0; visibility:hidden; transition:opacity 250ms ease, visibility 0s linear 250ms; }
+@keyframes cuentaCloudEnter { 0% { opacity:0; transform:scale(.55); } 55% { opacity:1; transform:scale(1.055); } 100% { opacity:1; transform:scale(1); } }
+@media(prefers-reduced-motion:reduce) { .mascot :global([data-cloud-loaded="true"]) > canvas { animation:none; } .mascot :global([data-cloud-loaded="true"]) > span { transition:none; } }
+
+/* Carga de Mi cuenta: fondo continuo y nube animada. */
+.loading { min-height:100vh; min-height:100dvh; width:100%; gap:10px; padding:0 20px calc(72px + env(safe-area-inset-bottom, 0px)); background:#f4f8fc; color:#527595; font-size:14px; font-weight:650; text-align:center; }
+.loadingScene { position:relative; display:grid; place-items:center; width:130px; height:115px; margin-bottom:2px; }
+.loadingHalo { position:absolute; width:100px; height:100px; border-radius:50%; background:radial-gradient(circle,#deeffc 0%,rgba(222,239,252,0) 70%); animation:cuentaLoadingHalo 2.4s ease-in-out infinite; }
+.loading .loadingCloud { position:relative; width:94px; height:68px; filter:drop-shadow(0 8px 8px rgba(69,112,151,.12)); animation:cuentaLoadingFloat 2.4s ease-in-out infinite; }
+.loadingDots { display:flex; gap:5px; margin-top:2px; }
+.loadingDots i { display:block; width:6px; height:6px; border-radius:50%; background:#8fb6d3; animation:cuentaLoadingDot 1.2s ease-in-out infinite; }
+.loadingDots i:nth-child(2) { animation-delay:.15s; }
+.loadingDots i:nth-child(3) { animation-delay:.3s; }
+@keyframes cuentaLoadingFloat { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-7px); } }
+@keyframes cuentaLoadingHalo { 0%,100% { transform:scale(.9); opacity:.65; } 50% { transform:scale(1.1); opacity:1; } }
+@keyframes cuentaLoadingDot { 0%,60%,100% { opacity:.35; transform:translateY(0); } 30% { opacity:1; transform:translateY(-4px); } }
+@media(prefers-reduced-motion:reduce) { .loading .loadingCloud,.loadingHalo,.loadingDots i { animation:none; } .loadingDots i { opacity:.7; } }

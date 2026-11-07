@@ -650,3 +650,19 @@ header.glass > div > div:first-child > div:last-child { flex:1; min-width:0; }
 .carlitos-announcement-online { flex:none; white-space:nowrap; }
 @media(max-width:639px) { .carlitos-announcement-details { gap:5px; } .carlitos-announcement-online { gap:4px; padding:4px 6px; } .carlitos-announcement-location { max-width:38vw; } }
 @media(max-width:390px) { .carlitos-announcement-inner { flex-wrap:wrap; justify-content:center; } .carlitos-announcement-offer { flex:1 1 100%; justify-content:center; } .carlitos-announcement-details { justify-content:center; } .carlitos-announcement-location { max-width:58vw; } }
+
+/* Accesos de contacto en la barra inferior móvil. */
+#bottomNav .nav-contact-whatsapp { color:#13874c!important; }
+#bottomNav .nav-contact-support { color:#426d98!important; }
+#bottomNav .nav-contact:hover { background:#f1f8fd!important; }
+@media(max-width:520px) { #bottomNav.nav-bottom { gap:0!important; padding-left:4px!important; padding-right:4px!important; } #bottomNav .nav-item > span:last-child { font-size:8px!important; white-space:nowrap; } #bottomNav .nav-item { gap:3px!important; } #bottomNav .nav-item[data-nav="cart"] .nav-icon-wrap { width:36px!important; } }
+
+/* Acceso a pedidos entre compra mínima y despacho. */
+.catalog-service-bar .catalog-my-orders { display:inline-flex; align-items:center; justify-content:center; gap:7px; flex:none; min-height:38px; padding:0 14px; border:1px solid #bfd8ed; border-radius:999px; color:#285d8e; background:#f5faff; font-size:11px; font-weight:800; text-decoration:none; box-shadow:0 3px 10px rgba(35,75,120,.10); transition:background .2s, border-color .2s; }
+.catalog-service-bar .catalog-my-orders svg { width:17px; height:17px; flex:none; }
+.catalog-service-bar .catalog-my-orders:hover { background:#e4f2ff; border-color:#91bfdf; }
+.catalog-service-bar .catalog-my-orders:focus-visible { outline:3px solid #315f91; outline-offset:2px; }
+@media(max-width:639px) { .catalog-service-bar { gap:5px; } .catalog-service-bar .catalog-my-orders { min-height:36px; padding:0 8px; gap:4px; font-size:10px; white-space:nowrap; } .catalog-service-bar .catalog-my-orders svg { width:14px; height:14px; } }
+@media(max-width:359px) { .catalog-service-bar .catalog-my-orders { padding:0 6px; font-size:9px; } }
+
+#bottomNav .nav-contact-support[aria-disabled="true"] { color:#8a99aa!important; opacity:.72; }

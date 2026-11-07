@@ -506,11 +506,16 @@ function getTrackingUrl(agency: string, tracking: string): string | null {
 
 export default function PedidosMultiChannelSection({
   showHeaderTitle = true,
+  carlitosTheme = false,
 }: {
   defaultTab?: "whatsapp" | "web";
   showHeaderTitle?: boolean;
+  carlitosTheme?: boolean;
 }) {
-  const { user, isLoggedIn } = useAuth();
+  const { user, isLoggedIn, loginWithGoogle } = useAuth();
+  const [purchaseChannel, setPurchaseChannel] = useState<"whatsapp" | "web" | null>(null);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleError, setGoogleError] = useState("");
   const reduced = useReducedMotion();
   const instance = useId();
   const detailRef = useRef<HTMLDivElement>(null);
@@ -714,8 +719,10 @@ export default function PedidosMultiChannelSection({
         );
       }
     }
-    return [...merged.values()].sort((a, b) => b.date - a.date);
-  }, [webOrders, phoneOrders]);
+    return [...merged.values()]
+      .filter((order) => !carlitosTheme || purchaseChannel !== "web" || order.channels.includes("Web"))
+      .sort((a, b) => b.date - a.date);
+  }, [webOrders, phoneOrders, carlitosTheme, purchaseChannel]);
 
   const counts = {
     all: orders.length,
@@ -812,7 +819,7 @@ export default function PedidosMultiChannelSection({
   }
 
   return (
-    <div className={styles.journey}>
+    <div className={`${styles.journey} ${carlitosTheme ? styles.carlitos : ""}`}>
       {showHeaderTitle && (
         <header className={styles.heading}>
           <div>
@@ -828,7 +835,7 @@ export default function PedidosMultiChannelSection({
           <a
             className={styles.helpLink}
             aria-label="Hablar con soporte por WhatsApp"
-            href="https://wa.me/56936599658"
+            href="https://wa.me/56936715405"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -838,8 +845,45 @@ export default function PedidosMultiChannelSection({
         </header>
       )}
 
+      {carlitosTheme && (
+        <section className={styles.channelChoice} aria-labelledby={instance + "-channel-title"}>
+          <h3 id={instance + "-channel-title"}>¿Por dónde hiciste tu pedido?</h3>
+          <p>Elige una opción para encontrar tus compras.</p>
+          <div className={styles.channelOptions}>
+            <button type="button" className={styles.channelWhatsapp} aria-pressed={purchaseChannel === "whatsapp"} onClick={() => { setPurchaseChannel("whatsapp"); setSelectedId(""); setFilter("all"); setQuery(""); }}>
+              <MessageCircle size={20} /> <span>WhatsApp</span>
+            </button>
+            <button type="button" className={styles.channelWeb} aria-pressed={purchaseChannel === "web"} onClick={() => { setPurchaseChannel("web"); setSelectedId(""); setFilter("all"); setQuery(""); }}>
+              <Globe2 size={20} /> <span>Tienda web</span>
+            </button>
+          </div>
+        </section>
+      )}
+
+      {carlitosTheme && purchaseChannel === "web" && !isLoggedIn && (
+        <section className={styles.webAccess} aria-label="Acceder a tus compras web">
+          <h3>Encuentra tus compras web</h3>
+          <p>Inicia sesión o crea una cuenta para ver tus pedidos.</p>
+          <div className={styles.webAccessActions}>
+            <Link href="/login" target="_top">Iniciar sesión</Link>
+            <Link href="/login?tab=register" target="_top">Crear cuenta</Link>
+            <button type="button" disabled={googleLoading} onClick={async () => {
+              setGoogleLoading(true);
+              setGoogleError("");
+              try {
+                const result = await loginWithGoogle();
+                if (!result.success) setGoogleError(result.error || "No se pudo iniciar sesión con Google.");
+              } catch {
+                setGoogleError("No pudimos conectar con Google. Inténtalo nuevamente.");
+              } finally { setGoogleLoading(false); }
+            }}>{googleLoading ? "Conectando…" : "Continuar con Google"}</button>
+          </div>
+          {googleError && <p className={styles.error} role="alert">{googleError}</p>}
+        </section>
+      )}
+
       {/* PHONE CONNECTION BANNER */}
-      <div className={styles.connection}>
+      {(!carlitosTheme || purchaseChannel === "whatsapp") && <div className={styles.connection}>
         <div className={styles.connectionTop}>
           <span className={styles.connectionSymbol}>
             <MessageCircle size={20} />
@@ -934,8 +978,9 @@ export default function PedidosMultiChannelSection({
             {webLoading && <Loader2 size={12} className={styles.spin} />}
           </span>
         )}
-      </div>
+      </div>}
 
+      {(!carlitosTheme || (purchaseChannel !== null && (purchaseChannel !== "web" || isLoggedIn))) && <>
       {webError && (
         <div role="alert" className={styles.error}>
           {webError}{" "}
@@ -1268,7 +1313,7 @@ export default function PedidosMultiChannelSection({
                             Ver detalle <ArrowRight size={14} />
                           </button>
                           <a
-                            href={`https://wa.me/56936599658?text=${encodeURIComponent(
+                            href={`https://wa.me/56936715405?text=${encodeURIComponent(
                               `Hola Importadora Carlitos, tengo una consulta sobre mi pedido #${order.code} (Estado: ${statusInfo.label})`,
                             )}`}
                             target="_blank"
@@ -1743,7 +1788,7 @@ export default function PedidosMultiChannelSection({
                       {/* WHATSAPP SUPPORT LINK */}
                       <a
                         className={styles.orderHelp}
-                        href={`https://wa.me/56936599658?text=${encodeURIComponent(
+                        href={`https://wa.me/56936715405?text=${encodeURIComponent(
                           `Hola Importadora Carlitos, tengo una consulta sobre mi pedido #${selected.code} (${meta.label})`,
                         )}`}
                         target="_blank"
@@ -1843,12 +1888,13 @@ export default function PedidosMultiChannelSection({
         </div>
       )}
 
-      {!isLoggedIn && (
+      {!isLoggedIn && !carlitosTheme && (
         <p className={styles.accountHint}>
           <ShieldCheck size={14} /> ¿Compraste desde la tienda web?{" "}
           <Link href="/login">Inicia sesión para ver todas tus compras.</Link>
         </p>
       )}
+      </>}
     </div>
   );
 }

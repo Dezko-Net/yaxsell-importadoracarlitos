@@ -313,7 +313,12 @@ export default function OrdersCloudMascot({
           if (leftEye) leftEye.scale.y = 0.162 * (1 - blink * 0.92);
           if (rightEye) rightEye.scale.y = 0.162 * (1 - blink * 0.92);
           renderer.render(scene, camera);
-          if (fallbackRef.current) fallbackRef.current.hidden = true;
+          if (variant === 'cover') {
+            // El primer fotograma 3D inicia la transición desde la nube de espera.
+            if (host.dataset.cloudLoaded !== 'true') host.dataset.cloudLoaded = 'true';
+          } else if (fallbackRef.current) {
+            fallbackRef.current.hidden = true;
+          }
           const gazeSettling = Math.abs(targetX - gazeX) > 0.001 || Math.abs(targetY - gazeY) > 0.001;
           if (!prefersReducedMotion.matches || gazeSettling) start();
         };
