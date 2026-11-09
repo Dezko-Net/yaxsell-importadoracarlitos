@@ -3,7 +3,8 @@ import { getAuth } from 'firebase-admin/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminApp, getAdminDb } from '@/lib/db-server';
 import { isAdminEmail } from '@/lib/admin-access';
-import { ORDERS_COLLECTION_ID, VENDOR_ORDERS_COLLECTION_ID } from '@/lib/db';
+import { ORDERS_COLLECTION_ID, PRODUCTS_COLLECTION_ID, VENDOR_ORDERS_COLLECTION_ID } from '@/lib/db';
+import { getProductImageUrl, resolveStorageImageUrl } from '@/lib/product-images';
 import { revalidateTag } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
@@ -30,7 +31,7 @@ function parseItems(order: any) {
     const price = Number(item.price ?? item.PRICE ?? 0);
     const total = Number(item.total ?? item.TOTAL ?? (price * qty));
     if (!Number.isInteger(qty) || qty < 1 || !Number.isFinite(total) || total < 0) throw new Error('Uno de los productos tiene cantidades o precios inválidos.');
-    return { index, name: String(item.name || item.NAME || item.productName || item.nombre || 'Producto'), sku: String(item.sku || item.SKU || ''), qty, total };
+    return { index, id: String(item.id || item.pid || item.productId || item.$id || ''), name: String(item.name || item.NAME || item.productName || item.nombre || 'Producto'), sku: String(item.sku || item.SKU || ''), img: resolveStorageImageUrl(item.img || item.imageUrl || item.image || item.IMAGEURL), qty, total };
   });
 }
 function version(order: any) {
@@ -46,6 +47,19 @@ export async function GET(request: NextRequest) {
     if (!snap.exists) return NextResponse.json({ error: 'Pedido no encontrado.' }, { status: 404 });
     const order = snap.data() || {};
     const items = parseItems(order);
+    // Pedidos antiguos pueden no guardar la foto; consultar solo sus productos.
+    const missingIds = [...new Set(items.filter(item => !item.img && validId(item.id)).map(item => item.id))];
+    if (missingIds.length) {
+      const db = getAdminDb();
+      const images = new Map<string, string>();
+      await Promise.all(missingIds.map(async productId => {
+        try {
+          const product = await db.collection(PRODUCTS_COLLECTION_ID).doc(productId).get();
+          if (product.exists) images.set(productId, getProductImageUrl(product.data() || {}));
+        } catch { /* La revisión sigue disponible aunque falte la imagen. */ }
+      }));
+      for (const item of items) if (!item.img) item.img = images.get(item.id) || '';
+    }
     return NextResponse.json({ order: { id: snap.id, code: String(order.ORDERCODE || ''), customer: String(order.CUSTOMERNAME || ''), status: String(order.STATUS || ''), items, version: version(order), pending: order.WAREHOUSE_SHORTAGE_PENDING === true } }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (error: any) { return NextResponse.json({ error: error.message || 'No se pudo consultar el pedido.' }, { status: 409 }); }
 }
