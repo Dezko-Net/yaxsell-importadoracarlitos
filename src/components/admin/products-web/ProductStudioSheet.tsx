@@ -90,9 +90,9 @@ export interface ProductStudioSheetProps {
   onCreateCategory: () => void;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   onImageInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onImageDrop: (e: React.DragEvent<HTMLDivElement>) => void;
+  onImageDrop: (e: React.DragEvent<HTMLDivElement>, slot?: 1 | 2 | 3) => void;
   onImagePaste: (e: React.ClipboardEvent<HTMLElement>) => void;
-  onPasteClipboardButton: () => void;
+  onPasteClipboardButton: (slot?: 1 | 2 | 3) => void;
   onUpdateField: <K extends keyof StudioProductFormState>(
     key: K,
     value: StudioProductFormState[K]
@@ -658,7 +658,7 @@ export function ProductStudioSheet({
                     className="hidden"
                   />
 
-                  <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
                     <div className="flex items-center gap-2">
                       <div className="w-7 h-7 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center">
                         <ImageIcon className="w-4 h-4" />
@@ -667,18 +667,44 @@ export function ProductStudioSheet({
                         <h3 className="text-xs font-black uppercase tracking-wider text-slate-800">
                           Estudio Fotográfico
                         </h3>
-                        <p className="text-[10px] text-slate-400 font-medium">
-                          Compresión automática WebP · Toca un slot para elegir
+                        <p className="text-[10px] text-slate-500 font-medium">
+                          Selecciona un slot (#1, #2 o #3) y presiona <strong className="text-indigo-600">Ctrl+V</strong> o <strong className="text-indigo-600">Pegar</strong>
                         </p>
                       </div>
                     </div>
 
-                    {uploadingImage && (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold">
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        Optimizando…
-                      </span>
-                    )}
+                    <div className="flex items-center gap-1.5">
+                      {uploadingImage ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-[11px] font-bold border border-indigo-200">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          Optimizando #{activeUploadSlot}…
+                        </span>
+                      ) : (
+                        <div className="inline-flex items-center gap-1 p-0.5 rounded-xl bg-slate-100 border border-slate-200/90">
+                          {([1, 2, 3] as const).map((slotNum) => {
+                            const active = activeUploadSlot === slotNum;
+                            return (
+                              <button
+                                key={slotNum}
+                                type="button"
+                                onClick={() => {
+                                  triggerHaptic('light');
+                                  setActiveUploadSlot(slotNum);
+                                  setImagePreviewError(false);
+                                }}
+                                className={`px-2 py-1 rounded-lg text-[10px] font-extrabold transition cursor-pointer ${
+                                  active
+                                    ? 'bg-indigo-600 text-white shadow-2xs'
+                                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/70'
+                                }`}
+                              >
+                                {slotNum === 1 ? '#1 Portada' : `#${slotNum} Foto`}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* 3-Card Bento Visual Slot Deck */}
@@ -691,22 +717,37 @@ export function ProductStudioSheet({
                       return (
                         <div
                           key={slot}
+                          tabIndex={0}
+                          role="button"
+                          aria-pressed={isSelected}
+                          aria-label={`Seleccionar slot de foto ${slot}`}
                           onClick={() => {
                             triggerHaptic('light');
                             setActiveUploadSlot(slot);
                             setImagePreviewError(false);
-                            if (!url && !uploadingImage) {
-                              fileInputRef.current?.click();
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              setActiveUploadSlot(slot);
+                              setImagePreviewError(false);
                             }
                           }}
+                          onDragOver={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (activeUploadSlot !== slot) setActiveUploadSlot(slot);
+                            setDraggingImage(true);
+                          }}
+                          onDrop={(e) => onImageDrop(e, slot)}
                           className={`${
                             isHero ? 'col-span-6' : 'col-span-3'
-                          } relative aspect-square rounded-2xl overflow-hidden border transition-all cursor-pointer group select-none ${
+                          } relative aspect-square rounded-2xl overflow-hidden border-2 transition-all cursor-pointer group select-none outline-none ${
                             isSelected
-                              ? 'border-slate-400 ring-2 ring-slate-200 shadow-xs'
+                              ? 'border-indigo-600 ring-3 ring-indigo-500/25 bg-indigo-50/35 shadow-sm'
                               : url
                                 ? 'border-slate-200 hover:border-slate-300'
-                                : 'border-dashed border-slate-300 bg-slate-50/70 hover:border-slate-400 hover:bg-slate-50'
+                                : 'border-dashed border-slate-300 bg-slate-50/70 hover:border-indigo-300 hover:bg-slate-50'
                           }`}
                         >
                           {url ? (
@@ -726,12 +767,14 @@ export function ProductStudioSheet({
                               {/* Top Slot Pill */}
                               <span
                                 className={`absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide backdrop-blur-md ${
-                                  isHero
-                                    ? 'bg-white/90 text-slate-800 border border-slate-200/80 shadow-2xs'
-                                    : 'bg-black/60 text-white'
+                                  isSelected
+                                    ? 'bg-indigo-600 text-white shadow-2xs'
+                                    : isHero
+                                      ? 'bg-white/90 text-slate-800 border border-slate-200/80 shadow-2xs'
+                                      : 'bg-black/60 text-white'
                                 }`}
                               >
-                                {isHero ? '★ Portada' : `#${slot}`}
+                                {isHero ? (isSelected ? '★ #1 Activo' : '★ Portada') : isSelected ? `#${slot} Activo` : `#${slot}`}
                               </span>
 
                               {/* Delete button */}
@@ -741,6 +784,7 @@ export function ProductStudioSheet({
                                   e.stopPropagation();
                                   triggerHaptic('light');
                                   onSetSlotUrl(slot, '');
+                                  setActiveUploadSlot(slot);
                                 }}
                                 aria-label={`Quitar foto ${slot}`}
                                 className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/65 hover:bg-rose-600 text-white flex items-center justify-center transition cursor-pointer"
@@ -765,24 +809,62 @@ export function ProductStudioSheet({
                               )}
                             </>
                           ) : (
-                            <div className="w-full h-full flex flex-col items-center justify-center p-2 text-center gap-1">
+                            <div className="w-full h-full flex flex-col items-center justify-center p-2 text-center gap-1.5">
+                              {isSelected && (
+                                <span className="px-2 py-0.5 rounded-full bg-indigo-600 text-white text-[8px] font-black uppercase tracking-wider shadow-2xs">
+                                  Slot #{slot} Activo
+                                </span>
+                              )}
                               <div
                                 className={`rounded-2xl flex items-center justify-center transition ${
-                                  isHero
-                                    ? 'w-10 h-10 bg-slate-200/70 text-slate-600'
-                                    : 'w-8 h-8 bg-slate-200/60 text-slate-500'
+                                  isSelected
+                                    ? isHero
+                                      ? 'w-10 h-10 bg-indigo-100 text-indigo-600'
+                                      : 'w-7 h-7 bg-indigo-100 text-indigo-600'
+                                    : isHero
+                                      ? 'w-10 h-10 bg-slate-200/70 text-slate-600'
+                                      : 'w-8 h-8 bg-slate-200/60 text-slate-500'
                                 }`}
                               >
                                 <Plus className={isHero ? 'w-5 h-5 stroke-[2.5]' : 'w-4 h-4 stroke-[2.5]'} />
                               </div>
-                              <span className="text-[10px] font-extrabold text-slate-700 leading-tight">
-                                {isHero ? 'Portada HD' : `Foto ${slot}`}
+                              <span
+                                className={`text-[10px] font-extrabold leading-tight ${
+                                  isSelected ? 'text-indigo-900' : 'text-slate-700'
+                                }`}
+                              >
+                                {isHero ? 'Portada #1' : `Foto #${slot}`}
                               </span>
-                              {isHero && (
-                                <span className="text-[9px] font-semibold text-slate-400">
-                                  Toca o suelta aquí
-                                </span>
-                              )}
+                              <div className="flex items-center justify-center gap-1 flex-wrap mt-0.5">
+                                <button
+                                  type="button"
+                                  disabled={uploadingImage}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    triggerHaptic('light');
+                                    onPasteClipboardButton(slot);
+                                  }}
+                                  className="px-2 py-0.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[9px] font-extrabold shadow-2xs transition cursor-pointer disabled:opacity-50"
+                                  title={`Pegar imagen del portapapeles en Foto #${slot}`}
+                                >
+                                  Pegar
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={uploadingImage}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    triggerHaptic('light');
+                                    setActiveUploadSlot(slot);
+                                    setImagePreviewError(false);
+                                    fileInputRef.current?.click();
+                                  }}
+                                  className="px-2 py-0.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-[9px] font-extrabold transition cursor-pointer disabled:opacity-50"
+                                  title={`Elegir archivo para Foto #${slot}`}
+                                >
+                                  Archivo
+                                </button>
+                              </div>
                             </div>
                           )}
                         </div>
@@ -802,7 +884,7 @@ export function ProductStudioSheet({
                       className="sm:hidden flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-2xl bg-slate-100 text-slate-700 border border-slate-200/90 text-[11px] font-extrabold active:scale-95 transition cursor-pointer disabled:opacity-50"
                     >
                       <Camera className="w-4 h-4 text-slate-600" />
-                      <span>Cámara</span>
+                      <span>Cámara #{activeUploadSlot}</span>
                     </button>
 
                     <button
@@ -815,7 +897,7 @@ export function ProductStudioSheet({
                       className="col-span-1 sm:col-span-2 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 py-2 px-2 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] sm:text-xs font-extrabold shadow-2xs active:scale-95 transition cursor-pointer disabled:opacity-50"
                     >
                       <Upload className="w-4 h-4" />
-                      <span>{uploadingImage ? 'Subiendo…' : 'Galería'}</span>
+                      <span>{uploadingImage ? 'Subiendo…' : `Galería #${activeUploadSlot}`}</span>
                     </button>
 
                     <button
@@ -823,12 +905,12 @@ export function ProductStudioSheet({
                       disabled={uploadingImage}
                       onClick={() => {
                         triggerHaptic('light');
-                        onPasteClipboardButton();
+                        onPasteClipboardButton(activeUploadSlot);
                       }}
                       className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 py-2 px-2 rounded-2xl bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-[11px] sm:text-xs font-extrabold active:scale-95 transition cursor-pointer disabled:opacity-50"
                     >
                       <ClipboardPaste className="w-4 h-4 text-slate-600" />
-                      <span>Pegar</span>
+                      <span>Pegar #{activeUploadSlot}</span>
                     </button>
 
                     <button

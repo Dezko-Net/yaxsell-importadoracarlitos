@@ -867,6 +867,18 @@ export default function WebProductsWorkspace() {
       const result = await uploadFile(withPrefix('products', `${id}.${extension}`), compressed);
       setImagePreviewError(false);
       setSlotUrl(targetSlot, result.url);
+      // Auto-avanzar al siguiente slot vacío para facilitar pegar/subir varias fotos seguidas
+      setForm((current) => {
+        const nextUrl1 = targetSlot === 1 ? result.url : current.imageUrl;
+        const nextUrl2 = targetSlot === 2 ? result.url : current.imageUrl2;
+        const nextUrl3 = targetSlot === 3 ? result.url : current.imageUrl3;
+        if (targetSlot === 1 && !nextUrl2.trim()) {
+          setActiveUploadSlot(2);
+        } else if ((targetSlot === 1 || targetSlot === 2) && !nextUrl3.trim()) {
+          setActiveUploadSlot(3);
+        }
+        return current;
+      });
       setNotice(
         targetSlot === 1
           ? 'Foto principal optimizada y cargada.'
@@ -891,16 +903,20 @@ export default function WebProductsWorkspace() {
     }
   }
 
-  function handleImageDrop(event: DragEvent<HTMLDivElement>) {
+  function handleImageDrop(event: DragEvent<HTMLDivElement>, slot?: 1 | 2 | 3) {
     event.preventDefault();
+    event.stopPropagation();
     setDraggingImage(false);
+    const targetSlot = slot ?? activeUploadSlot;
+    if (slot) setActiveUploadSlot(slot);
     const file = event.dataTransfer.files?.[0];
     if (file) {
-      void uploadSelectedImage(file, activeUploadSlot);
+      void uploadSelectedImage(file, targetSlot);
     }
   }
 
-  function handleImagePaste(event: ClipboardEvent<HTMLElement>) {
+  function handleImagePaste(event: ClipboardEvent<HTMLElement> | globalThis.ClipboardEvent) {
+    if (event.defaultPrevented) return;
     const imageItem = Array.from(event.clipboardData?.items || []).find((item) =>
       item.type.startsWith('image/')
     );
@@ -910,8 +926,8 @@ export default function WebProductsWorkspace() {
       void uploadSelectedImage(file, activeUploadSlot);
       return;
     }
-    const target = event.target as HTMLElement;
-    if (target.closest('input, textarea, [contenteditable="true"]')) return;
+    const target = event.target as HTMLElement | null;
+    if (target?.closest?.('input, textarea, [contenteditable="true"]')) return;
     const text = event.clipboardData?.getData('text/plain')?.trim() || '';
     if (/^https?:\/\//i.test(text)) {
       event.preventDefault();
@@ -921,14 +937,25 @@ export default function WebProductsWorkspace() {
     }
   }
 
-  async function handlePasteFromClipboardButton() {
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const onWindowPaste = (e: globalThis.ClipboardEvent) => {
+      handleImagePaste(e);
+    };
+    window.addEventListener('paste', onWindowPaste);
+    return () => window.removeEventListener('paste', onWindowPaste);
+  });
+
+  async function handlePasteFromClipboardButton(slot?: 1 | 2 | 3) {
+    const targetSlot = slot ?? activeUploadSlot;
+    if (slot) setActiveUploadSlot(slot);
     setError(null);
     try {
       if (!navigator.clipboard?.read) {
         const text = (await navigator.clipboard?.readText?.())?.trim() || '';
         if (/^https?:\/\//i.test(text)) {
           setImagePreviewError(false);
-          setSlotUrl(activeUploadSlot, text);
+          setSlotUrl(targetSlot, text);
           return;
         }
         setError('Usa Ctrl+V (o Cmd+V en Mac) para pegar la imagen copiada.');
@@ -941,7 +968,7 @@ export default function WebProductsWorkspace() {
           const blob = await item.getType(imageType);
           const extension = imageType.split('/')[1] || 'png';
           const file = new File([blob], `portapapeles.${extension}`, { type: imageType });
-          await uploadSelectedImage(file, activeUploadSlot);
+          await uploadSelectedImage(file, targetSlot);
           return;
         }
       }
@@ -950,7 +977,7 @@ export default function WebProductsWorkspace() {
           const text = (await (await item.getType('text/plain')).text()).trim();
           if (/^https?:\/\//i.test(text)) {
             setImagePreviewError(false);
-            setSlotUrl(activeUploadSlot, text);
+            setSlotUrl(targetSlot, text);
             return;
           }
         }
@@ -3368,7 +3395,7 @@ export default function WebProductsWorkspace() {
         onImageInputChange={handleImageInputChange}
         onImageDrop={handleImageDrop}
         onImagePaste={handleImagePaste}
-        onPasteClipboardButton={() => void handlePasteFromClipboardButton()}
+        onPasteClipboardButton={(slot) => void handlePasteFromClipboardButton(slot)}
         onUpdateField={updateField}
         onSetSlotUrl={setSlotUrl}
         onApplyMarginPreset={applyMarginPreset}
