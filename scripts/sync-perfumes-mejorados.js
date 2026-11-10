@@ -110,15 +110,24 @@ async function run() {
   console.log(`Already enhanced in DB: ${alreadyEnhanced} | Newly enhanced found on disk: ${toUpdate.length}`);
 
   let updated = 0;
-  for (const item of toUpdate) {
-    const imageUrl = await uploadImageToStorage(item.localPath);
-    await db.collection('products').doc(item.id).update({
-      IMAGEURL: imageUrl,
-      PHOTO_ENHANCED: true,
-      updatedAt: Date.now(),
-    });
-    updated++;
-    console.log(`UPDATED [${item.id}] ${item.name} -> PHOTO_ENHANCED: true`);
+  try {
+    for (const item of toUpdate) {
+      const imageUrl = await uploadImageToStorage(item.localPath);
+      await db.collection('products').doc(item.id).update({
+        IMAGEURL: imageUrl,
+        PHOTO_ENHANCED: true,
+        updatedAt: Date.now(),
+      });
+      updated++;
+      console.log(`UPDATED [${item.id}] ${item.name} -> PHOTO_ENHANCED: true`);
+    }
+  } finally {
+    // Aunque un lote falle a mitad de camino, publicar las imágenes ya guardadas.
+    if (updated > 0) {
+      const response = await fetch('https://www.importadoracarlitos.cl/api/revalidate?tag=products');
+      if (!response.ok) throw new Error(`Se guardaron ${updated} imágenes, pero no se pudo actualizar el catálogo (HTTP ${response.status}).`);
+      await db.collection('catalog_sync').doc('current').set({ revision: crypto.randomUUID() });
+    }
   }
 
   console.log(`Sync complete! Total enhanced in DB now: ${alreadyEnhanced + updated} / ${snap.size}`);

@@ -829,7 +829,8 @@ export default function WebProductsWorkspace() {
       }
 
       const savedName = String(data.category?.name || cleanName).trim();
-      try { localStorage.setItem('carlitos_catalog_changed', String(Date.now())); } catch {}
+      const { signalCatalogChanged } = await import('@/lib/catalog-live-refresh');
+      await signalCatalogChanged();
       setStoredCategories((current) => Array.from(new Set([...current, savedName])));
       updateField('category', savedName);
       setCreatingCategory(false);

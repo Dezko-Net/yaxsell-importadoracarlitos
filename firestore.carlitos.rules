@@ -158,6 +158,18 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Solo una señal pública, sin datos de clientes, para refrescar el catálogo
+    // cuando un administrador publica cambios. No requiere sondeo periódico.
+    match /catalog_sync/{signalId} {
+      allow get: if signalId == 'current';
+      allow list: if false;
+      allow create, update: if signalId == 'current' && isAdmin()
+        && request.resource.data.keys().hasOnly(['revision'])
+        && request.resource.data.revision is string
+        && request.resource.data.revision.size() <= 100;
+      allow delete: if false;
+    }
+
     // Metadatos de navegación y contenido que la tienda presenta públicamente.
     match /categories/{categoryId} {
       allow read: if true;

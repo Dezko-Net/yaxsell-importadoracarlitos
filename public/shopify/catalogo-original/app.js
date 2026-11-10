@@ -1218,9 +1218,42 @@ window.addEventListener('yaxsel:cart-updated', () => {
     }
   } catch (err) {}
 });
+let catalogSignalActive = false;
+let catalogRefreshPending = false;
+let catalogRefreshRunning = false;
+async function scheduleCatalogRefresh() {
+  if (!_firestoreReady || catalogRefreshRunning) { catalogRefreshPending = true; return; }
+  catalogRefreshRunning = true;
+  try {
+    do {
+      catalogRefreshPending = false;
+      await refreshData();
+    } while (catalogRefreshPending);
+  } catch (error) {
+    console.warn('[catalog] No se pudo actualizar el catálogo:', error);
+  } finally {
+    catalogRefreshRunning = false;
+  }
+}
+function listenForCatalogChanges() {
+  let initialized = false;
+  db.doc('catalog_sync/current').onSnapshot(function(snapshot) {
+    catalogSignalActive = true;
+    if (!initialized) {
+      initialized = true;
+      // Cubrir cambios ocurridos mientras se cargaba el catálogo inicial.
+      if (snapshot.exists) void scheduleCatalogRefresh();
+      return;
+    }
+    void scheduleCatalogRefresh();
+  }, function(error) {
+    catalogSignalActive = false;
+    console.warn('[catalog] Aviso en tiempo real no disponible:', error);
+  });
+}
 window.addEventListener('storage', (e) => {
-  if (e.key === 'carlitos_catalog_changed' && e.newValue) {
-    void refreshData();
+  if (!catalogSignalActive && e.key === 'carlitos_catalog_changed' && e.newValue) {
+    void scheduleCatalogRefresh();
   }
   if (e.key === 'yaxsel_cart' && e.newValue) {
     try {
@@ -5950,6 +5983,7 @@ async function loadAppwriteProducts() {
 }
 
 async function init() {
+  listenForCatalogChanges();
   renderSkeleton();
   try {
     allProducts = await fetchAppwriteProducts(true);
@@ -5960,6 +5994,7 @@ async function init() {
     console.error('No se pudieron cargar productos desde Appwrite', e);
   }
   await loadFirestoreData();
+  if (catalogRefreshPending) void scheduleCatalogRefresh();
   
   // Migrate cart items: fill id and image from allProducts if missing
   var productsById = {};

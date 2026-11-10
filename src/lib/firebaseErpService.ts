@@ -288,9 +288,10 @@ export function purgeServerProductsCache(): void {
   const nowTs = Date.now();
   const doPurge = () => {
     lastPurgeAt = Date.now();
-    fetch('/api/revalidate?tag=products').then(response => {
+    fetch('/api/revalidate?tag=products').then(async response => {
       if (!response.ok) throw new Error('No se pudo actualizar el catálogo');
-      try { localStorage.setItem('carlitos_catalog_changed', String(Date.now())); } catch {}
+      const { signalCatalogChanged } = await import('./catalog-live-refresh');
+      await signalCatalogChanged();
     }).catch(error => console.error('[catalog] No se pudo invalidar la caché:', error));
   };
   if (nowTs - lastPurgeAt > 2000) {

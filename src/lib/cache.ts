@@ -163,9 +163,10 @@ function fireRevalidate(): void {
     localStorage.setItem(PREFIX + 'reval:last', String(Date.now()));
     localStorage.removeItem(PREFIX + 'reval:pending');
   } catch {}
-  fetch('/api/admin/revalidate', { method: 'POST' }).then(response => {
+  fetch('/api/admin/revalidate', { method: 'POST' }).then(async response => {
     if (!response.ok) throw new Error('No se pudo actualizar el catálogo');
-    try { localStorage.setItem('carlitos_catalog_changed', String(Date.now())); } catch {}
+    const { signalCatalogChanged } = await import('./catalog-live-refresh');
+    await signalCatalogChanged();
   }).catch(error => console.error('[catalog] No se pudo invalidar la caché:', error));
 }
 
@@ -237,9 +238,10 @@ export function invalidateCategoryCache(): void {
   cacheInvalidate('categories:');
   cacheInvalidate('subcategories:');
   if (isBrowser()) {
-    fetch('/api/revalidate?tag=categories').then(response => {
+    fetch('/api/revalidate?tag=categories').then(async response => {
       if (!response.ok) throw new Error('No se pudieron actualizar las categorías');
-      try { localStorage.setItem('carlitos_catalog_changed', String(Date.now())); } catch {}
+      const { signalCatalogChanged } = await import('./catalog-live-refresh');
+      await signalCatalogChanged();
     }).catch(error => console.error('[catalog] No se pudo invalidar la caché:', error));
   }
 }
