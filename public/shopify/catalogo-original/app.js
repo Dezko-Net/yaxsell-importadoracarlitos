@@ -1219,6 +1219,9 @@ window.addEventListener('yaxsel:cart-updated', () => {
   } catch (err) {}
 });
 window.addEventListener('storage', (e) => {
+  if (e.key === 'carlitos_catalog_changed' && e.newValue) {
+    void refreshData();
+  }
   if (e.key === 'yaxsel_cart' && e.newValue) {
     try {
       const parsed = JSON.parse(e.newValue);
@@ -5798,11 +5801,11 @@ function fetchAppwriteProducts(forceRefresh) {
 async function loadAppwriteProducts() {
   var apiBase = window.location.origin;
   // Categorías y tiendas se actualizan aparte: no deben bloquear los productos.
-  var categoriesPromise = fetch(apiBase + '/api/public-data/catalog?categoriesOnly=true')
+  var categoriesPromise = fetch(apiBase + '/api/public-data/catalog?categoriesOnly=true', { cache: 'no-store' })
     .then(function(res) { return res.ok ? res.json() : null; }).catch(function() { return null; });
   var vendorsPromise = fetch(apiBase + '/api/public-data/vendors')
     .then(function(res) { return res.ok ? res.json() : null; }).catch(function() { return null; });
-  var prodRes = await fetch(apiBase + '/api/public-data/products?limit=1000&includeVendorProducts=true&minimal=true&stockv=2');
+  var prodRes = await fetch(apiBase + '/api/public-data/products?limit=1000&includeVendorProducts=true&minimal=true&stockv=2', { cache: 'no-store' });
   if (!prodRes.ok) throw new Error('No se pudieron cargar los productos (HTTP ' + prodRes.status + ').');
   var prodData = await prodRes.json();
   if (!Array.isArray(prodData) && !Array.isArray(prodData.products)) throw new Error('Respuesta de productos inválida.');
@@ -5949,10 +5952,10 @@ async function loadAppwriteProducts() {
 async function init() {
   renderSkeleton();
   try {
-    allProducts = await fetchAppwriteProducts();
+    allProducts = await fetchAppwriteProducts(true);
     catalogLoadError = false;
   } catch (e) {
-    allProducts = [];
+    allProducts = await fetchAppwriteProducts(false).catch(function() { return []; });
     catalogLoadError = true;
     console.error('No se pudieron cargar productos desde Appwrite', e);
   }
@@ -6039,10 +6042,11 @@ function syncHeaderHeight() {
 
 // Re-fetch live data (products + Firestore overrides/stock/prices)
 async function refreshData() {
+  if (_catalogFetchInFlight) await _catalogFetchInFlight.catch(function() {});
   _lastCatalogSyncTs = 0;
   try { sessionStorage.removeItem(IFRAME_CATALOG_CACHE_KEY); } catch (e) {}
   try {
-    allProducts = await fetchAppwriteProducts();
+    allProducts = await fetchAppwriteProducts(true);
     catalogLoadError = false;
   } catch (e) { catalogLoadError = true; /* conservar productos ya mostrados */ }
   await loadFirestoreData();

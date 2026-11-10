@@ -29,7 +29,6 @@ export default function ComprobacionPedidos() {
   const cameraQueue = useRef<Promise<void>>(Promise.resolve());
   const busyRef = useRef(false);
   const lastRef = useRef('');
-  const lastSeenRef = useRef(0);
   const pendingRef = useRef(false);
   const [running, setRunning] = useState(false);
   const [cameraAttempt, setCameraAttempt] = useState(0);
@@ -58,10 +57,8 @@ export default function ComprobacionPedidos() {
       } catch { /* El QR no contiene una URL válida. */ }
     }
     const id = readOrderId(decoded);
-    if (id && id === lastRef.current) lastSeenRef.current = Date.now();
     if (!id || id === lastRef.current || busyRef.current || pendingRef.current) return;
     lastRef.current = id;
-    lastSeenRef.current = Date.now();
     busyRef.current = true;
     setError(''); setMessage(''); setBusy(true);
     try {
@@ -77,11 +74,8 @@ export default function ComprobacionPedidos() {
     finally { busyRef.current = false; setBusy(false); }
   }, []);
 
-  const onScanMiss = useCallback(() => {
-    if (!pendingRef.current && !busyRef.current && lastRef.current && Date.now() - lastSeenRef.current > 1200) {
-      lastRef.current = '';
-    }
-  }, []);
+  // Mantener bloqueado el último pedido hasta escanear otro o pedir una relectura.
+  const onScanMiss = useCallback(() => {}, []);
 
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get('pedido');

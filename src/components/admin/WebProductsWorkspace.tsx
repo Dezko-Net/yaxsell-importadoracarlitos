@@ -829,6 +829,7 @@ export default function WebProductsWorkspace() {
       }
 
       const savedName = String(data.category?.name || cleanName).trim();
+      try { localStorage.setItem('carlitos_catalog_changed', String(Date.now())); } catch {}
       setStoredCategories((current) => Array.from(new Set([...current, savedName])));
       updateField('category', savedName);
       setCreatingCategory(false);

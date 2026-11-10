@@ -101,7 +101,6 @@ export default function CategoriesPage() {
       }
       setModal(null);
       invalidateCategoryCache();
-      try { await fetch('/api/admin/revalidate', { method: 'POST' }); } catch {}
     } catch (e: any) { alert('Error: ' + e.message); }
     finally { setIsSaving(false); }
   };
@@ -124,6 +123,7 @@ export default function CategoriesPage() {
         databases.updateDocument(databaseId, CATEGORIES_COLLECTION_ID, a.$id, { order: a.order }),
         databases.updateDocument(databaseId, CATEGORIES_COLLECTION_ID, b.$id, { order: b.order }),
       ]);
+      invalidateCategoryCache();
     } catch (e: any) { alert('Error al reordenar: ' + e.message); load(); }
     finally { setReordering(null); }
   };

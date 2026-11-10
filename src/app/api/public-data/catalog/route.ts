@@ -3,7 +3,6 @@ import { serverListDocuments } from '@/lib/db-server';
 import { CATEGORIES_COLLECTION, SUBCATEGORIES_COLLECTION, TIMED_OFFERS_COLLECTION } from '@/lib/db';
 import { unstable_cache } from 'next/cache';
 
-import { getCatalogDataMemoryCache, setCatalogDataMemoryCache } from '@/lib/catalog-data-cache';
 
 const getCachedCatalogStructure = unstable_cache(
   async () => {
@@ -52,15 +51,11 @@ const getCachedCatalogOffers = unstable_cache(
 
 const getCachedCatalogData = unstable_cache(
   async () => {
-    const mem = getCatalogDataMemoryCache();
-    if (mem) return mem;
     const [structure, offers] = await Promise.all([
       getCachedCatalogStructure(),
       getCachedCatalogOffers(),
     ]);
-    const result = { ...structure, offers };
-    setCatalogDataMemoryCache(result);
-    return result;
+    return { ...structure, offers };
   },
   ['public-catalog-cache-v10'],
   { revalidate: 86400, tags: ['catalog', 'categories', 'offers'] }
@@ -69,23 +64,25 @@ const getCachedCatalogData = unstable_cache(
 export async function GET(request: NextRequest) {
   try {
     if (request.nextUrl.searchParams.get('categoriesOnly') === 'true') {
-      const mem = getCatalogDataMemoryCache();
-      const structure = mem || await getCachedCatalogStructure();
+      const structure = await getCachedCatalogStructure();
       return NextResponse.json({
         categories: structure.categories || [],
         subcategories: structure.subcategories || [],
         offers: [],
       }, {
         headers: {
-          'Cache-Control': 'public, max-age=600, s-maxage=3600, stale-while-revalidate=86400'
+          'Cache-Control': 'private, no-store, max-age=0',
+          'Vercel-CDN-Cache-Control': 'no-store',
+          'CDN-Cache-Control': 'no-store',
         }
       });
     }
-    const mem = getCatalogDataMemoryCache();
-    const data = mem || await getCachedCatalogData();
+    const data = await getCachedCatalogData();
     return NextResponse.json(data, {
       headers: {
-        'Cache-Control': 'public, max-age=600, s-maxage=3600, stale-while-revalidate=86400'
+        'Cache-Control': 'private, no-store, max-age=0',
+        'Vercel-CDN-Cache-Control': 'no-store',
+        'CDN-Cache-Control': 'no-store',
       }
     });
   } catch (error: any) {

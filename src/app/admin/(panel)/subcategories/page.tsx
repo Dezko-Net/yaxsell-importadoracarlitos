@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Query, ID } from '@/lib/db';
 import { getServices, getFirebaseConfig, SUBCATEGORIES_COLLECTION_ID, CATEGORIES_COLLECTION_ID } from '@/lib/db';
+import { invalidateCategoryCache } from '@/lib/cache';
 import { Subcategory, Category } from '@/types/admin';
 import { Plus, Pencil, Trash2, X, RefreshCw, AlertTriangle, ChevronUp, ChevronDown, Search, FolderOpen } from 'lucide-react';
 import ImageUploadField from '@/components/admin/ImageUploadField';
@@ -40,6 +41,7 @@ export default function SubcategoriesPage() {
       await Promise.all([...selected].map(id => databases.deleteDocument(databaseId, SUBCATEGORIES_COLLECTION_ID, id)));
       setSubcategories(prev => prev.filter(s => !selected.has(s.$id)));
       setSelected(new Set());
+      invalidateCategoryCache();
     } catch (e: any) { alert('Error: ' + e.message); }
     finally { setBulkDeleting(false); }
   };
@@ -99,6 +101,7 @@ export default function SubcategoriesPage() {
         setSubcategories(prev => prev.map(s => s.$id === d.$id ? doc as unknown as Subcategory : s));
       }
       setModal(null);
+      invalidateCategoryCache();
     } catch (e: any) { alert('Error: ' + e.message); }
     finally { setIsSaving(false); }
   };
@@ -121,6 +124,7 @@ export default function SubcategoriesPage() {
         databases.updateDocument(databaseId, SUBCATEGORIES_COLLECTION_ID, a.$id, { name: a.name, categoryId: a.categoryId }),
         databases.updateDocument(databaseId, SUBCATEGORIES_COLLECTION_ID, b.$id, { name: b.name, categoryId: b.categoryId }),
       ]);
+      invalidateCategoryCache();
     } catch (e: any) { alert('Error al reordenar: ' + e.message); load(); }
     finally { setReordering(null); }
   };
@@ -133,6 +137,7 @@ export default function SubcategoriesPage() {
       const { databaseId } = getFirebaseConfig();
       await databases.deleteDocument(databaseId, SUBCATEGORIES_COLLECTION_ID, id);
       setSubcategories(prev => prev.filter(s => s.$id !== id));
+      invalidateCategoryCache();
     } catch (e: any) { alert('Error: ' + e.message); }
     finally { setDeleteId(null); }
   };

@@ -163,8 +163,10 @@ function fireRevalidate(): void {
     localStorage.setItem(PREFIX + 'reval:last', String(Date.now()));
     localStorage.removeItem(PREFIX + 'reval:pending');
   } catch {}
-  fetch('/api/admin/revalidate', { method: 'POST' }).catch(() => {});
-  fetch('/api/revalidate?tag=products').catch(() => {});
+  fetch('/api/admin/revalidate', { method: 'POST' }).then(response => {
+    if (!response.ok) throw new Error('No se pudo actualizar el catálogo');
+    try { localStorage.setItem('carlitos_catalog_changed', String(Date.now())); } catch {}
+  }).catch(error => console.error('[catalog] No se pudo invalidar la caché:', error));
 }
 
 export function requestProductsRevalidate(): void {
@@ -218,8 +220,6 @@ export function invalidateProductCache(): void {
     } catch {}
 
     // 3. Disparar revalidación inmediata en el servidor (Next.js revalidateTag + paths)
-    fetch('/api/admin/revalidate', { method: 'POST' }).catch(() => {});
-    fetch('/api/revalidate?tag=products').catch(() => {});
     requestProductsRevalidate();
 
     // 4. Revalidar SWR
@@ -237,7 +237,10 @@ export function invalidateCategoryCache(): void {
   cacheInvalidate('categories:');
   cacheInvalidate('subcategories:');
   if (isBrowser()) {
-    fetch('/api/admin/revalidate', { method: 'POST' }).catch(() => {});
+    fetch('/api/revalidate?tag=categories').then(response => {
+      if (!response.ok) throw new Error('No se pudieron actualizar las categorías');
+      try { localStorage.setItem('carlitos_catalog_changed', String(Date.now())); } catch {}
+    }).catch(error => console.error('[catalog] No se pudo invalidar la caché:', error));
   }
 }
 
