@@ -537,7 +537,7 @@ body.catalog-explorer-open { overflow:hidden; }
 .hero-logo-image { object-fit:contain !important; background:#fff; }
 
 /* Carlitos warehouse photo replaces the animated cloud background in the storefront hero. */
-.hero-banner.hero-sky-surface { background-color:#263b38; background-image:linear-gradient(90deg,rgba(8,18,17,.46) 0%,rgba(12,23,21,.30) 55%,rgba(12,23,21,.16) 100%),url('/images/carlitos-hero-almacen.png'); background-position:center,center 54%; background-size:cover; }
+.hero-banner.hero-sky-surface { background-color:#263b38; background-image:linear-gradient(90deg,rgba(8,18,17,.46) 0%,rgba(12,23,21,.30) 55%,rgba(12,23,21,.16) 100%),url('/images/carlitos-hero-boutique-v1.webp'); background-position:center,center 54%; background-size:cover; }
 .hero-banner .hero-sky-canvas, .hero-banner .hero-sky-shade { display:none !important; }
 
 /* Carlitos wordmark inspired by the red-and-gold lettering in the supplied logo. */

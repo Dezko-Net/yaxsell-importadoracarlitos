@@ -15,7 +15,7 @@ export interface WebClientConfig {
 
 const isCarlitosProject = (process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'importadora-carlitos') === 'importadora-carlitos';
 export const DEFAULT_WEB_CLIENT_CONFIG: WebClientConfig = isCarlitosProject ? {
-  storeName: 'Importadora Carlitos', logoUrl: '/images/importadora-carlitos-logo-nuevo.png', heroImageUrl: '/images/carlitos-hero-almacen.png',
+  storeName: 'Importadora Carlitos', logoUrl: '/images/importadora-carlitos-logo-nuevo.png', heroImageUrl: '/images/carlitos-hero-boutique-v1.webp',
   supportPhone: '56985520703', botPhone: '56954592656', address: "Av. Libertador Bernardo O'Higgins #2960", siteUrl: 'https://www.importadoracarlitos.cl',
   announcementText: 'Ropa · perfumes · accesorios', shippingText: 'Envíos a todo Chile', heroKicker: 'Proveedor directo · Chile',
   heroTitle: 'Ropa que va contigo. Perfumes para cada momento.',
